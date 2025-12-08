@@ -1,44 +1,59 @@
-# albertsons
+![n8n.io - Workflow Automation](https://user-images.githubusercontent.com/65276001/173571060-9f2f6d7b-bac0-43b6-bdb2-001da9694058.png)
 
-This template should help get you started developing with Vue 3 in Vite.
+# n8n-editor-ui
 
-## Recommended IDE Setup
+The UI to create and update n8n workflows
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+```
+npm install n8n -g
+```
 
-## Recommended Browser Setup
+## Project setup
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd) 
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
-```sh
+```
 pnpm install
 ```
 
-### Compile and Hot-Reload for Development
+### Compiles and hot-reloads for development
 
-```sh
-pnpm dev
+```
+pnpm serve
 ```
 
-### Compile and Minify for Production
+### Compiles and minifies for production
 
-```sh
+```
 pnpm build
 ```
 
-### Lint with [ESLint](https://eslint.org/)
+### Run your tests
 
-```sh
+```
+pnpm test
+```
+
+### Lints and fixes files
+
+```
 pnpm lint
 ```
+
+### Run your end-to-end tests
+
+```
+pnpm --filter=n8n-playwright test:local
+```
+
+### Run your unit tests
+
+```
+pnpm test:unit
+```
+
+### Customize configuration
+
+See [Configuration Reference](https://cli.vuejs.org/config/).
+
+## License
+
+You can find the license information [here](https://github.com/n8n-io/n8n/blob/master/README.md#license)

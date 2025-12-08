@@ -1,85 +1,272 @@
-<script setup>
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+<script setup lang="ts">
+import AssistantsHub from '@/features/ai/assistant/components/AssistantsHub.vue';
+import AskAssistantFloatingButton from '@/features/ai/assistant/components/Chat/AskAssistantFloatingButton.vue';
+import BannerStack from '@/features/shared/banners/components/BannerStack.vue';
+import Modals from '@/app/components/Modals.vue';
+import { useHistoryHelper } from '@/app/composables/useHistoryHelper';
+import { useTelemetryContext } from '@/app/composables/useTelemetryContext';
+import { useTelemetryInitializer } from '@/app/composables/useTelemetryInitializer';
+import { useWorkflowDiffRouting } from '@/app/composables/useWorkflowDiffRouting';
+import {
+	APP_MODALS_ELEMENT_ID,
+	CODEMIRROR_TOOLTIP_CONTAINER_ELEMENT_ID,
+	HIRING_BANNER,
+	VIEWS,
+} from '@/app/constants';
+import { useChatPanelStore } from '@/features/ai/assistant/chatPanel.store';
+import { useAssistantStore } from '@/features/ai/assistant/assistant.store';
+import { useNDVStore } from '@/features/ndv/shared/ndv.store';
+import { useSettingsStore } from '@/app/stores/settings.store';
+import { useUIStore } from '@/app/stores/ui.store';
+import { useUsersStore } from '@/features/settings/users/users.store';
+import LoadingView from '@/app/views/LoadingView.vue';
+import { locale, N8nCommandBar } from '@n8n/design-system';
+import { setLanguage } from '@n8n/i18n';
+// Note: no need to import en.json here; default 'en' is handled via setLanguage
+import { useRootStore } from '@n8n/stores/useRootStore';
+import axios from 'axios';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
+import { useStyles } from '@/app/composables/useStyles';
+import { useExposeCssVar } from '@/app/composables/useExposeCssVar';
+import { useFloatingUiOffsets } from '@/app/composables/useFloatingUiOffsets';
+import { useCommandBar } from '@/features/shared/commandBar/composables/useCommandBar';
+import { hasPermission } from '@/app/utils/rbac/permissions';
+
+const route = useRoute();
+const rootStore = useRootStore();
+const assistantStore = useAssistantStore();
+const chatPanelStore = useChatPanelStore();
+const uiStore = useUIStore();
+const usersStore = useUsersStore();
+const settingsStore = useSettingsStore();
+const ndvStore = useNDVStore();
+const { APP_Z_INDEXES } = useStyles();
+
+const {
+	initialize: initializeCommandBar,
+	isEnabled: isCommandBarEnabled,
+	items,
+	placeholder,
+	context,
+	onCommandBarChange,
+	onCommandBarNavigateTo,
+	isLoading: isCommandBarLoading,
+} = useCommandBar();
+
+const { setAppZIndexes } = useStyles();
+const { toastBottomOffset, askAiFloatingButtonBottomOffset } = useFloatingUiOffsets();
+
+// Initialize undo/redo
+useHistoryHelper(route);
+
+// Initialize workflow diff routing management
+useWorkflowDiffRouting();
+
+useTelemetryInitializer();
+
+const loading = ref(true);
+const defaultLocale = computed(() => rootStore.defaultLocale);
+const isDemoMode = computed(() => route.name === VIEWS.DEMO);
+const hasContentFooter = ref(false);
+const appGrid = ref<Element | null>(null);
+
+const showCommandBar = computed(
+	() => isCommandBarEnabled.value && hasPermission(['authenticated']) && !isDemoMode.value,
+);
+
+const chatPanelWidth = computed(() => chatPanelStore.width);
+
+useTelemetryContext({ ndv_source: computed(() => ndvStore.lastSetActiveNodeSource) });
+
+onMounted(async () => {
+	setAppZIndexes();
+	logHiringBanner();
+	loading.value = false;
+	window.addEventListener('resize', updateGridWidth);
+	await updateGridWidth();
+});
+
+watch(showCommandBar, (newVal) => {
+	if (newVal) {
+		void initializeCommandBar();
+	}
+});
+
+onBeforeUnmount(() => {
+	window.removeEventListener('resize', updateGridWidth);
+});
+
+const logHiringBanner = () => {
+	if (settingsStore.isHiringBannerEnabled && !isDemoMode.value) {
+		console.log(HIRING_BANNER);
+	}
+};
+
+const updateGridWidth = async () => {
+	await nextTick();
+	if (appGrid.value) {
+		const { width, height } = appGrid.value.getBoundingClientRect();
+		uiStore.appGridDimensions = { width, height };
+	}
+};
+// As chat panel width changes, recalculate the total width regularly
+watch(chatPanelWidth, async () => {
+	await updateGridWidth();
+});
+
+watch(route, (r) => {
+	hasContentFooter.value = r.matched.some(
+		(matchedRoute) => matchedRoute.components?.footer !== undefined,
+	);
+});
+
+watch(
+	defaultLocale,
+	async (newLocale) => {
+		setLanguage(newLocale);
+
+		axios.defaults.headers.common['Accept-Language'] = newLocale;
+
+		void locale.use(newLocale);
+	},
+	{ immediate: true },
+);
+
+useExposeCssVar('--toast--offset', toastBottomOffset);
+useExposeCssVar('--ask-assistant--floating-button--margin-bottom', askAiFloatingButtonBottomOffset);
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@src/assets/logo.svg" width="125" height="125" />
+	<LoadingView v-if="loading" />
+	<div
+		v-else
+		id="n8n-app"
+		:class="{
+			[$style.container]: true,
+			[$style.sidebarCollapsed]: uiStore.sidebarMenuCollapsed,
+		}"
+	>
+		<div id="app-grid" ref="appGrid" :class="$style['app-grid']">
+			<div id="banners" :class="$style.banners">
+				<!-- <BannerStack v-if="!isDemoMode" /> -->
+			</div>
+			<div id="header" :class="$style.header">
+				<RouterView name="header" />
+			</div>
+			<div v-if="usersStore.currentUser" id="sidebar" :class="$style.sidebar">
+				<RouterView name="sidebar" />
+			</div>
+			<div id="content" :class="$style.content">
+				<div :class="$style.contentWrapper">
+					<RouterView v-slot="{ Component }">
+						<KeepAlive v-if="$route.meta.keepWorkflowAlive" include="NodeView" :max="1">
+							<component :is="Component" />
+						</KeepAlive>
+						<component :is="Component" v-else />
+					</RouterView>
+				</div>
+				<div v-if="hasContentFooter" :class="$style.contentFooter">
+					<!-- <RouterView name="footer" /> -->
+				</div>
+			</div>
+			<div :id="APP_MODALS_ELEMENT_ID" :class="$style.modals">
+				<Modals />
+			</div>
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
-    </div>
-  </header>
-
-  <RouterView />
+			<N8nCommandBar
+				v-if="showCommandBar"
+				:items="items"
+				:placeholder="placeholder"
+				:context="context"
+				:is-loading="isCommandBarLoading"
+				:z-index="APP_Z_INDEXES.COMMAND_BAR"
+				@input-change="onCommandBarChange"
+				@navigate-to="onCommandBarNavigateTo"
+			/>
+			<AskAssistantFloatingButton v-if="assistantStore.isFloatingButtonShown" />
+		</div>
+		<AssistantsHub />
+		<div :id="CODEMIRROR_TOOLTIP_CONTAINER_ELEMENT_ID" />
+	</div>
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
+<style lang="scss" module>
+// On the root level, whole app is a flex container
+// with app grid and assistant sidebar as children
+.container {
+	height: 100vh;
+	overflow: hidden;
+	display: grid;
+	grid-template-columns: 1fr auto;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+// App grid is the main app layout including modals and other absolute positioned elements
+.app-grid {
+	position: relative;
+	display: grid;
+	height: 100vh;
+	grid-template-areas:
+		'banners banners'
+		'sidebar header'
+		'sidebar content';
+	grid-template-columns: auto 1fr;
+	grid-template-rows: auto auto 1fr;
 }
 
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
+.banners {
+	grid-area: banners;
+	z-index: var(--top-banners--z);
 }
 
-nav a.router-link-exact-active {
-  color: var(--color-text);
+.content {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	overflow: auto;
+	grid-area: content;
 }
 
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
+.contentFooter {
+	height: auto;
+	z-index: 10;
+	width: 100%;
+	display: none;
+
+	// Only show footer if there's content
+	&:has(*) {
+		display: block;
+	}
 }
 
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
+.contentWrapper {
+	display: flex;
+	grid-area: content;
+	position: relative;
+	overflow: auto;
+	height: 100%;
+	width: 100%;
+	justify-content: center;
+
+	main {
+		width: 100%;
+		height: 100%;
+	}
 }
 
-nav a:first-of-type {
-  border: 0;
+.header {
+	grid-area: header;
+	z-index: var(--app-header--z);
+	min-width: 0;
+	min-height: 0;
 }
 
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
+.sidebar {
+	grid-area: sidebar;
+	z-index: var(--app-sidebar--z);
+}
 
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
+.modals {
+	width: 100%;
 }
 </style>
