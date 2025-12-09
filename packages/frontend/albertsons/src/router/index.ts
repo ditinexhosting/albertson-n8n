@@ -24,6 +24,8 @@ import { useRecentResources } from '@/features/shared/commandBar/composables/use
 import { usePostHog } from '@/app/stores/posthog.store';
 import { TEMPLATE_SETUP_EXPERIENCE } from '@/app/constants/experiments';
 
+const AlbertsonsLoginView = async () =>
+  await import('@/views/AlbertsonsLogin.vue');
 const ChangePasswordView = async () =>
 	await import('@/features/core/auth/views/ChangePasswordView.vue');
 const ErrorView = async () => await import('@/app/views/ErrorView.vue');
@@ -452,6 +454,20 @@ export const routes: RouteRecordRaw[] = [
 			middleware: ['guest'],
 		},
 	},
+	{
+  path: '/albertsons/login',
+  name: 'ALBERTSONS_LOGIN',
+  components: {
+    default: AlbertsonsLoginView,
+  },
+  meta: {
+    telemetry: {
+      pageCategory: 'auth',
+    },
+    middleware: ['guest'],
+  },
+},
+
 	{
 		path: '/signup',
 		name: VIEWS.SIGNUP,
