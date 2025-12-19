@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import AssistantsHub from '@/features/ai/assistant/components/AssistantsHub.vue';
+import AssistantsHub from '@src/app/features/ai/assistant/components/AssistantsHub.vue';
 import AskAssistantFloatingButton from '@/features/ai/assistant/components/Chat/AskAssistantFloatingButton.vue';
 import BannerStack from '@/features/shared/banners/components/BannerStack.vue';
 import Modals from '@/app/components/Modals.vue';

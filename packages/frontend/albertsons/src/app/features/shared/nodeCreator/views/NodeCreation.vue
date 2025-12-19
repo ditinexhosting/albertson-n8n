@@ -20,7 +20,7 @@ import KeyboardShortcutTooltip from '@/app/components/KeyboardShortcutTooltip.vu
 import { useI18n } from '@n8n/i18n';
 import { useTelemetry } from '@/app/composables/useTelemetry';
 import { useAssistantStore } from '@/features/ai/assistant/assistant.store';
-import { useBuilderStore } from '@/features/ai/assistant/builder.store';
+import { useBuilderStore } from '@src/app/features/ai/assistant/builder.store';
 import { useChatPanelStore } from '@/features/ai/assistant/chatPanel.store';
 import { useCommandBar } from '@/features/shared/commandBar/composables/useCommandBar';
 
