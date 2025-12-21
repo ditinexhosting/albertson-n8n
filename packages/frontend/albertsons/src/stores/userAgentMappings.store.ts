@@ -9,7 +9,7 @@ export const useUserAgentMappingsStore = defineStore('albertsonsUserAgentMapping
 	actions: {
 		async fetchUserAgentMappings() {
 			// IMPORTANT: await the request and log it
-			const result = await albertsonsRestApiRequest('GET', '/v1/userAgentMappings/all');
+			const result = await albertsonsRestApiRequest('GET', '/v1/my-agents/all');
 
 			console.log('userAgentMappings/all result', result);
 

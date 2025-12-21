@@ -164,11 +164,15 @@ export const routes: RouteRecordRaw[] = [
 		name: 'My Agents',
 		components: {
 			default: () => import('@src/views/AgentsView.vue'),
-
+			header: Header,
 			sidebar: MainSidebar,
 		},
 		meta: {
 			middleware: ['authenticated'],
+			header: {
+				title: 'My Agents',
+				showBack: false,
+			},
 		},
 	},
 

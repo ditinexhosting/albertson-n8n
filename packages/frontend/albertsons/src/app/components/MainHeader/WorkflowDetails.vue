@@ -154,6 +154,21 @@ watch(
 );
 
 /**
+ * Trigger custom save
+ */
+watch(
+	[() => workflowsStore.workflowId, () => isWorkflowSaving.value],
+	async ([workflowId, isSaving], [oldWorkflowId, oldIsSaving]) => {
+		if (isSaving && workflowId && workflowId !== '__EMPTY__') {
+			await albertsonsRestApiRequest('POST', `/v1/my-agents/create`, {
+				ownerId: usersStore.currentUser.id,
+				workflowId: workflowId,
+			});
+		}
+	},
+);
+
+/**
  * New functionality
  * Custom Publish button
  */
@@ -213,11 +228,6 @@ async function onSaveButtonClick() {
 
 	if (saved) {
 		showCreateWorkflowSuccessToast(id);
-
-		await albertsonsRestApiRequest('POST', `/v1/userAgentMappings/create`, {
-			ownerId: usersStore.currentUser.id,
-			workflowId: id,
-		});
 
 		await npsSurveyStore.fetchPromptsData();
 

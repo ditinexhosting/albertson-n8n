@@ -108,7 +108,7 @@ function goToEditWorkflow(id) {
 								<br />
 								<small class="txt_secondary">{{ item.workflow.nodes.length }} nodes</small>
 							</td>
-							<td class="txt_secondary workflow_project">Inventory Management Automation</td>
+							<td class="txt_secondary workflow_project">-</td>
 							<td>
 								<span
 									:class="['status', item?.workflow?.active ? 'active' : 'inactive']"
