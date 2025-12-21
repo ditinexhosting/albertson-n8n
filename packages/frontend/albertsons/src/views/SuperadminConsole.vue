@@ -18,7 +18,7 @@ import {
 } from 'naive-ui';
 import { h } from 'vue';
 import { RouterLink } from 'vue-router';
-import { Users, FileLock, Pencil, LockKeyhole, MoreVertical } from 'lucide-vue-next';
+import { Users, FileLock, Pencil, LockKeyhole, MoreVertical, Plus } from 'lucide-vue-next';
 import { ROUTERS } from '@src/utils/constants';
 import { albertsonsRestApiRequest } from '@src/utils/albertsonsRestApiRequest';
 import { useToast } from '@/app/composables/useToast';
@@ -349,7 +349,13 @@ const handleAction = async (key, row) => {
 						<div class="text-xl font-semibold mb-1!">Manage Users</div>
 						<div class="text-xs text-secondary">Add, Edit, Deactivate users</div>
 					</div>
-					<n-button type="primary" @click="showAddUserModal = true">Add User</n-button>
+					<n-button type="primary" @click="showAddUserModal = true"
+						><template #icon>
+							<NIcon>
+								<Plus />
+							</NIcon> </template
+						>Add User</n-button
+					>
 				</div>
 				<n-data-table :columns="columns" :data="users" />
 			</div>
