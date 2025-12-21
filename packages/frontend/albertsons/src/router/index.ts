@@ -24,6 +24,12 @@ import { useRecentResources } from '@/features/shared/commandBar/composables/use
 import { usePostHog } from '@/app/stores/posthog.store';
 import { TEMPLATE_SETUP_EXPERIENCE } from '@/app/constants/experiments';
 
+import { ROUTERS } from '@src/utils/constants.ts';
+
+/** custom components */
+const Header = async () => await import('@src/components/Header.vue');
+
+/** custom components */
 const ChangePasswordView = async () =>
 	await import('@/features/core/auth/views/ChangePasswordView.vue');
 const ErrorView = async () => await import('@/app/views/ErrorView.vue');
@@ -110,6 +116,17 @@ function getTemplatesRedirect(defaultRedirect: VIEWS[keyof VIEWS]): { name: stri
 }
 
 export const routes: RouteRecordRaw[] = [
+	{
+		path: '/signin',
+		redirect: '/login',
+	},
+	{
+		path: '/login',
+		name: 'ALBERTSONS_LOGIN',
+		components: {
+			default: AlbertsonsLoginView,
+		},
+	},
 	// Albertsons dashboard
 	{
 		path: '/dashboard',
@@ -126,13 +143,18 @@ export const routes: RouteRecordRaw[] = [
 	// Super Admin Console
 	{
 		path: '/superadmin',
-		name: 'SUPERADMIN_CONSOLE',
+		name: ROUTERS.SUPERADMIN_CONSOLE,
 		components: {
 			default: SuperadminConsoleView,
 			sidebar: MainSidebar,
+			header: Header,
 		},
 		meta: {
 			middleware: ['authenticated'],
+			header: {
+				title: 'Super Admin Console',
+				showBack: false,
+			},
 		},
 	},
 
@@ -185,7 +207,6 @@ export const routes: RouteRecordRaw[] = [
 			middleware: ['authenticated'],
 		},
 	},
-
 	{
 		path: '/',
 		redirect: '/dashboard',
@@ -193,7 +214,6 @@ export const routes: RouteRecordRaw[] = [
 			middleware: ['authenticated'],
 		},
 	},
-
 	{
 		path: '/collections/:id',
 		name: VIEWS.COLLECTION,
@@ -521,41 +541,19 @@ export const routes: RouteRecordRaw[] = [
 		redirect: '/workflow/new',
 	},
 
-	{
-		path: '/signin',
-		name: VIEWS.SIGNIN,
-		components: {
-			default: SigninView,
-		},
-		meta: {
-			telemetry: {
-				pageCategory: 'auth',
-			},
-			middleware: ['guest'],
-		},
-	},
-
-	{
-		path: '/login',
-		name: 'ALBERTSONS_LOGIN',
-		components: {
-			default: AlbertsonsLoginView,
-		},
-	},
-
-	{
-		path: '/signup',
-		name: VIEWS.SIGNUP,
-		components: {
-			default: SignupView,
-		},
-		meta: {
-			telemetry: {
-				pageCategory: 'auth',
-			},
-			middleware: ['guest'],
-		},
-	},
+	// {
+	// 	path: '/signup',
+	// 	name: VIEWS.SIGNUP,
+	// 	components: {
+	// 		default: SignupView,
+	// 	},
+	// 	meta: {
+	// 		telemetry: {
+	// 			pageCategory: 'auth',
+	// 		},
+	// 		middleware: ['guest'],
+	// 	},
+	// },
 
 	{
 		path: '/signout',

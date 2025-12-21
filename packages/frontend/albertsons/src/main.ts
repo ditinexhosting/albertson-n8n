@@ -10,9 +10,9 @@ import 'vue-json-pretty/lib/styles.css';
 import '@n8n/design-system/css/index.scss';
 // import '@n8n/design-system/css/tailwind/index.css';
 
-import '@/main.scss';
 import '@src/main.css';
 import './_tokens.scss';
+import '@/main.scss';
 // Ensure i18n HMR owner is evaluated as early as possible in dev
 import '@/app/dev/i18nHmr';
 

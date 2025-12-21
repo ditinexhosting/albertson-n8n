@@ -1,4 +1,12 @@
 @layer theme, base, components, utilities;
+
 @import 'tailwindcss/theme.css' layer(theme);
+/* Omit the following line to disable Preflight: */
 /* @import "tailwindcss/preflight.css" layer(base); */
 @import 'tailwindcss/utilities.css' layer(utilities);
+
+@theme {
+	--color-primary: #01529f;
+	--color-background: #f9fafb;
+	--color-secondary: #6b7280;
+}
