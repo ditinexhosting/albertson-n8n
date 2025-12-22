@@ -35,7 +35,12 @@ async function fetchExecutions() {
 	try {
 		isLoading.value = true;
 
+		// TODO: replace this with real current user id from store
+		const ownerId = '4db69577-063f-48cc-a4bd-eedd3edc2f61';
+
 		const params = new URLSearchParams();
+		params.append('ownerId', ownerId); // required by backend
+
 		if (search.value) params.append('search', search.value);
 		if (statusFilter.value !== 'all') params.append('status', statusFilter.value);
 
