@@ -15,7 +15,8 @@ import { usePageRedirectionHelper } from '@/app/composables/usePageRedirectionHe
 import { WORKFLOW_SUGGESTIONS } from '@/app/constants/workflowSuggestions';
 import shuffle from 'lodash/shuffle';
 
-import { N8nAskAssistantChat, N8nText } from '@n8n/design-system';
+import { N8nText } from '@n8n/design-system';
+import N8nAskAssistantChat from '@src/app/features/ai/assistant/components/Agent/AskAssistantChat.vue';
 
 const emit = defineEmits<{
 	close: [];

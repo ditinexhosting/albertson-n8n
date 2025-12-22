@@ -26,6 +26,7 @@ const packagesDir = resolve(__dirname, '..', '..');
 
 const alias = [
 	{ find: '@src', replacement: resolve(__dirname, 'src') },
+	{ find: '@design', replacement: resolve(packagesDir, 'frontend', '@n8n', 'design-system') },
 	{ find: '@', replacement: resolve(packagesDir, 'frontend', 'editor-ui', 'src') },
 	{ find: 'stream', replacement: 'stream-browserify' },
 	// Ensure bare imports resolve to sources (not dist)
