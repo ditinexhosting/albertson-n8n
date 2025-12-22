@@ -1,424 +1,366 @@
 <template>
-	<!-- PAGE WRAPPER WITH INTERNAL SCROLL -->
-	<div class="page-shell">
-		<div class="page-inner">
-			<div class="dashboard-scroll">
-				<div class="dashboard">
-					<!-- HEADER -->
-					<div class="header">
-						<h2 class="page-title">Pulse</h2>
+	<n-layout class="h-screen">
+		<n-layout-content class="page-shell">
+			<div class="page-inner">
+				<div class="dashboard-scroll">
+					<div class="dashboard">
+						<!-- HEADER -->
+						<header class="header">
+							<h2 class="page-title">Pulse</h2>
 
-						<div class="search-wrapper">
-							<svg
-								class="search-icon"
-								width="16"
-								height="16"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-							>
-								<circle cx="11" cy="11" r="8"></circle>
-								<path d="m21 21-4.35-4.35"></path>
-							</svg>
-							<input type="text" placeholder="Search workflows, projects..." class="search-input" />
-						</div>
-
-						<div class="header-right">
-							<button class="notification-btn">
-								<span class="badge">4</span>
-								<svg
-									width="20"
-									height="20"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2"
-								>
-									<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-									<path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-								</svg>
-							</button>
-						</div>
-					</div>
-
-					<!-- METRICS GRID -->
-					<div class="metrics-row">
-						<!-- System Health Card -->
-						<div class="metric-card health-card">
-							<div class="health-value">92<span class="percent">%</span></div>
-							<div class="health-label">
-								<svg
-									width="12"
-									height="12"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2"
-								>
-									<polyline points="20 6 9 17 4 12"></polyline>
-								</svg>
-								<span>System Health</span>
-							</div>
-							<div class="health-status">Good</div>
-							<div class="health-time">
-								<svg
-									width="10"
-									height="10"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2"
-								>
-									<circle cx="12" cy="12" r="10"></circle>
-									<polyline points="12 6 12 12 16 14"></polyline>
-								</svg>
-								Updated 2s ago
-							</div>
-						</div>
-
-						<!-- Executions Card -->
-						<div class="metric-card compact-card">
-							<div class="compact-header">
-								<span class="card-label">EXECUTIONS (7D)</span>
-								<div class="mini-chart blue">
-									<div class="bar" style="height: 40%"></div>
-									<div class="bar" style="height: 60%"></div>
-									<div class="bar" style="height: 80%"></div>
-									<div class="bar" style="height: 50%"></div>
-									<div class="bar" style="height: 90%"></div>
-									<div class="bar" style="height: 70%"></div>
-									<div class="bar" style="height: 100%"></div>
-								</div>
-							</div>
-							<div class="compact-value">10,816</div>
-							<div class="compact-change positive">
-								<svg
-									width="8"
-									height="8"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2"
-								>
-									<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
-								</svg>
-								+12.3%
-							</div>
-						</div>
-
-						<!-- Success Rate Card -->
-						<div class="metric-card compact-card">
-							<div class="compact-header">
-								<span class="card-label">SUCCESS RATE</span>
-								<div class="mini-chart green">
-									<div class="bar" style="height: 90%"></div>
-									<div class="bar" style="height: 95%"></div>
-									<div class="bar" style="height: 85%"></div>
-									<div class="bar" style="height: 92%"></div>
-									<div class="bar" style="height: 97%"></div>
-									<div class="bar" style="height: 93%"></div>
-									<div class="bar" style="height: 98%"></div>
-								</div>
-							</div>
-							<div class="compact-value">97.4%</div>
-							<div class="compact-change positive">
-								<svg
-									width="8"
-									height="8"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2"
-								>
-									<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
-								</svg>
-								+2.1%
-							</div>
-						</div>
-
-						<!-- Failures Card -->
-						<div class="metric-card compact-card">
-							<div class="compact-header">
-								<span class="card-label">FAILURES (7D)</span>
-								<div class="mini-chart red">
-									<div class="bar" style="height: 70%"></div>
-									<div class="bar" style="height: 50%"></div>
-									<div class="bar" style="height: 90%"></div>
-									<div class="bar" style="height: 60%"></div>
-									<div class="bar" style="height: 40%"></div>
-									<div class="bar" style="height: 55%"></div>
-									<div class="bar" style="height: 45%"></div>
-								</div>
-							</div>
-							<div class="compact-value">254</div>
-							<div class="compact-change negative">
-								<svg
-									width="8"
-									height="8"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2"
-								>
-									<polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline>
-								</svg>
-								-5.2%
-							</div>
-						</div>
-
-						<!-- Active Agents Card -->
-						<div class="metric-card compact-card">
-							<div class="compact-header">
-								<span class="card-label">ACTIVE AGENTS</span>
-							</div>
-							<div class="compact-value">7</div>
-							<div class="compact-change positive">
-								<svg
-									width="8"
-									height="8"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2"
-								>
-									<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
-								</svg>
-								+16.7%
-							</div>
-						</div>
-					</div>
-
-					<!-- ACTION BUTTONS -->
-					<div class="action-buttons">
-						<button class="action-btn primary" @click="goToNewWorkflow">
-							<svg
-								width="14"
-								height="14"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-							>
-								<line x1="12" y1="5" x2="12" y2="19"></line>
-								<line x1="5" y1="12" x2="19" y2="12"></line>
-							</svg>
-							Create Agent
-						</button>
-						<button class="action-btn secondary">
-							<svg
-								width="14"
-								height="14"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-							>
-								<polygon points="5 3 19 12 5 21 5 3"></polygon>
-							</svg>
-							View Executions
-						</button>
-						<button class="action-btn secondary">
-							<svg
-								width="14"
-								height="14"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-							>
-								<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-							</svg>
-							Projects
-						</button>
-					</div>
-
-					<!-- ROW: NEEDS ATTENTION + MVP AGENTS (SIDE BY SIDE) -->
-					<div class="attention-mvp-row">
-						<!-- NEEDS ATTENTION -->
-						<div class="needs-attention">
-							<div class="needs-header">
-								<div class="needs-title">
-									<svg
-										width="16"
-										height="16"
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										stroke-width="2"
-									>
-										<circle cx="12" cy="12" r="10"></circle>
-										<line x1="12" y1="8" x2="12" y2="12"></line>
-										<line x1="12" y1="16" x2="12.01" y2="16"></line>
-									</svg>
-									<span>Needs Attention</span>
-								</div>
+							<div class="search-wrapper">
+								<Search class="search-icon" />
+								<n-input
+									v-model:value="search"
+									size="small"
+									placeholder="Search workflows, projects..."
+									class="search-input"
+									clearable
+								/>
 							</div>
 
-							<div class="needs-list">
-								<!-- Card 1 -->
-								<div class="needs-item critical">
-									<div class="needs-left">
-										<div class="needs-badge critical-badge">Critical</div>
-										<div class="needs-main">
-											<div class="needs-name">Expense Anomaly Detection</div>
-											<div class="needs-desc">
-												Database connection timeout &mdash; unable to fetch expense records
+							<div class="header-right">
+								<n-badge :value="4" type="info" processing>
+									<n-button quaternary circle class="notification-btn">
+										<Bell class="notif-icon" />
+									</n-button>
+								</n-badge>
+							</div>
+						</header>
+
+						<!-- INNER CONTENT WRAPPER (keeps cards aligned) -->
+						<div class="dashboard-inner">
+							<!-- METRICS STRIP -->
+							<div class="metrics-strip">
+								<n-grid :cols="5" :x-gap="12" :y-gap="12">
+									<!-- System Health -->
+									<n-gi>
+										<n-card size="small" class="metric-card health-card" embedded>
+											<div class="health-value">
+												{{ metrics.systemHealth ? metrics.systemHealth : 92
+												}}<span class="percent">%</span>
 											</div>
-										</div>
-									</div>
-									<div class="needs-right">
-										<div class="needs-date">Last run: 13/12/2024</div>
-										<button class="needs-btn fix">Fix Now</button>
-									</div>
-								</div>
+											<div class="health-label">
+												<CheckCircle2 class="health-icon" />
+												<span>System Health</span>
+											</div>
+											<n-tag size="small" round type="success" class="health-status"> Good </n-tag>
+											<div class="health-time">
+												<Clock class="time-icon" />
+												Updated 2s ago
+											</div>
+										</n-card>
+									</n-gi>
 
-								<!-- Card 2 -->
-								<div class="needs-item warning">
-									<div class="needs-left">
-										<div class="needs-badge warning-badge">Warning</div>
-										<div class="needs-main">
-											<div class="needs-name">Expense Anomaly Detection</div>
-											<div class="needs-desc">Success rate dropped to 82.1%</div>
+									<!-- Other metrics -->
+									<n-gi v-for="card in metricCards" :key="card.key">
+										<n-card size="small" class="metric-card compact-card" embedded>
+											<div class="compact-header">
+												<span class="card-label">
+													{{ card.label }}
+												</span>
+												<div class="mini-chart">
+													<div
+														v-for="(h, idx) in card.bars"
+														:key="idx"
+														class="bar"
+														:class="card.colorClass"
+														:style="{ height: h + '%' }"
+													/>
+												</div>
+											</div>
+											<div class="compact-value">
+												{{ card.value }}
+											</div>
+											<div class="compact-change" :class="card.positive ? 'positive' : 'negative'">
+												<ArrowUpRight v-if="card.positive" class="change-icon" />
+												<ArrowDownRight v-else class="change-icon" />
+												{{ card.delta }}
+											</div>
+										</n-card>
+									</n-gi>
+								</n-grid>
+							</div>
+
+							<div class="action-buttons">
+								<!-- Primary -->
+								<n-button
+									type="primary"
+									size="small"
+									round
+									class="action-btn primary"
+									@click="goToNewWorkflow"
+								>
+									<Plus class="btn-icon" />
+									Create Agent
+								</n-button>
+
+								<!-- View Executions: outlined play icon -->
+								<n-button size="small" round class="action-btn secondary" @click="goToExecutions">
+									<Play class="btn-icon btn-icon-outline" />
+									View Executions
+								</n-button>
+
+								<!-- Projects: lightning icon -->
+								<n-button size="small" round class="action-btn secondary">
+									<Zap class="btn-icon" />
+									Projects
+								</n-button>
+							</div>
+
+							<!-- MAIN GRID -->
+							<div class="main-grid">
+								<n-grid :cols="24" :x-gap="20" :y-gap="20">
+									<!-- LEFT -->
+									<n-gi :span="16">
+										<div class="left-column">
+											<!-- NEEDS ATTENTION -->
+											<n-card size="small" class="needs-attention">
+												<div class="needs-header">
+													<div class="needs-title">
+														<AlertTriangle class="needs-title-icon" />
+														<span>Needs Attention</span>
+													</div>
+													<div class="needs-count">2</div>
+												</div>
+
+												<div class="needs-list">
+													<!-- Card 1 -->
+													<div class="needs-item needs-critical">
+														<div class="needs-left">
+															<div class="needs-icon critical-icon">
+																<XCircle class="needs-inner-icon" />
+															</div>
+															<div class="needs-main">
+																<div class="needs-name">Expense Anomaly Detection</div>
+																<div class="needs-desc">
+																	Database connection timeout — unable to fetch expense records
+																</div>
+																<div class="needs-date-inline">13/12/2024</div>
+															</div>
+														</div>
+														<div class="needs-right">
+															<n-button
+																size="tiny"
+																type="error"
+																round
+																class="needs-btn needs-btn-primary"
+															>
+																Fix Now
+																<ChevronRight class="needs-arrow" />
+															</n-button>
+														</div>
+													</div>
+
+													<!-- Card 2 -->
+													<div class="needs-item needs-warning">
+														<div class="needs-left">
+															<div class="needs-icon warning-icon">
+																<AlertTriangle class="needs-inner-icon" />
+															</div>
+															<div class="needs-main">
+																<div class="needs-name">Expense Anomaly Detection</div>
+																<div class="needs-desc">Success rate dropped to 82.1%</div>
+																<div class="needs-date-inline">Last run: 13/12/2024</div>
+															</div>
+														</div>
+														<div class="needs-right">
+															<n-button size="tiny" round tertiary class="needs-btn">
+																Review
+																<ChevronRight class="needs-arrow" />
+															</n-button>
+														</div>
+													</div>
+												</div>
+											</n-card>
+
+											<!-- ACTIVITY STREAM -->
+											<n-card size="small" class="activity-section">
+												<div class="activity-header">
+													<div class="activity-title">
+														<span class="live-dot"></span>
+														<span class="live-text">LIVE</span>
+														Activity Stream
+													</div>
+													<button class="view-all">
+														View all
+														<ChevronRight class="view-all-icon" />
+													</button>
+												</div>
+
+												<div class="activity-list">
+													<div v-if="loading" class="activity-placeholder">
+														<div class="placeholder-icon">⏳</div>
+														<div class="placeholder-text">Loading activities...</div>
+													</div>
+
+													<div
+														v-else
+														v-for="activity in activities"
+														:key="activity.id"
+														class="activity-item"
+														:class="{
+															clickable: activity.id !== 'placeholder-1',
+														}"
+														@click="activity.id !== 'placeholder-1' && openWorkflow(activity.id)"
+													>
+														<div class="activity-icon" :class="activity.type"></div>
+
+														<div class="activity-info">
+															<div class="activity-name">
+																{{ activity.title }}
+															</div>
+															<div class="activity-desc">
+																{{ activity.subtitle }}
+															</div>
+														</div>
+
+														<div class="activity-time">
+															<div class="time-date">
+																{{ activity.date }}
+															</div>
+															<div v-if="activity.time" class="time-duration">
+																{{ activity.time }}
+															</div>
+														</div>
+													</div>
+												</div>
+											</n-card>
 										</div>
-									</div>
-									<div class="needs-right">
-										<div class="needs-date">Last run: 13/12/2024</div>
-										<button class="needs-btn review">Review</button>
-									</div>
-								</div>
+									</n-gi>
+
+									<!-- RIGHT -->
+									<n-gi :span="8">
+										<div class="right-column">
+											<!-- MVP AGENTS -->
+											<n-card size="small" class="mvp-card">
+												<div class="mvp-header">
+													<div class="mvp-title">
+														<Trophy class="mvp-trophy" />
+														MVP Agents
+													</div>
+												</div>
+
+												<div class="mvp-divider"></div>
+
+												<div class="mvp-list">
+													<div v-for="agent in mvpAgents" :key="agent.rank" class="mvp-item">
+														<div class="mvp-rank" :class="'mvp-rank-' + agent.rank">
+															{{ agent.rank }}
+														</div>
+
+														<div class="mvp-main">
+															<div class="mvp-name">
+																{{ agent.name }}
+															</div>
+															<div class="mvp-metrics">
+																<span>{{ agent.runs }} runs</span>
+																<span class="mvp-sr"> {{ agent.successRate }}% SR </span>
+															</div>
+															<div v-if="agent.badge" class="mvp-streak-pill">
+																<Flame class="mvp-streak-icon" />
+																<span>{{ agent.badge }}</span>
+															</div>
+														</div>
+
+														<div class="mvp-right">
+															<ArrowUpRight class="mvp-trend-arrow" />
+														</div>
+													</div>
+												</div>
+
+												<button class="mvp-footer-link">View all agents</button>
+											</n-card>
+
+											<!-- 7-DAY TREND -->
+											<n-card size="small" class="trend-card">
+												<div class="trend-header">
+													<div class="trend-title">7-Day Trend</div>
+												</div>
+
+												<div class="trend-body">
+													<div class="trend-legend">
+														<span class="legend-item">
+															<span class="legend-dot success-dot"></span>
+															Success
+														</span>
+														<span class="legend-item">
+															<span class="legend-dot failure-dot"></span>
+															Failures
+														</span>
+													</div>
+
+													<div class="trend-chart">
+														<div v-for="(day, idx) in trendData" :key="idx" class="trend-column">
+															<div class="trend-bars">
+																<div
+																	class="trend-bar success"
+																	:style="{ height: day.success + '%' }"
+																></div>
+																<div
+																	class="trend-bar failure"
+																	:style="{ height: day.failure + '%' }"
+																></div>
+															</div>
+															<div class="trend-label">
+																{{ day.label }}
+															</div>
+														</div>
+													</div>
+												</div>
+											</n-card>
+										</div>
+									</n-gi>
+								</n-grid>
 							</div>
 						</div>
-
-						<!-- MVP AGENTS -->
-						<div class="mvp-card">
-							<div class="mvp-header">
-								<div class="mvp-title">MVP Agents</div>
-								<button class="mvp-view-all">View all agents</button>
-							</div>
-
-							<div class="mvp-list">
-								<div class="mvp-item" v-for="agent in mvpAgents" :key="agent.rank">
-									<div class="mvp-rank">{{ agent.rank }}</div>
-									<div class="mvp-main">
-										<div class="mvp-name">{{ agent.name }}</div>
-										<div class="mvp-metrics">
-											<span class="mvp-runs">{{ agent.runs }} runs</span>
-											<span class="mvp-success">{{ agent.successRate }}% SR</span>
-										</div>
-									</div>
-									<div class="mvp-right">
-										<div class="mvp-badge" :class="{ 'mvp-hot': agent.hot }">
-											{{ agent.badge }}
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
+						<!-- /dashboard-inner -->
 					</div>
-
-					<!-- BOTTOM GRID: ACTIVITY + 7-DAY TREND -->
-					<div class="bottom-grid">
-						<div class="bottom-left">
-							<div class="activity-section">
-								<div class="activity-header">
-									<div class="activity-title">
-										<span class="live-dot"></span>
-										<span class="live-text">LIVE</span>
-										Activity Stream
-									</div>
-									<a href="#" class="view-all">
-										View all
-										<svg
-											width="14"
-											height="14"
-											viewBox="0 0 24 24"
-											fill="none"
-											stroke="currentColor"
-											stroke-width="2"
-										>
-											<line x1="5" y1="12" x2="19" y2="12"></line>
-											<polyline points="12 5 19 12 12 19"></polyline>
-										</svg>
-									</a>
-								</div>
-
-								<div class="activity-list">
-									<div v-if="loading" class="activity-placeholder">
-										<div class="placeholder-icon">⏳</div>
-										<div class="placeholder-text">Loading activities...</div>
-									</div>
-									<div
-										v-else
-										v-for="activity in activities"
-										:key="activity.id"
-										class="activity-item"
-										@click="activity.id !== 'placeholder-1' && openWorkflow(activity.id)"
-										:class="{ clickable: activity.id !== 'placeholder-1' }"
-									>
-										<div class="activity-icon" :class="activity.type">
-											{{ activity.icon }}
-										</div>
-										<div class="activity-info">
-											<div class="activity-name">{{ activity.title }}</div>
-											<div class="activity-desc">
-												{{ activity.subtitle }}
-											</div>
-										</div>
-										<div class="activity-time">
-											<div class="time-date">{{ activity.date }}</div>
-											<div class="time-duration" v-if="activity.time">
-												{{ activity.time }}
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-
-						<div class="bottom-right">
-							<div class="trend-card">
-								<div class="trend-header">
-									<div class="trend-title">7-Day Trend</div>
-								</div>
-								<div class="trend-body">
-									<div class="trend-legend">
-										<span class="legend-item">
-											<span class="legend-dot success-dot"></span> Success
-										</span>
-										<span class="legend-item">
-											<span class="legend-dot failure-dot"></span> Failures
-										</span>
-									</div>
-									<div class="trend-chart">
-										<div class="trend-column" v-for="(day, idx) in trendData" :key="idx">
-											<div class="trend-bars">
-												<div class="trend-bar success" :style="{ height: day.success + '%' }"></div>
-												<div class="trend-bar failure" :style="{ height: day.failure + '%' }"></div>
-											</div>
-											<div class="trend-label">{{ day.label }}</div>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-					<!-- END dashboard inner -->
 				</div>
 			</div>
-		</div>
-	</div>
+		</n-layout-content>
+	</n-layout>
 </template>
 
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import {
+	NLayout,
+	NLayoutContent,
+	NGrid,
+	NGi,
+	NCard,
+	NButton,
+	NBadge,
+	NInput,
+	NTag,
+} from 'naive-ui';
+import {
+	Search,
+	Bell,
+	CheckCircle2,
+	Clock,
+	AlertTriangle,
+	XCircle,
+	ArrowUpRight,
+	ArrowDownRight,
+	ChevronRight,
+	Trophy,
+	Flame,
+	Plus,
+	Play,
+	Zap,
+	FolderKanban,
+} from 'lucide-vue-next';
 import { useWorkflowsStore } from '@/app/stores/workflows.store';
 import { useTemplatesStore } from '../stores/templates.store';
 
 const router = useRouter();
 const workflowsStore = useWorkflowsStore();
 const templatesStore = useTemplatesStore();
+
+const search = ref('');
 
 /* n8n bindings – DO NOT TOUCH */
 const workflows = computed(() => workflowsStore.allWorkflows);
@@ -432,6 +374,10 @@ function goToNewWorkflow() {
 	router.push('/workflow/new');
 }
 
+function goToExecutions() {
+	router.push('/executions');
+}
+
 function openWorkflow(id) {
 	router.push(`/workflow/${id}`);
 }
@@ -440,7 +386,6 @@ function publishAsTemplate(id) {
 	templatesStore.publishAsTemplate(id);
 }
 
-// Dashboard data - computed from real workflows
 const activities = computed(() => {
 	if (!workflows.value || workflows.value.length === 0) {
 		return [
@@ -479,6 +424,86 @@ const activities = computed(() => {
 			};
 		});
 });
+
+/* LIVE METRICS */
+const metricsLoading = ref(false);
+
+const metrics = ref({
+	systemHealth: 0,
+	executions7d: 0,
+	executionsDelta: 0,
+	successRate: 0,
+	successDelta: 0,
+	failures7d: 0,
+	failuresDelta: 0,
+	activeAgents: 0,
+	activeAgentsDelta: 0,
+});
+
+async function loadMetrics() {
+	try {
+		metricsLoading.value = true;
+
+		const res = await fetch('/rest/agent-metrics');
+		const data = await res.json();
+
+		metrics.value = {
+			systemHealth: data.systemHealth ?? 92,
+			executions7d: data.executions7d ?? 10816,
+			executionsDelta: data.executionsDelta ?? 12.3,
+			successRate: data.successRate ?? 97.4,
+			successDelta: data.successDelta ?? 2.1,
+			failures7d: data.failures7d ?? 254,
+			failuresDelta: data.failuresDelta ?? -5.2,
+			activeAgents: data.activeAgents ?? 7,
+			activeAgentsDelta: data.activeAgentsDelta ?? 16.7,
+		};
+	} catch (e) {
+		console.error('Failed to load metrics', e);
+	} finally {
+		metricsLoading.value = false;
+	}
+}
+
+const metricCards = computed(() => [
+	{
+		key: 'executions',
+		label: 'EXECUTIONS (7D)',
+		value: metrics.value.executions7d.toLocaleString(),
+		delta: (metrics.value.executionsDelta >= 0 ? '+' : '') + metrics.value.executionsDelta + '%',
+		positive: metrics.value.executionsDelta >= 0,
+		colorClass: 'bar-blue',
+		bars: [40, 60, 80, 50, 90, 70, 100],
+	},
+	{
+		key: 'success',
+		label: 'SUCCESS RATE',
+		value: `${metrics.value.successRate.toFixed(1)}%`,
+		delta: (metrics.value.successDelta >= 0 ? '+' : '') + metrics.value.successDelta + '%',
+		positive: metrics.value.successDelta >= 0,
+		colorClass: 'bar-green',
+		bars: [90, 95, 85, 92, 97, 93, 98],
+	},
+	{
+		key: 'failures',
+		label: 'FAILURES (7D)',
+		value: metrics.value.failures7d.toLocaleString(),
+		delta: (metrics.value.failuresDelta >= 0 ? '+' : '') + metrics.value.failuresDelta + '%',
+		positive: metrics.value.failuresDelta < 0 ? false : true,
+		colorClass: 'bar-red',
+		bars: [70, 50, 90, 60, 40, 55, 45],
+	},
+	{
+		key: 'agents',
+		label: 'ACTIVE AGENTS',
+		value: String(metrics.value.activeAgents),
+		delta:
+			(metrics.value.activeAgentsDelta >= 0 ? '+' : '') + metrics.value.activeAgentsDelta + '%',
+		positive: metrics.value.activeAgentsDelta >= 0,
+		colorClass: 'bar-indigo',
+		bars: [30, 40, 50, 60, 70, 80, 90],
+	},
+]);
 
 const mvpAgents = [
 	{
@@ -535,24 +560,18 @@ const trendData = [
 
 onMounted(() => {
 	loadWorkflows();
+	loadMetrics();
 });
 </script>
 
 <style scoped>
-* {
-	margin: 0;
-	padding: 0;
-	box-sizing: border-box;
-}
-
-/* outer shell to give internal scroll */
 .page-shell {
 	width: 100%;
 	height: 100vh;
-	background: var(--color--background);
+	background: var(--color--background--light-2);
 	display: flex;
-	justify-content: center;
-	align-items: stretch;
+	justify-content: flex-start;
+	align-items: flex-start;
 }
 
 .page-inner {
@@ -565,37 +584,49 @@ onMounted(() => {
 	overflow-y: auto;
 }
 
-/* main dashboard content */
+/* outer container spans full width; no horizontal padding */
 .dashboard {
 	width: 100%;
 	min-height: 100%;
-	padding: 20px;
+	padding-top: 16px;
+	padding-bottom: 24px;
+	background: var(--color--background--light-2);
+}
+
+/* inner container keeps all cards aligned and away from edges */
+.dashboard-inner {
+	padding-left: 32px;
+	padding-right: 100px; /* no gap on scrollbar side */
 }
 
 /* HEADER */
 .header {
+	position: sticky;
+	top: 0;
+	z-index: 8;
 	background: var(--color--background--light-3);
-	padding: 10px 24px; /* was 16px 24px */
-	border-radius: var(--radius--lg);
-	margin-bottom: 16px; /* slightly smaller gap below */
+	padding: 12px 32px;
+	border-radius: 0;
+	margin-top: -16px;
+	margin-bottom: 16px;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	gap: 16px; /* a bit tighter */
-	box-shadow: var(--shadow--light);
+	gap: 8px;
+	box-shadow: 0 1px 0 rgba(15, 23, 42, 0.06);
+	border-bottom: 1px solid rgba(148, 163, 184, 0.25);
 }
 
 .page-title {
-	font-size: 20px;
+	font-size: 18px;
 	font-weight: 600;
 	color: var(--color--text--shade-1);
-	flex-shrink: 0;
 }
 
 .search-wrapper {
 	position: relative;
 	flex: 1;
-	max-width: 500px;
+	max-width: 460px;
 	margin: 0 auto;
 }
 
@@ -604,190 +635,142 @@ onMounted(() => {
 	left: 12px;
 	top: 50%;
 	transform: translateY(-50%);
+	width: 16px;
+	height: 16px;
 	color: var(--color--text--tint-1);
 }
 
 .search-input {
-	width: 100%;
-	padding: 6px 12px 6px 34px;
-	border: var(--border);
-	border-radius: var(--radius);
-	font-size: 13px;
-	color: var(--color--text--shade-1);
-	background: var(--color--background--light-3);
-	outline: none;
-	transition: border-color 0.2s;
-}
-
-.search-input::placeholder {
-	color: var(--color--text--tint-1);
-}
-
-.search-input:focus {
-	border-color: var(--color--primary);
+	padding-left: 32px;
+	border-radius: 999px;
+	--n-border-radius: 999px;
 }
 
 .header-right {
+	position: relative;
 	flex-shrink: 0;
+	padding-right: 0;
 }
 
 .notification-btn {
-	position: relative;
-	width: 40px;
-	height: 40px;
-	border: var(--border);
-	border-radius: var(--radius--lg);
+	width: 32px;
+	height: 32px;
+	border-radius: 999px;
+	border: 1px solid var(--border-color--light);
 	background: var(--color--background--light-3);
-	color: var(--color--text);
-	cursor: pointer;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	transition: all 0.2s;
+}
+.notif-icon {
+	width: 20px;
+	height: 20px;
 }
 
-.notification-btn:hover {
-	background: var(--color--background--light-2);
-}
-
-.badge {
-	position: absolute;
-	top: -4px;
-	right: -4px;
-	background: var(--color--primary);
-	color: var(--color--text--tint-3);
-	font-size: 9px;
-	font-weight: 600;
-	padding: 2px 5px;
-	border-radius: 8px;
-	line-height: 1;
-}
-
-/* METRICS ROW */
-.metrics-row {
-	display: flex;
-	gap: 20px;
-	margin-bottom: 20px;
-	overflow-x: auto;
+/* METRICS STRIP */
+.metrics-strip {
+	background: var(--color--background--light-3);
+	border-radius: 16px;
+	border: 1px solid var(--border-color--light);
+	padding: 18px 20px;
+	box-shadow: var(--shadow--light);
+	margin-bottom: 16px;
 }
 
 .metric-card {
-	background: var(--color--background--light-3);
-	border: var(--border);
-	border-radius: var(--radius--lg);
-	padding: 20px;
-	transition: all 0.2s;
-	box-shadow: var(--shadow--light);
-	flex: 1;
-	min-width: 160px;
+	border-radius: 16px;
+	border: 1px solid var(--border-color--light);
+	box-shadow: none;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	min-height: 112px;
 }
 
-.metric-card:hover {
-	box-shadow: var(--shadow);
-}
-
-/* Health Card */
+/* health */
 .health-card {
-	border: 2px solid var(--color--success);
+	border: 1px solid var(--color--success--tint-2);
 }
 
 .health-value {
-	font-size: 48px;
+	font-size: 40px;
 	font-weight: 700;
 	color: var(--color--text--shade-1);
 	line-height: 1;
-	margin-bottom: 10px;
 }
-
 .percent {
-	font-size: 24px;
+	font-size: 22px;
 }
-
 .health-label {
 	display: flex;
 	align-items: center;
-	gap: 5px;
+	gap: 4px;
 	font-size: 12px;
 	color: var(--color--text);
-	margin-bottom: 8px;
 }
-
-.health-label svg {
-	stroke: var(--color--success);
+.health-icon {
+	width: 14px;
+	height: 14px;
+	color: var(--color--success);
 }
-
 .health-status {
-	display: inline-block;
-	background: var(--color--success--tint-4);
-	color: var(--color--success--shade-1);
-	padding: 3px 10px;
-	border-radius: 10px;
-	font-size: 11px;
-	font-weight: 600;
-	margin-bottom: 8px;
+	margin-top: 4px;
+	background: var(--color--success--tint-4) !important;
+	color: var(--color--success--shade-1) !important;
 }
-
 .health-time {
+	margin-top: 4px;
 	display: flex;
 	align-items: center;
 	gap: 4px;
-	font-size: 10px;
+	font-size: 11px;
 	color: var(--color--text--tint-1);
 }
-
-/* Compact Cards */
-.compact-card {
-	display: flex;
-	flex-direction: column;
+.time-icon {
+	width: 12px;
+	height: 12px;
 }
 
+/* compact cards */
 .compact-header {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	margin-bottom: 12px;
+	margin-bottom: 8px;
 }
-
 .card-label {
 	font-size: 10px;
 	font-weight: 600;
-	color: var(--color--text);
 	letter-spacing: 0.3px;
+	text-transform: uppercase;
+	color: var(--color--text);
 }
-
 .mini-chart {
 	display: flex;
 	align-items: flex-end;
 	gap: 2px;
 	height: 18px;
 }
-
-.mini-chart .bar {
-	width: 3.5px;
+.bar {
+	width: 3px;
 	border-radius: 2px;
-	transition: all 0.2s;
 }
-
-.mini-chart.blue .bar {
+.bar-blue {
 	background: var(--color--primary--tint-1);
 }
-
-.mini-chart.green .bar {
+.bar-green {
 	background: var(--color--success--tint-1);
 }
-
-.mini-chart.red .bar {
+.bar-red {
 	background: var(--color--danger--tint-1);
+}
+.bar-indigo {
+	background: var(--color--secondary--tint-1);
 }
 
 .compact-value {
-	font-size: 32px;
+	font-size: 30px;
 	font-weight: 700;
 	color: var(--color--text--shade-1);
-	margin-bottom: 6px;
-	line-height: 1;
+	margin-bottom: 4px;
 }
-
 .compact-change {
 	display: flex;
 	align-items: center;
@@ -795,120 +778,139 @@ onMounted(() => {
 	font-size: 12px;
 	font-weight: 600;
 }
-
 .compact-change.positive {
 	color: var(--color--success);
 }
-
 .compact-change.negative {
 	color: var(--color--danger);
+}
+.change-icon {
+	width: 12px;
+	height: 12px;
 }
 
 /* ACTION BUTTONS */
 .action-buttons {
 	display: flex;
-	gap: 10px;
+	gap: 8px;
 	margin-bottom: 16px;
 }
 
 .action-btn {
-	display: flex;
+	display: inline-flex;
 	align-items: center;
-	gap: 6px;
-	padding: 8px 16px;
-	border-radius: var(--radius);
 	font-size: 13px;
 	font-weight: 600;
-	cursor: pointer;
-	transition: all 0.2s;
-	border: none;
+	border-radius: 9px;
+	padding: 7px 18px;
+}
+
+.btn-icon {
+	width: 16px;
+	height: 16px;
+	margin-right: 7px; /* more gap between icon & label */
+}
+
+.btn-icon-outline {
+	stroke-width: 1.6;
 }
 
 .action-btn.primary {
-	background: var(--button--color--background--primary);
-	color: var(--button--color--text--primary);
-	border: 1px solid var(--button--border-color--primary);
+	background: var(--color--primary) !important;
+	color: var(--button--color--text--primary) !important;
+	border-color: var(--color--primary--shade-1, var(--color--primary)) !important;
+	box-shadow: 0 4px 10px rgba(1, 82, 159, 0.22);
 }
 
 .action-btn.primary:hover {
-	background: var(--button--color--background--primary--hover-active-focus);
-	border-color: var(--button--border-color--primary--hover-active);
+	background: var(--color--primary--shade-1, var(--color--primary)) !important;
+	border-color: var(--color--primary--shade-2, var(--color--primary)) !important;
 }
 
 .action-btn.secondary {
-	background: var(--button--color--background--secondary);
-	color: var(--button--color--text--secondary);
-	border: 1px solid var(--button--border-color--secondary);
+	background: var(--color--background--light-3) !important;
+	color: var(--color--text--shade-1) !important;
+	border-color: var(--border-color--light) !important;
+	box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
 }
 
 .action-btn.secondary:hover {
-	background: var(--button--color--background--secondary--hover);
-	color: var(--button--color--text--secondary--hover-active-focus);
-	border-color: var(--button--border-color--secondary--hover-active-focus);
+	background: var(--color--background--light-2) !important;
 }
 
-/* ROW: Needs Attention + MVP */
-.attention-mvp-row {
-	display: grid;
-	grid-template-columns: minmax(0, 2.1fr) minmax(280px, 1fr);
-	gap: 20px;
-	margin-bottom: 10px;
-	align-items: start;
+/* MAIN GRID */
+.main-grid {
+	margin-top: 0;
+}
+
+.left-column,
+.right-column {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
 }
 
 /* NEEDS ATTENTION */
 .needs-attention {
-	background: var(--color--background--light-3);
-	border-radius: 12px; /* a bit more rounded like design */
-	border: 1px solid var(--color--danger--tint-1);
-	padding: 12px 16px 10px; /* reduced bottom padding */
-	box-shadow: var(--shadow--light);
+	background: var(--color--background--light-3) !important;
+	border-radius: 16px;
+	border: 1px solid var(--color--danger--tint-1) !important;
 }
 
 .needs-header {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	margin-bottom: 8px; /* smaller gap below title */
+	margin-bottom: 8px;
+}
+
+.needs-title {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--color--danger);
+}
+.needs-title-icon {
+	width: 16px;
+	height: 16px;
+}
+
+.needs-count {
+	min-width: 22px;
+	height: 22px;
+	border-radius: 999px;
+	background: var(--color--danger);
+	color: var(--color--text--tint-3);
+	font-size: 11px;
+	font-weight: 600;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 .needs-list {
-	background: #fff; /* light inner panel like first image */
-	border-radius: 10px;
-	padding: 4px 4px 6px; /* very small internal padding */
+	margin-top: 8px;
+	padding-top: 8px;
+	border-top: 1px solid var(--color--danger--tint-1);
 	display: flex;
 	flex-direction: column;
-	gap: 6px; /* tight gap between the two items */
-}
-
-.needs-title svg {
-	stroke: var(--color--danger);
-}
-
-.needs-list {
-	display: flex;
-	flex-direction: column;
-	gap: 6px; /* was 8px – reduces visual gap */
+	gap: 6px;
 }
 
 .needs-item {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	padding: 6px 12px; /* was 8px 12px */
-	border-radius: var(--radius);
-	background: var(--color--background--light-2);
-	border: 1px solid var(--color--background--light-1);
+	padding: 10px 14px;
+	border-radius: 14px;
 }
-
-.needs-item.critical {
-	background: rgba(248, 113, 113, 0.04);
-	border-color: var(--color--danger--tint-2);
+.needs-critical {
+	background: var(--color--danger--tint-4);
 }
-
-.needs-item.warning {
-	background: rgba(249, 200, 115, 0.06);
-	border-color: var(--color--warning--tint-2);
+.needs-warning {
+	background: var(--color--warning--tint-2);
 }
 
 .needs-left {
@@ -916,224 +918,77 @@ onMounted(() => {
 	align-items: flex-start;
 	gap: 10px;
 }
-
-.needs-badge {
-	font-size: 10px;
-	font-weight: 700;
-	padding: 3px 8px;
+.needs-icon {
+	width: 28px;
+	height: 28px;
 	border-radius: 999px;
-	white-space: nowrap;
-	margin-top: 2px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
-
-.critical-badge {
-	background: var(--color--danger--tint-4);
+.critical-icon {
+	background: var(--color--danger--tint-3);
 	color: var(--color--danger--shade-1);
 }
-
-.warning-badge {
-	background: var(--color--warning--tint-4);
+.warning-icon {
+	background: var(--color--warning--tint-1);
 	color: var(--color--warning--shade-1);
+}
+.needs-inner-icon {
+	width: 14px;
+	height: 14px;
 }
 
 .needs-main {
 	display: flex;
 	flex-direction: column;
-	gap: 0; /* remove extra gap between title and subtitle */
+	gap: 2px;
 }
-
 .needs-name {
 	font-size: 13px;
 	font-weight: 600;
 	color: var(--color--text--shade-1);
-	margin: 0; /* IMPORTANT: remove default margin */
-	line-height: 1.2;
 }
-
 .needs-desc {
 	font-size: 11px;
-	color: var(--color--text--tint-1);
-	margin: 2px 0 0; /* tiny space under title, none below */
-	line-height: 1.2;
+	color: var(--color--text);
 }
-
-.needs-right {
-	text-align: right;
-	display: flex;
-	flex-direction: column;
-	align-items: flex-end;
-	gap: 3px; /* was 6px */
-}
-
-.needs-date {
+.needs-date-inline {
 	font-size: 11px;
 	color: var(--color--text--tint-1);
 }
 
 .needs-btn {
-	font-size: 11px;
-	font-weight: 600;
-	border-radius: 999px;
-	padding: 4px 12px;
-	border: none;
-	cursor: pointer;
-	transition: all 0.2s;
-}
-
-.needs-btn.fix {
-	background: var(--color--danger);
-	color: var(--color--text--tint-3);
-}
-
-.needs-btn.fix:hover {
-	opacity: 0.9;
-}
-
-.needs-btn.review {
-	background: var(--color--background--light-3);
-	color: var(--color--text--shade-1);
-	border: 1px solid var(--color--border--subtle);
-}
-
-/* MVP AGENTS */
-.mvp-card {
-	background: var(--color--background--light-3);
-	border-radius: var(--radius--lg);
-	border: var(--border);
-	padding: 18px;
-	box-shadow: var(--shadow--light);
-}
-
-.mvp-header {
-	display: flex;
-	justify-content: space-between;
+	display: inline-flex;
 	align-items: center;
-	margin-bottom: 8px;
-}
-
-.mvp-title {
-	font-size: 13px;
-	font-weight: 600;
-	color: var(--color--text--shade-1);
-}
-
-.mvp-view-all {
-	font-size: 11px;
-	color: var(--link--color--secondary);
-	background: transparent;
-	border: none;
-	cursor: pointer;
-	padding: 0;
-}
-
-.mvp-list {
-	display: flex;
-	flex-direction: column;
 	gap: 6px;
-	margin-top: 6px;
-}
-
-.mvp-item {
-	display: flex;
-	align-items: center;
-	gap: 10px;
-	padding: 8px 6px;
-	border-radius: var(--radius);
-}
-
-.mvp-item:hover {
-	background: var(--color--background--light-2);
-}
-
-.mvp-rank {
-	width: 18px;
-	height: 18px;
-	border-radius: 999px;
 	font-size: 11px;
 	font-weight: 600;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	background: var(--color--background--light-2);
-	color: var(--color--text--shade-1);
-	flex-shrink: 0;
+}
+.needs-btn-primary {
+	padding-inline: 12px;
+}
+.needs-arrow {
+	width: 10px;
+	height: 10px;
 }
 
-.mvp-main {
-	flex: 1;
-	display: flex;
-	flex-direction: column;
-	gap: 2px;
-}
-
-.mvp-name {
-	font-size: 12px;
-	font-weight: 600;
-	color: var(--color--text--shade-1);
-}
-
-.mvp-metrics {
-	font-size: 11px;
-	color: var(--color--text--tint-1);
-	display: flex;
-	gap: 8px;
-}
-
-.mvp-right {
-	display: flex;
-	align-items: center;
-	justify-content: flex-end;
-}
-
-.mvp-badge {
-	font-size: 10px;
-	padding: 3px 8px;
-	border-radius: 999px;
-	background: var(--color--background--light-2);
-	color: var(--color--text--shade-1);
-	white-space: nowrap;
-}
-
-.mvp-hot {
-	background: var(--color--success--tint-4);
-	color: var(--color--success--shade-1);
-}
-
-/* BOTTOM GRID */
-.bottom-grid {
-	display: grid;
-	grid-template-columns: minmax(0, 2.1fr) minmax(280px, 1fr);
-	gap: 20px;
-	align-items: flex-start;
-	margin-top: 0px; /* 👈 adjust once (120–160px range) */
-}
-
-.bottom-left {
-	display: flex;
-	flex-direction: column;
-	margin-top: -140px;
-}
-
-.bottom-right {
-	display: flex;
-	flex-direction: column;
-	margin-top: -0px;
-}
-
-/* ACTIVITY STREAM */
+/* ACTIVITY */
 .activity-section {
-	background: var(--color--background--light-3);
-	border: var(--border);
-	border-radius: var(--radius--lg);
-	padding: 20px;
+	background: var(--color--background--light-3) !important;
+	border-radius: 16px;
+	border: 1px solid var(--border-color--light) !important;
 	box-shadow: var(--shadow--light);
+	padding: 10px 18px 14px;
 }
 
 .activity-header {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	margin-bottom: 16px;
+	margin-bottom: 6px;
+	border-bottom: 1px solid var(--border-color--light);
+	padding-bottom: 6px;
 }
 
 .activity-title {
@@ -1148,23 +1003,11 @@ onMounted(() => {
 .live-dot {
 	width: 6px;
 	height: 6px;
-	background: var(--color--danger);
-	border-radius: 50%;
-	animation: pulse 2s infinite;
+	border-radius: 999px;
+	background: var(--color--success);
 }
-
-@keyframes pulse {
-	0%,
-	100% {
-		opacity: 1;
-	}
-	50% {
-		opacity: 0.5;
-	}
-}
-
 .live-text {
-	color: var(--color--danger);
+	color: var(--color--success);
 	font-size: 10px;
 	font-weight: 700;
 	letter-spacing: 0.5px;
@@ -1173,39 +1016,37 @@ onMounted(() => {
 .view-all {
 	display: flex;
 	align-items: center;
-	gap: 3px;
-	color: var(--link--color--secondary);
-	text-decoration: none;
+	gap: 4px;
+	background: transparent;
+	border: none;
 	font-size: 12px;
 	font-weight: 500;
-	transition: color 0.2s;
+	color: var(--link--color--secondary);
+	cursor: pointer;
 }
-
 .view-all:hover {
 	color: var(--link--color--secondary--hover);
+}
+.view-all-icon {
+	width: 14px;
+	height: 14px;
 }
 
 .activity-list {
 	display: flex;
 	flex-direction: column;
-	gap: 6px;
+	gap: 4px;
 }
-
 .activity-item {
 	display: flex;
 	align-items: center;
 	gap: 10px;
-	padding: 10px;
-	border-radius: var(--radius);
-	transition: background 0.2s;
+	padding: 8px 6px;
+	border-radius: 10px;
 }
-
-.activity-item.clickable {
-	cursor: pointer;
-}
-
 .activity-item.clickable:hover {
 	background: var(--color--background--light-2);
+	cursor: pointer;
 }
 
 .activity-placeholder {
@@ -1213,60 +1054,51 @@ onMounted(() => {
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	padding: 40px 20px;
+	padding: 32px 16px;
 	text-align: center;
 }
-
 .placeholder-icon {
-	font-size: 48px;
-	margin-bottom: 12px;
-	opacity: 0.5;
+	font-size: 28px;
+	margin-bottom: 6px;
+	opacity: 0.6;
 }
-
 .placeholder-text {
-	font-size: 14px;
+	font-size: 13px;
 	color: var(--color--text);
 	font-weight: 500;
 }
 
 .activity-icon {
-	width: 36px;
-	height: 36px;
-	border-radius: 50%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	font-size: 16px;
+	width: 18px;
+	height: 18px;
+	border-radius: 999px;
+	border: 2px solid var(--color--success);
+	position: relative;
 	flex-shrink: 0;
 }
-
-.activity-icon.alert {
-	background: var(--color--warning--tint-2);
+.activity-icon::before {
+	content: '';
+	position: absolute;
+	inset: 4px;
+	border-radius: 999px;
+	background: var(--color--success);
 }
-
-.activity-icon.success {
-	background: var(--color--success--tint-4);
-}
-
 .activity-icon.info {
-	background: var(--color--info--tint-2);
+	border-color: var(--color--secondary);
 }
-
-.activity-icon.error {
-	background: var(--color--danger--tint-4);
+.activity-icon.info::before {
+	background: var(--color--secondary);
 }
 
 .activity-info {
 	flex: 1;
 }
-
 .activity-name {
 	font-size: 13px;
 	font-weight: 600;
 	color: var(--color--text--shade-1);
 	margin-bottom: 2px;
 }
-
 .activity-desc {
 	font-size: 12px;
 	color: var(--color--text);
@@ -1276,34 +1108,184 @@ onMounted(() => {
 	text-align: right;
 	flex-shrink: 0;
 }
-
 .time-date {
 	font-size: 11px;
 	color: var(--color--text);
 }
-
 .time-duration {
 	font-size: 10px;
 	color: var(--color--text--tint-1);
 	margin-top: 1px;
 }
 
-/* 7-DAY TREND */
-.trend-card {
-	background: var(--color--background--light-3);
-	border-radius: var(--radius--lg);
-	border: var(--border);
-	padding: 18px;
+/* MVP CARD */
+.mvp-card {
+	background: var(--color--background--light-3) !important;
+	border-radius: 16px;
+	border: 1px solid var(--border-color--light) !important;
 	box-shadow: var(--shadow--light);
+	padding: 10px 18px 12px;
+}
+
+.mvp-header {
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	margin-bottom: 4px;
+}
+.mvp-title {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--color--text--shade-1);
+}
+.mvp-trophy {
+	width: 16px;
+	height: 16px;
+	color: var(--color-warning-orange);
+}
+
+.mvp-divider {
+	height: 1px;
+	background: var(--border-color--light);
+	margin: 6px 0 4px;
+}
+
+.mvp-list {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	margin-bottom: 4px;
+}
+.mvp-item {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	padding: 6px 2px;
+	border-radius: 10px;
+}
+.mvp-item:hover {
+	background: var(--color--background--light-2);
+}
+
+.mvp-rank {
+	width: 24px;
+	height: 24px;
+	border-radius: 999px;
+	font-size: 12px;
+	font-weight: 600;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	color: #ffffff;
+	background: #d1d5db;
+}
+.mvp-rank-1 {
+	background: #fbbf24;
+	color: #78350f;
+}
+.mvp-rank-2 {
+	background: #e5e7eb;
+	color: #4b5563;
+}
+.mvp-rank-3 {
+	background: #f97316;
+	color: #7c2d12;
+}
+.mvp-rank-4,
+.mvp-rank-5 {
+	background: #f3f4f6;
+	color: #6b7280;
+}
+
+.mvp-main {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+.mvp-name {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--color--text--shade-1);
+}
+.mvp-metrics {
+	font-size: 11px;
+	color: var(--color--text--tint-1);
+	display: flex;
+	gap: 6px;
+}
+.mvp-sr {
+	color: var(--color--success);
+	font-weight: 600;
+}
+
+.mvp-streak-pill {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	margin-top: 4px;
+	padding: 4px 10px 4px 22px;
+	border-radius: 999px;
+	background: var(--color-light-orange);
+	color: var(--color-warning-orange);
+	font-size: 10px;
+	font-weight: 600;
+}
+.mvp-streak-icon {
+	position: absolute;
+	left: 8px;
+	width: 12px;
+	height: 12px;
+}
+
+.mvp-right {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding-right: 2px;
+}
+.mvp-trend-arrow {
+	width: 14px;
+	height: 14px;
+	color: var(--color--success);
+}
+
+.mvp-footer-link {
+	margin-top: 4px;
+	align-self: center;
+	background: transparent;
+	border: none;
+	color: var(--link--color--secondary);
+	font-size: 12px;
+	font-weight: 500;
+	cursor: pointer;
+	padding: 6px 0 2px;
+}
+.mvp-footer-link:hover {
+	color: var(--link--color--secondary--hover);
+	text-decoration: underline;
+}
+
+/* TREND CARD */
+.trend-card {
+	background: var(--color--background--light-3) !important;
+	border-radius: 16px;
+	border: 1px solid var(--border-color--light) !important;
+	box-shadow: var(--shadow--light);
+	padding: 12px 18px 14px;
 }
 
 .trend-header {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	margin-bottom: 10px;
+	margin-bottom: 6px;
 }
-
 .trend-title {
 	font-size: 13px;
 	font-weight: 600;
@@ -1313,46 +1295,39 @@ onMounted(() => {
 .trend-body {
 	display: flex;
 	flex-direction: column;
-	gap: 8px;
+	gap: 6px;
 }
-
 .trend-legend {
 	display: flex;
-	justify-content: flex-start;
 	gap: 16px;
 	font-size: 10px;
 	color: var(--color--text--tint-1);
 }
-
 .legend-item {
 	display: flex;
 	align-items: center;
 	gap: 4px;
 }
-
 .legend-dot {
 	width: 8px;
 	height: 8px;
 	border-radius: 50%;
 }
-
 .success-dot {
 	background: var(--color--success);
 }
-
 .failure-dot {
 	background: var(--color--danger);
 }
 
 .trend-chart {
-	margin-top: 4px;
+	margin-top: 2px;
 	display: flex;
 	align-items: flex-end;
 	justify-content: space-between;
 	gap: 4px;
 	height: 120px;
 }
-
 .trend-column {
 	display: flex;
 	flex-direction: column;
@@ -1361,7 +1336,6 @@ onMounted(() => {
 	gap: 4px;
 	flex: 1;
 }
-
 .trend-bars {
 	display: flex;
 	align-items: flex-end;
@@ -1370,52 +1344,24 @@ onMounted(() => {
 	justify-content: center;
 	height: 100%;
 }
-
 .trend-bar {
 	width: 6px;
 	border-radius: 3px;
 }
-
 .trend-bar.success {
 	background: var(--color--success--tint-1);
 }
-
 .trend-bar.failure {
 	background: var(--color--danger--tint-1);
 }
-
 .trend-label {
 	font-size: 10px;
 	color: var(--color--text--tint-1);
 }
 
-/* RESPONSIVE */
 @media (max-width: 1200px) {
-	.attention-mvp-row,
-	.bottom-grid {
-		grid-template-columns: 1fr;
-	}
-}
-
-@media (max-width: 768px) {
-	.dashboard {
-		padding: 12px;
-	}
-
-	.header {
-		flex-wrap: wrap;
-		gap: 10px;
-	}
-
-	.action-buttons {
-		flex-wrap: wrap;
-		margin-top: 12px;
-	}
-
-	.action-btn {
-		flex: 1;
-		min-width: 140px;
-		justify-content: center;
+	.dashboard-inner {
+		padding: 0 16px;
 	}
 }
 </style>
