@@ -28,7 +28,7 @@
 							</div>
 						</header>
 
-						<!-- INNER CONTENT WRAPPER (keeps cards aligned) -->
+						<!-- INNER CONTENT WRAPPER -->
 						<div class="dashboard-inner">
 							<!-- METRICS STRIP -->
 							<div class="metrics-strip">
@@ -82,6 +82,7 @@
 								</n-grid>
 							</div>
 
+							<!-- ACTION BUTTONS -->
 							<div class="action-buttons">
 								<!-- Primary -->
 								<n-button
@@ -95,13 +96,13 @@
 									Create Agent
 								</n-button>
 
-								<!-- View Executions: outlined play icon -->
+								<!-- View Executions -->
 								<n-button size="small" round class="action-btn secondary" @click="goToExecutions">
 									<Play class="btn-icon btn-icon-outline" />
 									View Executions
 								</n-button>
 
-								<!-- Projects: lightning icon -->
+								<!-- Projects -->
 								<n-button size="small" round class="action-btn secondary">
 									<Zap class="btn-icon" />
 									Projects
@@ -244,7 +245,15 @@
 												<div class="mvp-divider"></div>
 
 												<div class="mvp-list">
-													<div v-for="agent in mvpAgents" :key="agent.rank" class="mvp-item">
+													<div v-if="agentsLoading && !mvpAgents.length" class="state">
+														Loading agents...
+													</div>
+
+													<div v-else-if="!agentsLoading && !mvpAgents.length" class="state">
+														No agents yet. Create your first agent to see stats here.
+													</div>
+
+													<div v-else v-for="agent in mvpAgents" :key="agent.id" class="mvp-item">
 														<div class="mvp-rank" :class="'mvp-rank-' + agent.rank">
 															{{ agent.rank }}
 														</div>
@@ -255,11 +264,7 @@
 															</div>
 															<div class="mvp-metrics">
 																<span>{{ agent.runs }} runs</span>
-																<span class="mvp-sr"> {{ agent.successRate }}% SR </span>
-															</div>
-															<div v-if="agent.badge" class="mvp-streak-pill">
-																<Flame class="mvp-streak-icon" />
-																<span>{{ agent.badge }}</span>
+																<span class="mvp-sr"> {{ agent.successRate.toFixed(1) }}% SR </span>
 															</div>
 														</div>
 
@@ -351,14 +356,15 @@ import {
 	Plus,
 	Play,
 	Zap,
-	FolderKanban,
 } from 'lucide-vue-next';
 import { useWorkflowsStore } from '@/app/stores/workflows.store';
 import { useTemplatesStore } from '../stores/templates.store';
+import { useUserAgentMappingsStore } from '@src/stores/userAgentMappings.store';
 
 const router = useRouter();
 const workflowsStore = useWorkflowsStore();
 const templatesStore = useTemplatesStore();
+const userAgentMappingsStore = useUserAgentMappingsStore();
 
 const search = ref('');
 
@@ -386,6 +392,7 @@ function publishAsTemplate(id) {
 	templatesStore.publishAsTemplate(id);
 }
 
+/* ACTIVITY STREAM DATA */
 const activities = computed(() => {
 	if (!workflows.value || workflows.value.length === 0) {
 		return [
@@ -505,49 +512,39 @@ const metricCards = computed(() => [
 	},
 ]);
 
-const mvpAgents = [
-	{
-		rank: 1,
-		name: 'Reward Points Calculator',
-		runs: '15,732',
-		successRate: '99.8',
-		badge: '132 runs successful in a row',
-		hot: true,
-	},
-	{
-		rank: 2,
-		name: 'Delivery Tracking Updates',
-		runs: '3,421',
-		successRate: '99.1',
-		badge: 'Top performer',
-		hot: false,
-	},
-	{
-		rank: 3,
-		name: 'Low Stock Alert',
-		runs: '1,245',
-		successRate: '99.2',
-		badge: 'Stable',
-		hot: false,
-	},
-	{
-		rank: 4,
-		name: 'Daily Inventory Sync',
-		runs: '342',
-		successRate: '98.5',
-		badge: 'On track',
-		hot: false,
-	},
-	{
-		rank: 5,
-		name: 'Shift Assignment Notifier',
-		runs: '89',
-		successRate: '100.0',
-		badge: 'New',
-		hot: false,
-	},
-];
+/* MY-AGENTS: MVP AGENTS DATA */
+const agentsLoading = ref(false);
 
+const rawAgents = computed(() => userAgentMappingsStore.getUserAgentMappings());
+
+// Map API result into a normalized shape
+const normalizedAgents = computed(() =>
+	rawAgents.value.map((item) => ({
+		id: item.id,
+		name: item.workflow?.name ?? 'Unnamed Agent',
+		runs: item.executions ?? item.total_executions ?? 0,
+		successRate: item.success_rate ?? 0,
+	})),
+);
+
+// Top 5 agents by success rate (and runs as tiebreaker)
+const mvpAgents = computed(() =>
+	normalizedAgents.value
+		.slice()
+		.sort((a, b) => {
+			if ((b.successRate ?? 0) === (a.successRate ?? 0)) {
+				return (b.runs ?? 0) - (a.runs ?? 0);
+			}
+			return (b.successRate ?? 0) - (a.successRate ?? 0);
+		})
+		.slice(0, 5)
+		.map((agent, index) => ({
+			...agent,
+			rank: index + 1,
+		})),
+);
+
+/* TREND DATA (static for now) */
 const trendData = [
 	{ label: 'Thu', success: 85, failure: 20 },
 	{ label: 'Fri', success: 90, failure: 25 },
@@ -558,9 +555,20 @@ const trendData = [
 	{ label: 'Wed', success: 98, failure: 10 },
 ];
 
-onMounted(() => {
-	loadWorkflows();
-	loadMetrics();
+onMounted(async () => {
+	await loadWorkflows();
+	await loadMetrics();
+
+	if (!rawAgents.value?.length) {
+		try {
+			agentsLoading.value = true;
+			await userAgentMappingsStore.fetchUserAgentMappings();
+		} catch (e) {
+			console.error('Failed to load agents', e);
+		} finally {
+			agentsLoading.value = false;
+		}
+	}
 });
 </script>
 
@@ -596,7 +604,7 @@ onMounted(() => {
 /* inner container keeps all cards aligned and away from edges */
 .dashboard-inner {
 	padding-left: 32px;
-	padding-right: 100px; /* no gap on scrollbar side */
+	padding-right: 100px;
 }
 
 /* HEADER */
@@ -808,7 +816,7 @@ onMounted(() => {
 .btn-icon {
 	width: 16px;
 	height: 16px;
-	margin-right: 7px; /* more gap between icon & label */
+	margin-right: 10px;
 }
 
 .btn-icon-outline {
@@ -1223,26 +1231,6 @@ onMounted(() => {
 	font-weight: 600;
 }
 
-.mvp-streak-pill {
-	position: relative;
-	display: flex;
-	align-items: center;
-	gap: 4px;
-	margin-top: 4px;
-	padding: 4px 10px 4px 22px;
-	border-radius: 999px;
-	background: var(--color-light-orange);
-	color: var(--color-warning-orange);
-	font-size: 10px;
-	font-weight: 600;
-}
-.mvp-streak-icon {
-	position: absolute;
-	left: 8px;
-	width: 12px;
-	height: 12px;
-}
-
 .mvp-right {
 	display: flex;
 	align-items: center;
@@ -1357,6 +1345,12 @@ onMounted(() => {
 .trend-label {
 	font-size: 10px;
 	color: var(--color--text--tint-1);
+}
+
+.state {
+	font-size: 12px;
+	color: var(--color--text--tint-1);
+	padding: 8px 0;
 }
 
 @media (max-width: 1200px) {
