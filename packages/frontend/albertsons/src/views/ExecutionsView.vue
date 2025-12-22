@@ -4,6 +4,9 @@ import { useRouter } from 'vue-router';
 import { useToast } from '@/app/composables/useToast';
 import { albertsonsRestApiRequest } from '@src/utils/albertsonsRestApiRequest';
 import { VIEWS } from '@/app/constants';
+import { useUsersStore } from '@/features/settings/users/users.store'; // <-- add this
+
+const usersStore = useUsersStore();
 
 interface ExecutionRow {
 	id: string;
@@ -36,6 +39,13 @@ async function fetchExecutions() {
 		isLoading.value = true;
 
 		const params = new URLSearchParams();
+
+		// required: current logged‑in user id
+		const ownerId = usersStore.currentUser?.id; // adjust field if needed
+		if (ownerId) {
+			params.append('ownerId', ownerId); // MUST be ownerId to match FastAPI
+		}
+
 		if (search.value) params.append('search', search.value);
 		if (statusFilter.value !== 'all') params.append('status', statusFilter.value);
 
