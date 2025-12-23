@@ -133,11 +133,16 @@ export const routes: RouteRecordRaw[] = [
 		name: 'DASHBOARD',
 		components: {
 			default: () => import('@src/views/DashboardView.vue'),
-
+			header: Header,
 			sidebar: MainSidebar,
 		},
 		meta: {
 			middleware: ['authenticated'],
+			header: {
+				title: 'Pulse',
+				showSearch: true,
+				showNotifications: true,
+			},
 		},
 	},
 	// Super Admin Console
@@ -157,7 +162,22 @@ export const routes: RouteRecordRaw[] = [
 			},
 		},
 	},
-
+	{
+		path: '/projects',
+		name: 'ALBERTSONS_PROJECTS',
+		components: {
+			default: () => import('@src/views/ProjectsView.vue'),
+			header: Header, // ✅ ADD THIS
+			sidebar: MainSidebar,
+		},
+		meta: {
+			middleware: ['authenticated'],
+			header: {
+				title: 'Projects', // ✅ ADD THIS
+				showBack: false,
+			},
+		},
+	},
 	// Albertsons Agents
 	{
 		path: '/agents',
@@ -182,33 +202,50 @@ export const routes: RouteRecordRaw[] = [
 		name: 'ALBERTSONS_TEMPLATES',
 		components: {
 			default: () => import('@src/views/AlbertsonsTemplates.vue'),
+			header: Header, // ✅ ADD
 			sidebar: MainSidebar,
 		},
 		meta: {
 			middleware: ['authenticated'],
+			header: {
+				title: 'Templates',
+				showBack: false,
+			},
 		},
 	},
+
 	// Albertsons Agent Library
 	{
 		path: '/agent-library',
 		name: 'ALBERTSONS_AGENT_LIBRARY',
 		components: {
 			default: () => import('@src/views/AgentLibrary.vue'),
+			header: Header,
 			sidebar: MainSidebar,
 		},
 		meta: {
 			middleware: ['authenticated'],
+			header: {
+				title: 'Agent Library',
+				showBack: false,
+			},
 		},
 	},
+
 	{
 		path: '/executions',
 		name: 'EXECUTIONS',
 		components: {
 			default: () => import('@src/views/ExecutionsView.vue'),
+			header: Header, // ✅ ADD
 			sidebar: MainSidebar,
 		},
 		meta: {
 			middleware: ['authenticated'],
+			header: {
+				title: 'Executions',
+				showBack: false,
+			},
 		},
 	},
 	{

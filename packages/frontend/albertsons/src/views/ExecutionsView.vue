@@ -59,38 +59,21 @@ async function fetchExecutions() {
 		const payload = (res as any).data ?? res;
 		const data = payload.data ?? payload;
 
-		const items: ExecutionRow[] = (data.items ?? []).map((row: any) => {
-			let durationMs: number | undefined = row.durationMs;
-
-			if (row.durationMs !== undefined && row.durationMs !== null) {
-				durationMs = Number(row.durationMs);
-			} else if (row.startedAt && row.stoppedAt) {
-				try {
-					const start = new Date(row.startedAt).getTime();
-					const stop = new Date(row.stoppedAt).getTime();
-					if (!isNaN(start) && !isNaN(stop) && stop >= start) {
-						durationMs = Math.max(stop - start, 0);
-					}
-				} catch (e) {
-					console.warn('Failed to parse dates for duration calculation:', e);
-				}
-			} else if (row.status === 'running' || row.status === 'waiting') {
-				durationMs = 0;
-			}
-
-			return {
-				id: row.id,
-				workflowId: row.workflowId,
-				workflowName: row.workflowName,
-				status: row.status,
-				mode: row.mode,
-				startedAt: row.startedAt,
-				finishedAt: row.stoppedAt ?? row.finishedAt ?? null,
-				durationMs,
-				retryOf: row.retryOf,
-				retrySuccessId: row.retrySuccessId,
-			};
-		});
+		const items: ExecutionRow[] = (data.items ?? []).map((row: any) => ({
+			id: row.id,
+			workflowId: row.workflowId,
+			workflowName: row.workflowName,
+			status: row.status,
+			mode: row.mode,
+			startedAt: row.startedAt,
+			finishedAt: row.stoppedAt ?? row.finishedAt ?? null,
+			durationMs:
+				row.durationMs !== undefined && row.durationMs !== null
+					? Number(row.durationMs)
+					: undefined,
+			retryOf: row.retryOf,
+			retrySuccessId: row.retrySuccessId,
+		}));
 
 		executions.value = items;
 		total.value = data.total ?? items.length;
@@ -203,30 +186,8 @@ function formatDate(dateString: string | null) {
 
 <template>
 	<div class="executions-page">
-		<!-- Top header with title + global search -->
-		<header class="main-header">
-			<div class="main-header-content">
-				<div class="main-header-row">
-					<div>
-						<h1 class="main-title">Executions</h1>
-						<p class="main-subtitle">Monitor agent execution history</p>
-					</div>
-
-					<div class="main-header-right">
-						<input
-							v-model="globalSearch"
-							type="text"
-							class="global-search-input"
-							placeholder="Search workflows, projects..."
-						/>
-					</div>
-				</div>
-			</div>
-		</header>
-
-		<!-- Executions container -->
 		<div class="executions-container">
-			<!-- Executions header with card search + filters + refresh (inside card) -->
+			<!-- Card header -->
 			<div class="executions-header">
 				<div class="executions-header-left">
 					<h2 class="executions-title">Executions</h2>
@@ -242,102 +203,62 @@ function formatDate(dateString: string | null) {
 							placeholder="Search executions..."
 						/>
 					</div>
-					<button type="button" class="filters-btn-icon">
-						<svg
-							class="filter-icon"
-							width="16"
-							height="16"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-						>
-							<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-						</svg>
-					</button>
-					<button type="button" class="refresh-btn" @click="onRefresh">Refresh</button>
+
+					<button class="refresh-btn" @click="onRefresh">Refresh</button>
 				</div>
 			</div>
 
 			<!-- Status filters -->
 			<div class="status-filters">
 				<button
+					v-for="s in ['all', 'success', 'error', 'running', 'waiting']"
+					:key="s"
 					class="status-filter"
-					:class="{ 'status-filter--active': statusFilter === 'all' }"
-					@click="statusFilter = 'all'"
+					:class="{ 'status-filter--active': statusFilter === s }"
+					@click="statusFilter = s"
 				>
-					All
+					{{ s }}
 				</button>
-				<button
-					class="status-filter"
-					:class="{ 'status-filter--active': statusFilter === 'success' }"
-					@click="statusFilter = 'success'"
-				>
-					Success
-				</button>
-				<button
-					class="status-filter"
-					:class="{ 'status-filter--active': statusFilter === 'error' }"
-					@click="statusFilter = 'error'"
-				>
-					Error
-				</button>
-				<button
-					class="status-filter"
-					:class="{ 'status-filter--active': statusFilter === 'running' }"
-					@click="statusFilter = 'running'"
-				>
-					Running
-				</button>
-				<button
-					class="status-filter"
-					:class="{ 'status-filter--active': statusFilter === 'waiting' }"
-					@click="statusFilter = 'waiting'"
-				>
-					Waiting
-				</button>
-
-				<div class="runs-count">{{ total }} runs</div>
 			</div>
 
-			<!-- Table container -->
+			<!-- Table -->
 			<div class="table-container">
 				<table class="executions-table">
 					<thead>
 						<tr>
-							<th class="col-status">STATUS</th>
-							<th class="col-agent">AGENT</th>
-							<th class="col-project">PROJECT</th>
-							<th class="col-triggered">TRIGGERED BY</th>
-							<th class="col-started">STARTED</th>
-							<th class="col-duration">DURATION</th>
-							<th class="col-retries">RETRIES</th>
+							<th>STATUS</th>
+							<th>AGENT</th>
+							<th>PROJECT</th>
+							<th>TRIGGERED</th>
+							<th>STARTED</th>
+							<th>DURATION</th>
+							<th>RETRIES</th>
 						</tr>
 					</thead>
+
 					<tbody>
 						<tr
 							v-for="row in executions"
 							:key="row.id"
 							:class="{ 'row-error': row.status === 'error' }"
 						>
-							<td class="col-status">
+							<td>
 								<span :class="['status-badge', `status-badge--${row.status}`]">
 									{{ formatStatus(row.status) }}
 								</span>
 							</td>
 
-							<!-- clickable agent name -->
-							<td class="col-agent clickable" @click="openExecution(row)">
+							<td class="clickable" @click="openExecution(row)">
 								<strong>{{ row.workflowName || row.workflowId }}</strong>
 							</td>
 
-							<td class="col-project">–</td>
-							<td class="col-triggered">{{ formatStatus(row.mode || 'manual') }}</td>
-							<td class="col-started">{{ formatDate(row.startedAt) }}</td>
-							<td class="col-duration">
+							<td>–</td>
+							<td>{{ formatStatus(row.mode || 'manual') }}</td>
+							<td>{{ formatDate(row.startedAt) }}</td>
+							<td>
 								<strong>{{ formatDuration(row.durationMs) }}</strong>
 							</td>
-							<td class="col-retries">{{ row.retryOf ? 1 : 0 }}</td>
+							<td>{{ row.retryOf ? 1 : 0 }}</td>
 						</tr>
 
 						<tr v-if="!isLoading && executions.length === 0">
