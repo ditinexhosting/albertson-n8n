@@ -1,112 +1,88 @@
 <template>
-	<!-- Outer shell: same pattern as Super Admin -->
+	<!-- Page shell -->
 	<div class="flex flex-1 p-4! flex-col gap-4 bg-[var(--color--background--light-2)]">
-		<!-- Top row: Pulse title (optional, can be removed if header is elsewhere) -->
-		<div class="flex items-center justify-between gap-4">
-			<div>
-				<div class="text-2xl font-bold leading-tight">Pulse</div>
-				<div class="text-xs text-secondary mt-1">System Health Dashboard</div>
-			</div>
-			<!-- You can later add search + bell here if needed -->
+		<!-- METRICS STRIP: white container with ONLY metric cards -->
+		<div class="metrics-strip">
+			<n-grid :cols="5" :x-gap="14" :y-gap="14">
+				<!-- System Health -->
+				<n-gi>
+					<div class="metric-card health-card">
+						<div class="health-value">
+							{{ metrics.systemHealth ? metrics.systemHealth : 92 }}<span class="percent">%</span>
+						</div>
+						<div class="health-label">
+							<CheckCircle2 class="health-icon" />
+							<span>System Health</span>
+						</div>
+						<n-tag size="small" round type="success" class="health-status"> Good </n-tag>
+						<div class="health-time">
+							<Clock class="time-icon" />
+							Updated 2s ago
+						</div>
+					</div>
+				</n-gi>
+
+				<!-- Other metrics -->
+				<n-gi v-for="card in metricCards" :key="card.key">
+					<div class="metric-card compact-card">
+						<div class="compact-header">
+							<span class="card-label">
+								{{ card.label }}
+							</span>
+							<div class="mini-chart">
+								<div
+									v-for="(h, idx) in card.bars"
+									:key="idx"
+									class="bar"
+									:class="card.colorClass"
+									:style="{ height: h + '%' }"
+								/>
+							</div>
+						</div>
+						<div class="compact-value">
+							{{ card.value }}
+						</div>
+						<div class="compact-change" :class="card.positive ? 'positive' : 'negative'">
+							<ArrowUpRight v-if="card.positive" class="change-icon" />
+							<ArrowDownRight v-else class="change-icon" />
+							{{ card.delta }}
+						</div>
+					</div>
+				</n-gi>
+			</n-grid>
 		</div>
 
-		<!-- Main white canvas, like wireframe center area -->
-		<div
-			class="flex-1 rounded-xl bg-white shadow border border-[var(--border-color--light)] px-6 py-6 flex flex-col gap-4"
-		>
-			<!-- METRICS STRIP + ACTIONS -->
-			<div class="flex flex-col gap-3 max-w-[1400px] mx-auto w-full">
-				<!-- METRICS STRIP -->
-				<div
-					class="w-full rounded-2xl border border-[var(--border-color--light)] bg-[var(--color--background--light-3)] shadow-[var(--shadow--light)] px-5 py-4"
+		<!-- ACTION BUTTONS: outside metrics strip, unchanged -->
+		<div class="max-w-[1400px] mx-auto w-full">
+			<div class="flex flex-row gap-2">
+				<n-button
+					type="primary"
+					size="small"
+					round
+					class="action-btn primary"
+					@click="goToNewWorkflow"
 				>
-					<n-grid :cols="5" :x-gap="12" :y-gap="12">
-						<!-- System Health -->
-						<n-gi>
-							<n-card size="small" class="metric-card health-card" embedded>
-								<div class="health-value">
-									{{ metrics.systemHealth ? metrics.systemHealth : 92
-									}}<span class="percent">%</span>
-								</div>
-								<div class="health-label">
-									<CheckCircle2 class="health-icon" />
-									<span>System Health</span>
-								</div>
-								<n-tag size="small" round type="success" class="health-status"> Good </n-tag>
-								<div class="health-time">
-									<Clock class="time-icon" />
-									Updated 2s ago
-								</div>
-							</n-card>
-						</n-gi>
+					<Plus class="btn-icon" />
+					Create Agent
+				</n-button>
 
-						<!-- Other metrics -->
-						<n-gi v-for="card in metricCards" :key="card.key">
-							<n-card size="small" class="metric-card compact-card" embedded>
-								<div class="compact-header">
-									<span class="card-label">
-										{{ card.label }}
-									</span>
-									<div class="mini-chart">
-										<div
-											v-for="(h, idx) in card.bars"
-											:key="idx"
-											class="bar"
-											:class="card.colorClass"
-											:style="{ height: h + '%' }"
-										/>
-									</div>
-								</div>
-								<div class="compact-value">
-									{{ card.value }}
-								</div>
-								<div class="compact-change" :class="card.positive ? 'positive' : 'negative'">
-									<ArrowUpRight v-if="card.positive" class="change-icon" />
-									<ArrowDownRight v-else class="change-icon" />
-									{{ card.delta }}
-								</div>
-							</n-card>
-						</n-gi>
-					</n-grid>
-				</div>
+				<n-button size="small" round class="action-btn secondary" @click="goToExecutions">
+					<Play class="btn-icon btn-icon-outline" />
+					View Executions
+				</n-button>
 
-				<!-- ACTION BUTTONS -->
-				<div class="flex flex-row gap-2">
-					<!-- Primary -->
-					<n-button
-						type="primary"
-						size="small"
-						round
-						class="action-btn primary"
-						@click="goToNewWorkflow"
-					>
-						<Plus class="btn-icon" />
-						Create Agent
-					</n-button>
-
-					<!-- View Executions -->
-					<n-button size="small" round class="action-btn secondary" @click="goToExecutions">
-						<Play class="btn-icon btn-icon-outline" />
-						View Executions
-					</n-button>
-
-					<!-- Projects -->
-					<n-button
-						size="small"
-						round
-						class="action-btn secondary"
-						@click="router.push('/projects')"
-					>
-						<Zap class="btn-icon" />
-						Projects
-					</n-button>
-				</div>
+				<n-button size="small" round class="action-btn secondary" @click="router.push('/projects')">
+					<Zap class="btn-icon" />
+					Projects
+				</n-button>
 			</div>
+		</div>
 
-			<!-- MAIN GRID (Needs + Activity / MVP + Trend) -->
-			<div class="w-full max-w-[1400px] mx-auto">
+		<!-- SCROLLABLE MAIN GRID -->
+		<div class="flex-1 overflow-y-auto scroll-thin">
+			<div class="w-full max-w-[200px] mx-auto">
 				<n-grid :cols="24" :x-gap="20" :y-gap="20">
-					<!-- LEFT -->
+					<!-- LEFT COLUMN -->
 					<n-gi :span="16">
 						<div class="left-column">
 							<!-- NEEDS ATTENTION -->
@@ -189,9 +165,7 @@
 										v-for="activity in activities"
 										:key="activity.id"
 										class="activity-item"
-										:class="{
-											clickable: activity.id !== 'placeholder-1',
-										}"
+										:class="{ clickable: activity.id !== 'placeholder-1' }"
 										@click="activity.id !== 'placeholder-1' && openWorkflow(activity.id)"
 									>
 										<div class="activity-icon" :class="activity.type"></div>
@@ -219,7 +193,7 @@
 						</div>
 					</n-gi>
 
-					<!-- RIGHT -->
+					<!-- RIGHT COLUMN -->
 					<n-gi :span="8">
 						<div class="right-column">
 							<!-- MVP AGENTS -->
@@ -266,7 +240,7 @@
 								<button class="mvp-footer-link">View all agents</button>
 							</n-card>
 
-							<!-- 7-DAY TREND -->
+							<!-- 7‑DAY TREND -->
 							<n-card size="small" class="trend-card">
 								<div class="trend-header">
 									<div class="trend-title">7-Day Trend</div>
@@ -355,7 +329,7 @@ function publishAsTemplate(id) {
 	templatesStore.publishAsTemplate(id);
 }
 
-/* ACTIVITY STREAM DATA – same as before */
+/* ACTIVITY STREAM DATA */
 const activities = computed(() => {
 	if (!workflows.value || workflows.value.length === 0) {
 		return [
@@ -395,7 +369,7 @@ const activities = computed(() => {
 		});
 });
 
-/* LIVE METRICS – unchanged */
+/* LIVE METRICS */
 const metricsLoading = ref(false);
 
 const metrics = ref({
@@ -475,7 +449,7 @@ const metricCards = computed(() => [
 	},
 ]);
 
-/* MVP AGENTS – unchanged */
+/* MVP AGENTS */
 const agentsLoading = ref(false);
 
 const rawAgents = computed(() => userAgentMappingsStore.getUserAgentMappings());
@@ -505,7 +479,7 @@ const mvpAgents = computed(() =>
 		})),
 );
 
-/* TREND DATA – unchanged */
+/* TREND DATA */
 const trendData = [
 	{ label: 'Thu', success: 85, failure: 20 },
 	{ label: 'Fri', success: 90, failure: 25 },
@@ -534,27 +508,86 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* removed: page-shell, page-inner, dashboard-scroll, dashboard, dashboard-inner */
-
-/* keep all your card styles exactly as before */
-
-.metrics-strip {
-	/* now handled by Tailwind wrapper, keep empty or remove */
+/* Thin, rounded, subtle scrollbar using design tokens */
+.scroll-thin {
+	scrollbar-width: thin;
+	/* thumb, track */
+	scrollbar-color: var(--border-color--light) transparent;
 }
 
+.scroll-thin::-webkit-scrollbar {
+	width: 4px;
+}
+
+.scroll-thin::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.scroll-thin::-webkit-scrollbar-thumb {
+	background-color: var(--border-color--light); /* light neutral */
+	border-radius: 999px; /* pill */
+}
+
+.scroll-thin::-webkit-scrollbar-thumb:hover {
+	background-color: var(--color--text--tint-2); /* slightly darker token */
+}
+
+/* TEMP: just to confirm scrollbar appears – remove when done */
+.flex-1.overflow-y-auto {
+	max-height: 200px;
+}
+
+/* METRICS STRIP CONTAINER */
+.metrics-strip {
+	background: white;
+	border-radius: 18px;
+	border: 1px solid var(--border-color--light);
+	box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+	padding: 20px 28px;
+	max-width: 1400px;
+	margin: 0 auto;
+	width: 100%;
+}
+
+/* metric cards */
 .metric-card {
-	border-radius: 16px;
+	border-radius: 12px;
 	border: 1px solid var(--border-color--light);
 	box-shadow: none;
 	display: flex;
 	flex-direction: column;
-	justify-content: space-between;
-	min-height: 112px;
+	justify-content: center;
+	min-height: 110px;
+	padding: 14px 12px;
+	background: transparent;
 }
 
-/* health */
+/* shared metric card base */
+.metric-card {
+	border-radius: 14px;
+	border: 1px solid var(--border-color--light);
+	box-shadow: none;
+	display: flex;
+	flex-direction: column;
+	justify-content: center; /* vertical centering */
+	min-height: 96px; /* 🔑 key fix: slimmer cards */
+	padding: 14px 16px; /* consistent inner spacing */
+}
+
+/* SYSTEM HEALTH CARD */
+/* ===================== */
 .health-card {
-	border: 1px solid var(--color--success--tint-2);
+	border: 2px solid var(--color--success--tint-2);
+	background: var(--color--background--light-3);
+	border-radius: 14px;
+	min-height: 128px;
+	max-height: 128px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	padding: 14px 8px;
 }
 
 .health-value {
@@ -562,64 +595,90 @@ onMounted(async () => {
 	font-weight: 700;
 	color: var(--color--text--shade-1);
 	line-height: 1;
+	margin-bottom: 4px;
 }
+
 .percent {
-	font-size: 22px;
+	font-size: 20px;
 }
+
 .health-label {
 	display: flex;
 	align-items: center;
-	gap: 4px;
+	justify-content: center;
+	gap: 6px;
 	font-size: 12px;
+	font-weight: 500;
 	color: var(--color--text);
+	margin-bottom: 6px;
 }
+
 .health-icon {
 	width: 14px;
 	height: 14px;
 	color: var(--color--success);
 }
+
 .health-status {
-	margin-top: 4px;
+	margin: 4px 0;
+	padding: 2px 10px;
 	background: var(--color--success--tint-4) !important;
 	color: var(--color--success--shade-1) !important;
+	font-size: 11px;
 }
+
 .health-time {
-	margin-top: 4px;
+	margin-top: 6px;
 	display: flex;
 	align-items: center;
+	justify-content: center;
 	gap: 4px;
-	font-size: 11px;
+	font-size: 10px;
 	color: var(--color--text--tint-1);
 }
+
 .time-icon {
 	width: 12px;
 	height: 12px;
 }
 
-/* compact cards */
+/* ===================== */
+/* COMPACT METRIC CARDS */
+/* ===================== */
+.compact-card {
+	display: flex;
+	flex-direction: column;
+	margin-top: 14px;
+	justify-content: center; /* vertical center */
+}
+
 .compact-header {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	margin-bottom: 8px;
+	margin-bottom: 6px;
 }
+
 .card-label {
 	font-size: 10px;
 	font-weight: 600;
-	letter-spacing: 0.3px;
+	letter-spacing: 0.4px;
 	text-transform: uppercase;
-	color: var(--color--text);
+	color: var(--color--text--tint-1);
 }
+
 .mini-chart {
 	display: flex;
 	align-items: flex-end;
 	gap: 2px;
-	height: 18px;
+	height: 16px;
 }
+
 .bar {
 	width: 3px;
 	border-radius: 2px;
 }
+
 .bar-blue {
 	background: var(--color--primary--tint-1);
 }
@@ -634,27 +693,32 @@ onMounted(async () => {
 }
 
 .compact-value {
-	font-size: 30px;
+	font-size: 26px; /* reduced from 28–30 */
 	font-weight: 700;
+	line-height: 1;
+	margin-bottom: 2px;
 	color: var(--color--text--shade-1);
-	margin-bottom: 4px;
 }
+
 .compact-change {
 	display: flex;
 	align-items: center;
 	gap: 4px;
-	font-size: 12px;
+	font-size: 11px;
 	font-weight: 600;
 }
+
 .compact-change.positive {
 	color: var(--color--success);
 }
+
 .compact-change.negative {
 	color: var(--color--danger);
 }
+
 .change-icon {
-	width: 12px;
-	height: 12px;
+	width: 11px;
+	height: 11px;
 }
 
 /* ACTION BUTTONS */
@@ -701,7 +765,7 @@ onMounted(async () => {
 	background: var(--color--background--light-2) !important;
 }
 
-/* MAIN GRID columns */
+/* main grid columns */
 .left-column,
 .right-column {
 	display: flex;
