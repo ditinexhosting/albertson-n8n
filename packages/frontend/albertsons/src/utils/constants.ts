@@ -7,3 +7,9 @@ export const AI_THINKING_STATUS = {
 export const ROUTERS = {
 	SUPERADMIN_CONSOLE: 'SUPERADMIN_CONSOLE',
 };
+
+export const PROJECT_STATUS = {
+	DRAFT: 'Draft',
+	ACTIVE: 'Active',
+	INACTIVE: 'Inactive',
+};
