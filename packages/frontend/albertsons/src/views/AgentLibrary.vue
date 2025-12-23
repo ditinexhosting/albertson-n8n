@@ -12,7 +12,7 @@ const agentLibraryStore = useAgentLibraryStore();
 const searchQuery = ref('');
 const activeCategory = ref('all');
 
-// Categories from wireframe
+// Categories
 const categories = [
 	{ id: 'all', label: 'All agents' },
 	{ id: 'inventory', label: 'Inventory' },
@@ -36,30 +36,26 @@ onMounted(async () => {
 });
 
 const loading = computed(() => workflowsStore.isLoading);
-
 const allAgents = computed(() => agentLibraryStore.getAgents() || []);
 
-// Filter agents by category and search
 const filteredAgents = computed(() => {
 	let result = allAgents.value;
 
 	if (activeCategory.value !== 'all') {
 		result = result.filter((agent: any) => {
 			const raw = agent.category || agent.tags?.[0]?.toLowerCase() || 'more';
-			const normalized = raw.toString().toLowerCase();
-			return normalized.includes(activeCategory.value);
+			return raw.toLowerCase().includes(activeCategory.value);
 		});
 	}
 
 	if (searchQuery.value.trim()) {
 		const q = searchQuery.value.toLowerCase();
-		result = result.filter((agent: any) => {
-			return (
+		result = result.filter(
+			(agent: any) =>
 				agent.name?.toLowerCase().includes(q) ||
 				agent.description?.toLowerCase().includes(q) ||
-				agent.authorName?.toLowerCase().includes(q)
-			);
-		});
+				agent.authorName?.toLowerCase().includes(q),
+		);
 	}
 
 	return result;
@@ -74,74 +70,53 @@ function publishAgent() {
 	router.push({ name: 'CreateAgent' });
 }
 
-function handleCategoryClick(categoryId: string) {
-	activeCategory.value = categoryId;
-}
-
 function getCategoryClass(agent: any) {
-	const raw = agent.category || agent.tags?.[0]?.toLowerCase() || 'General';
-	const key = raw.toString().toLowerCase();
-	return categoryColorMap[key] || 'pill-default';
+	const raw = agent.category || agent.tags?.[0]?.toLowerCase() || 'general';
+	return categoryColorMap[raw] || 'pill-default';
 }
 </script>
 
 <template>
 	<div class="agent-library-page">
-		<!-- Header -->
-		<header class="header">
-			<div class="header-top">
-				<div class="header-title-section">
-					<h1 class="page-title">Agent Library</h1>
-					<p class="page-subtitle">Discover and deploy pre-built automation agents</p>
-				</div>
-				<button type="button" class="btn-publish" @click="publishAgent">Publish Agent</button>
-			</div>
+		<!-- ACTION ROW -->
+		<div class="top-actions">
+			<button type="button" class="btn-publish" @click="publishAgent">Publish Agent</button>
+		</div>
 
-			<!-- Search Bar -->
-			<div class="search-container">
-				<input
-					v-model="searchQuery"
-					type="text"
-					class="search-input"
-					placeholder="Search agents..."
-				/>
-			</div>
+		<!-- Search -->
+		<div class="search-container">
+			<input
+				v-model="searchQuery"
+				type="text"
+				class="search-input"
+				placeholder="Search agents..."
+			/>
+		</div>
 
-			<!-- Category Tabs -->
-			<div class="categories-container">
-				<div class="categories-tabs">
-					<button
-						v-for="category in categories"
-						:key="category.id"
-						type="button"
-						class="category-tab"
-						:class="{ active: activeCategory === category.id }"
-						@click="handleCategoryClick(category.id)"
-					>
-						{{ category.label }}
-					</button>
-				</div>
-				<p class="agents-count">{{ filteredAgents.length }} agents</p>
+		<!-- Categories -->
+		<div class="categories-container">
+			<div class="categories-tabs">
+				<button
+					v-for="category in categories"
+					:key="category.id"
+					class="category-tab"
+					:class="{ active: activeCategory === category.id }"
+					@click="activeCategory = category.id"
+				>
+					{{ category.label }}
+				</button>
 			</div>
-		</header>
+			<p class="agents-count">{{ filteredAgents.length }} agents</p>
+		</div>
 
 		<!-- Content -->
 		<main class="content">
-			<!-- Loading -->
-			<section v-if="loading" class="loading-section">
-				<p class="loading-text">Loading agents...</p>
-			</section>
+			<section v-if="loading" class="empty-section">Loading agents...</section>
 
-			<!-- Empty -->
 			<section v-else-if="filteredAgents.length === 0" class="empty-section">
-				<p class="empty-text">
-					{{
-						searchQuery ? 'No agents match your search.' : 'No agents available in this category.'
-					}}
-				</p>
+				No agents found.
 			</section>
 
-			<!-- Agents Grid -->
 			<section v-else class="agents-grid">
 				<article
 					v-for="agent in filteredAgents"
@@ -149,41 +124,23 @@ function getCategoryClass(agent: any) {
 					class="agent-card"
 					@click="openAgent(agent.workflowId)"
 				>
-					<!-- Top row: title + small circular icon -->
 					<div class="agent-card-header">
-						<h2 class="agent-card-title">
-							{{ agent.name || 'Untitled agent' }}
-						</h2>
-						<button
-							type="button"
-							class="agent-card-icon-btn"
-							@click.stop="openAgent(agent.workflowId)"
-							aria-label="Open agent"
-						>
-							<span class="agent-card-icon-dot" />
-						</button>
+						<h2 class="agent-card-title">{{ agent.name || 'Untitled agent' }}</h2>
+						<span class="agent-card-icon-dot" />
 					</div>
 
 					<div class="agent-card-divider" />
 
-					<!-- Description -->
 					<p class="agent-card-description">
-						{{ agent.description || 'AI-powered automation agent with configurable workflows.' }}
+						{{ agent.description || 'AI-powered automation agent.' }}
 					</p>
 
-					<!-- Category pill -->
-					<div class="agent-card-category-row">
-						<span class="agent-card-category-pill" :class="getCategoryClass(agent)">
-							{{ agent.category || 'General' }}
-						</span>
-					</div>
+					<span class="agent-card-category-pill" :class="getCategoryClass(agent)">
+						{{ agent.category || 'General' }}
+					</span>
 
-					<!-- Bottom meta: plays + runs / installs -->
 					<div class="agent-card-footer-meta">
-						<span class="meta-play-icon">▶</span>
-						<span class="meta-text"> {{ agent.runs?.toLocaleString() || '0' }} runs </span>
-						<span class="meta-dot">•</span>
-						<span class="meta-text"> {{ agent.installs?.toLocaleString() || '0' }} installs </span>
+						▶ {{ agent.runs || 0 }} runs • {{ agent.installs || 0 }} installs
 					</div>
 				</article>
 			</section>
@@ -199,34 +156,10 @@ function getCategoryClass(agent: any) {
 	padding: 24px 56px;
 }
 
-/* Header */
-.header {
-	margin-bottom: 28px;
-}
-
-.header-top {
+.top-actions {
 	display: flex;
-	justify-content: space-between;
-	align-items: flex-start;
-	margin-bottom: 20px;
-}
-
-.header-title-section {
-	flex: 1;
-}
-
-.page-title {
-	font-size: 26px;
-	font-weight: 700;
-	color: var(--color-text-primary, #1f2933);
-	margin: 0 0 4px 0;
-	letter-spacing: -0.3px;
-}
-
-.page-subtitle {
-	font-size: 14px;
-	color: var(--color-text-secondary, #6b7280);
-	margin: 0;
+	justify-content: flex-end;
+	margin-bottom: 16px;
 }
 
 /* Publish button */

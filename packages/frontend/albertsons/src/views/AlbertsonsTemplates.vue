@@ -27,11 +27,6 @@ function useTemplate(id: string) {
 
 <template>
 	<div class="templates-page">
-		<header class="header">
-			<h1 class="title">Workflow Templates</h1>
-			<p class="subtitle">Published workflow templates available to everyone.</p>
-		</header>
-
 		<section v-if="loading">
 			<p class="subtitle">Loading...</p>
 		</section>
@@ -50,19 +45,16 @@ function useTemplate(id: string) {
 
 				<div class="card-body">
 					<h2 class="card-title">{{ template.name || 'Untitled workflow' }}</h2>
-					<p class="card-description">{{ template.description || 'No decription' }}</p>
+					<p class="card-description">{{ template.description || 'No description' }}</p>
 					<p class="card-meta">
-						Last updated at
+						Last updated
 						{{ new Date(template.updatedAt || template.createdAt).toLocaleString() }}
 					</p>
-					<p class="card-meta">
-						Last updated by
-						{{ template.authorName }}
-					</p>
+					<p class="card-meta">By {{ template.authorName }}</p>
 				</div>
 
 				<div class="card-footer">
-					<button type="button" class="btn-primary" @click="useTemplate(template.workflowId)">
+					<button class="btn-primary" @click="useTemplate(template.workflowId)">
 						Use Template
 					</button>
 				</div>

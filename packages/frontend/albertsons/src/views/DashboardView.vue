@@ -1,349 +1,315 @@
 <template>
-	<n-layout class="h-screen">
-		<n-layout-content class="page-shell">
-			<div class="page-inner">
-				<div class="dashboard-scroll">
-					<div class="dashboard">
-						<!-- HEADER -->
-						<header class="header">
-							<h2 class="page-title">Pulse</h2>
+	<!-- Outer shell: same pattern as Super Admin -->
+	<div class="flex flex-1 p-4! flex-col gap-4 bg-[var(--color--background--light-2)]">
+		<!-- Top row: Pulse title (optional, can be removed if header is elsewhere) -->
+		<div class="flex items-center justify-between gap-4">
+			<div>
+				<div class="text-2xl font-bold leading-tight">Pulse</div>
+				<div class="text-xs text-secondary mt-1">System Health Dashboard</div>
+			</div>
+			<!-- You can later add search + bell here if needed -->
+		</div>
 
-							<div class="search-wrapper">
-								<Search class="search-icon" />
-								<n-input
-									v-model:value="search"
-									size="small"
-									placeholder="Search workflows, projects..."
-									class="search-input"
-									clearable
-								/>
-							</div>
+		<!-- Main white canvas, like wireframe center area -->
+		<div
+			class="flex-1 rounded-xl bg-white shadow border border-[var(--border-color--light)] px-6 py-6 flex flex-col gap-4"
+		>
+			<!-- METRICS STRIP + ACTIONS -->
+			<div class="flex flex-col gap-3 max-w-[1400px] mx-auto w-full">
+				<!-- METRICS STRIP -->
+				<div
+					class="w-full rounded-2xl border border-[var(--border-color--light)] bg-[var(--color--background--light-3)] shadow-[var(--shadow--light)] px-5 py-4"
+				>
+					<n-grid :cols="5" :x-gap="12" :y-gap="12">
+						<!-- System Health -->
+						<n-gi>
+							<n-card size="small" class="metric-card health-card" embedded>
+								<div class="health-value">
+									{{ metrics.systemHealth ? metrics.systemHealth : 92
+									}}<span class="percent">%</span>
+								</div>
+								<div class="health-label">
+									<CheckCircle2 class="health-icon" />
+									<span>System Health</span>
+								</div>
+								<n-tag size="small" round type="success" class="health-status"> Good </n-tag>
+								<div class="health-time">
+									<Clock class="time-icon" />
+									Updated 2s ago
+								</div>
+							</n-card>
+						</n-gi>
 
-							<div class="header-right">
-								<n-badge :value="4" type="info" processing>
-									<n-button quaternary circle class="notification-btn">
-										<Bell class="notif-icon" />
-									</n-button>
-								</n-badge>
-							</div>
-						</header>
+						<!-- Other metrics -->
+						<n-gi v-for="card in metricCards" :key="card.key">
+							<n-card size="small" class="metric-card compact-card" embedded>
+								<div class="compact-header">
+									<span class="card-label">
+										{{ card.label }}
+									</span>
+									<div class="mini-chart">
+										<div
+											v-for="(h, idx) in card.bars"
+											:key="idx"
+											class="bar"
+											:class="card.colorClass"
+											:style="{ height: h + '%' }"
+										/>
+									</div>
+								</div>
+								<div class="compact-value">
+									{{ card.value }}
+								</div>
+								<div class="compact-change" :class="card.positive ? 'positive' : 'negative'">
+									<ArrowUpRight v-if="card.positive" class="change-icon" />
+									<ArrowDownRight v-else class="change-icon" />
+									{{ card.delta }}
+								</div>
+							</n-card>
+						</n-gi>
+					</n-grid>
+				</div>
 
-						<!-- INNER CONTENT WRAPPER -->
-						<div class="dashboard-inner">
-							<!-- METRICS STRIP -->
-							<div class="metrics-strip">
-								<n-grid :cols="5" :x-gap="12" :y-gap="12">
-									<!-- System Health -->
-									<n-gi>
-										<n-card size="small" class="metric-card health-card" embedded>
-											<div class="health-value">
-												{{ metrics.systemHealth ? metrics.systemHealth : 92
-												}}<span class="percent">%</span>
-											</div>
-											<div class="health-label">
-												<CheckCircle2 class="health-icon" />
-												<span>System Health</span>
-											</div>
-											<n-tag size="small" round type="success" class="health-status"> Good </n-tag>
-											<div class="health-time">
-												<Clock class="time-icon" />
-												Updated 2s ago
-											</div>
-										</n-card>
-									</n-gi>
+				<!-- ACTION BUTTONS -->
+				<div class="flex flex-row gap-2">
+					<!-- Primary -->
+					<n-button
+						type="primary"
+						size="small"
+						round
+						class="action-btn primary"
+						@click="goToNewWorkflow"
+					>
+						<Plus class="btn-icon" />
+						Create Agent
+					</n-button>
 
-									<!-- Other metrics -->
-									<n-gi v-for="card in metricCards" :key="card.key">
-										<n-card size="small" class="metric-card compact-card" embedded>
-											<div class="compact-header">
-												<span class="card-label">
-													{{ card.label }}
-												</span>
-												<div class="mini-chart">
-													<div
-														v-for="(h, idx) in card.bars"
-														:key="idx"
-														class="bar"
-														:class="card.colorClass"
-														:style="{ height: h + '%' }"
-													/>
-												</div>
-											</div>
-											<div class="compact-value">
-												{{ card.value }}
-											</div>
-											<div class="compact-change" :class="card.positive ? 'positive' : 'negative'">
-												<ArrowUpRight v-if="card.positive" class="change-icon" />
-												<ArrowDownRight v-else class="change-icon" />
-												{{ card.delta }}
-											</div>
-										</n-card>
-									</n-gi>
-								</n-grid>
-							</div>
+					<!-- View Executions -->
+					<n-button size="small" round class="action-btn secondary" @click="goToExecutions">
+						<Play class="btn-icon btn-icon-outline" />
+						View Executions
+					</n-button>
 
-							<!-- ACTION BUTTONS -->
-							<div class="action-buttons">
-								<!-- Primary -->
-								<n-button
-									type="primary"
-									size="small"
-									round
-									class="action-btn primary"
-									@click="goToNewWorkflow"
-								>
-									<Plus class="btn-icon" />
-									Create Agent
-								</n-button>
-
-								<!-- View Executions -->
-								<n-button size="small" round class="action-btn secondary" @click="goToExecutions">
-									<Play class="btn-icon btn-icon-outline" />
-									View Executions
-								</n-button>
-
-								<!-- Projects -->
-								<n-button size="small" round class="action-btn secondary">
-									<Zap class="btn-icon" />
-									Projects
-								</n-button>
-							</div>
-
-							<!-- MAIN GRID -->
-							<div class="main-grid">
-								<n-grid :cols="24" :x-gap="20" :y-gap="20">
-									<!-- LEFT -->
-									<n-gi :span="16">
-										<div class="left-column">
-											<!-- NEEDS ATTENTION -->
-											<n-card size="small" class="needs-attention">
-												<div class="needs-header">
-													<div class="needs-title">
-														<AlertTriangle class="needs-title-icon" />
-														<span>Needs Attention</span>
-													</div>
-													<div class="needs-count">2</div>
-												</div>
-
-												<div class="needs-list">
-													<!-- Card 1 -->
-													<div class="needs-item needs-critical">
-														<div class="needs-left">
-															<div class="needs-icon critical-icon">
-																<XCircle class="needs-inner-icon" />
-															</div>
-															<div class="needs-main">
-																<div class="needs-name">Expense Anomaly Detection</div>
-																<div class="needs-desc">
-																	Database connection timeout — unable to fetch expense records
-																</div>
-																<div class="needs-date-inline">13/12/2024</div>
-															</div>
-														</div>
-														<div class="needs-right">
-															<n-button
-																size="tiny"
-																type="error"
-																round
-																class="needs-btn needs-btn-primary"
-															>
-																Fix Now
-																<ChevronRight class="needs-arrow" />
-															</n-button>
-														</div>
-													</div>
-
-													<!-- Card 2 -->
-													<div class="needs-item needs-warning">
-														<div class="needs-left">
-															<div class="needs-icon warning-icon">
-																<AlertTriangle class="needs-inner-icon" />
-															</div>
-															<div class="needs-main">
-																<div class="needs-name">Expense Anomaly Detection</div>
-																<div class="needs-desc">Success rate dropped to 82.1%</div>
-																<div class="needs-date-inline">Last run: 13/12/2024</div>
-															</div>
-														</div>
-														<div class="needs-right">
-															<n-button size="tiny" round tertiary class="needs-btn">
-																Review
-																<ChevronRight class="needs-arrow" />
-															</n-button>
-														</div>
-													</div>
-												</div>
-											</n-card>
-
-											<!-- ACTIVITY STREAM -->
-											<n-card size="small" class="activity-section">
-												<div class="activity-header">
-													<div class="activity-title">
-														<span class="live-dot"></span>
-														<span class="live-text">LIVE</span>
-														Activity Stream
-													</div>
-													<button class="view-all">
-														View all
-														<ChevronRight class="view-all-icon" />
-													</button>
-												</div>
-
-												<div class="activity-list">
-													<div v-if="loading" class="activity-placeholder">
-														<div class="placeholder-icon">⏳</div>
-														<div class="placeholder-text">Loading activities...</div>
-													</div>
-
-													<div
-														v-else
-														v-for="activity in activities"
-														:key="activity.id"
-														class="activity-item"
-														:class="{
-															clickable: activity.id !== 'placeholder-1',
-														}"
-														@click="activity.id !== 'placeholder-1' && openWorkflow(activity.id)"
-													>
-														<div class="activity-icon" :class="activity.type"></div>
-
-														<div class="activity-info">
-															<div class="activity-name">
-																{{ activity.title }}
-															</div>
-															<div class="activity-desc">
-																{{ activity.subtitle }}
-															</div>
-														</div>
-
-														<div class="activity-time">
-															<div class="time-date">
-																{{ activity.date }}
-															</div>
-															<div v-if="activity.time" class="time-duration">
-																{{ activity.time }}
-															</div>
-														</div>
-													</div>
-												</div>
-											</n-card>
-										</div>
-									</n-gi>
-
-									<!-- RIGHT -->
-									<n-gi :span="8">
-										<div class="right-column">
-											<!-- MVP AGENTS -->
-											<n-card size="small" class="mvp-card">
-												<div class="mvp-header">
-													<div class="mvp-title">
-														<Trophy class="mvp-trophy" />
-														MVP Agents
-													</div>
-												</div>
-
-												<div class="mvp-divider"></div>
-
-												<div class="mvp-list">
-													<div v-if="agentsLoading && !mvpAgents.length" class="state">
-														Loading agents...
-													</div>
-
-													<div v-else-if="!agentsLoading && !mvpAgents.length" class="state">
-														No agents yet. Create your first agent to see stats here.
-													</div>
-
-													<div v-else v-for="agent in mvpAgents" :key="agent.id" class="mvp-item">
-														<div class="mvp-rank" :class="'mvp-rank-' + agent.rank">
-															{{ agent.rank }}
-														</div>
-
-														<div class="mvp-main">
-															<div class="mvp-name">
-																{{ agent.name }}
-															</div>
-															<div class="mvp-metrics">
-																<span>{{ agent.runs }} runs</span>
-																<span class="mvp-sr"> {{ agent.successRate.toFixed(1) }}% SR </span>
-															</div>
-														</div>
-
-														<div class="mvp-right">
-															<ArrowUpRight class="mvp-trend-arrow" />
-														</div>
-													</div>
-												</div>
-
-												<button class="mvp-footer-link">View all agents</button>
-											</n-card>
-
-											<!-- 7-DAY TREND -->
-											<n-card size="small" class="trend-card">
-												<div class="trend-header">
-													<div class="trend-title">7-Day Trend</div>
-												</div>
-
-												<div class="trend-body">
-													<div class="trend-legend">
-														<span class="legend-item">
-															<span class="legend-dot success-dot"></span>
-															Success
-														</span>
-														<span class="legend-item">
-															<span class="legend-dot failure-dot"></span>
-															Failures
-														</span>
-													</div>
-
-													<div class="trend-chart">
-														<div v-for="(day, idx) in trendData" :key="idx" class="trend-column">
-															<div class="trend-bars">
-																<div
-																	class="trend-bar success"
-																	:style="{ height: day.success + '%' }"
-																></div>
-																<div
-																	class="trend-bar failure"
-																	:style="{ height: day.failure + '%' }"
-																></div>
-															</div>
-															<div class="trend-label">
-																{{ day.label }}
-															</div>
-														</div>
-													</div>
-												</div>
-											</n-card>
-										</div>
-									</n-gi>
-								</n-grid>
-							</div>
-						</div>
-						<!-- /dashboard-inner -->
-					</div>
+					<!-- Projects -->
+					<n-button
+						size="small"
+						round
+						class="action-btn secondary"
+						@click="router.push('/projects')"
+					>
+						<Zap class="btn-icon" />
+						Projects
+					</n-button>
 				</div>
 			</div>
-		</n-layout-content>
-	</n-layout>
+
+			<!-- MAIN GRID (Needs + Activity / MVP + Trend) -->
+			<div class="w-full max-w-[1400px] mx-auto">
+				<n-grid :cols="24" :x-gap="20" :y-gap="20">
+					<!-- LEFT -->
+					<n-gi :span="16">
+						<div class="left-column">
+							<!-- NEEDS ATTENTION -->
+							<n-card size="small" class="needs-attention">
+								<div class="needs-header">
+									<div class="needs-title">
+										<AlertTriangle class="needs-title-icon" />
+										<span>Needs Attention</span>
+									</div>
+									<div class="needs-count">2</div>
+								</div>
+
+								<div class="needs-list">
+									<!-- Card 1 -->
+									<div class="needs-item needs-critical">
+										<div class="needs-left">
+											<div class="needs-icon critical-icon">
+												<XCircle class="needs-inner-icon" />
+											</div>
+											<div class="needs-main">
+												<div class="needs-name">Expense Anomaly Detection</div>
+												<div class="needs-desc">
+													Database connection timeout — unable to fetch expense records
+												</div>
+												<div class="needs-date-inline">13/12/2024</div>
+											</div>
+										</div>
+										<div class="needs-right">
+											<n-button size="tiny" type="error" round class="needs-btn needs-btn-primary">
+												Fix Now
+												<ChevronRight class="needs-arrow" />
+											</n-button>
+										</div>
+									</div>
+
+									<!-- Card 2 -->
+									<div class="needs-item needs-warning">
+										<div class="needs-left">
+											<div class="needs-icon warning-icon">
+												<AlertTriangle class="needs-inner-icon" />
+											</div>
+											<div class="needs-main">
+												<div class="needs-name">Expense Anomaly Detection</div>
+												<div class="needs-desc">Success rate dropped to 82.1%</div>
+												<div class="needs-date-inline">Last run: 13/12/2024</div>
+											</div>
+										</div>
+										<div class="needs-right">
+											<n-button size="tiny" round tertiary class="needs-btn">
+												Review
+												<ChevronRight class="needs-arrow" />
+											</n-button>
+										</div>
+									</div>
+								</div>
+							</n-card>
+
+							<!-- ACTIVITY STREAM -->
+							<n-card size="small" class="activity-section">
+								<div class="activity-header">
+									<div class="activity-title">
+										<span class="live-dot"></span>
+										<span class="live-text">LIVE</span>
+										Activity Stream
+									</div>
+									<button class="view-all">
+										View all
+										<ChevronRight class="view-all-icon" />
+									</button>
+								</div>
+
+								<div class="activity-list">
+									<div v-if="loading" class="activity-placeholder">
+										<div class="placeholder-icon">⏳</div>
+										<div class="placeholder-text">Loading activities...</div>
+									</div>
+
+									<div
+										v-else
+										v-for="activity in activities"
+										:key="activity.id"
+										class="activity-item"
+										:class="{
+											clickable: activity.id !== 'placeholder-1',
+										}"
+										@click="activity.id !== 'placeholder-1' && openWorkflow(activity.id)"
+									>
+										<div class="activity-icon" :class="activity.type"></div>
+
+										<div class="activity-info">
+											<div class="activity-name">
+												{{ activity.title }}
+											</div>
+											<div class="activity-desc">
+												{{ activity.subtitle }}
+											</div>
+										</div>
+
+										<div class="activity-time">
+											<div class="time-date">
+												{{ activity.date }}
+											</div>
+											<div v-if="activity.time" class="time-duration">
+												{{ activity.time }}
+											</div>
+										</div>
+									</div>
+								</div>
+							</n-card>
+						</div>
+					</n-gi>
+
+					<!-- RIGHT -->
+					<n-gi :span="8">
+						<div class="right-column">
+							<!-- MVP AGENTS -->
+							<n-card size="small" class="mvp-card">
+								<div class="mvp-header">
+									<div class="mvp-title">
+										<Trophy class="mvp-trophy" />
+										MVP Agents
+									</div>
+								</div>
+
+								<div class="mvp-divider"></div>
+
+								<div class="mvp-list">
+									<div v-if="agentsLoading && !mvpAgents.length" class="state">
+										Loading agents...
+									</div>
+
+									<div v-else-if="!agentsLoading && !mvpAgents.length" class="state">
+										No agents yet. Create your first agent to see stats here.
+									</div>
+
+									<div v-else v-for="agent in mvpAgents" :key="agent.id" class="mvp-item">
+										<div class="mvp-rank" :class="'mvp-rank-' + agent.rank">
+											{{ agent.rank }}
+										</div>
+
+										<div class="mvp-main">
+											<div class="mvp-name">
+												{{ agent.name }}
+											</div>
+											<div class="mvp-metrics">
+												<span>{{ agent.runs }} runs</span>
+												<span class="mvp-sr"> {{ agent.successRate.toFixed(1) }}% SR </span>
+											</div>
+										</div>
+
+										<div class="mvp-right">
+											<ArrowUpRight class="mvp-trend-arrow" />
+										</div>
+									</div>
+								</div>
+
+								<button class="mvp-footer-link">View all agents</button>
+							</n-card>
+
+							<!-- 7-DAY TREND -->
+							<n-card size="small" class="trend-card">
+								<div class="trend-header">
+									<div class="trend-title">7-Day Trend</div>
+								</div>
+
+								<div class="trend-body">
+									<div class="trend-legend">
+										<span class="legend-item">
+											<span class="legend-dot success-dot"></span>
+											Success
+										</span>
+										<span class="legend-item">
+											<span class="legend-dot failure-dot"></span>
+											Failures
+										</span>
+									</div>
+
+									<div class="trend-chart">
+										<div v-for="(day, idx) in trendData" :key="idx" class="trend-column">
+											<div class="trend-bars">
+												<div class="trend-bar success" :style="{ height: day.success + '%' }"></div>
+												<div class="trend-bar failure" :style="{ height: day.failure + '%' }"></div>
+											</div>
+											<div class="trend-label">
+												{{ day.label }}
+											</div>
+										</div>
+									</div>
+								</div>
+							</n-card>
+						</div>
+					</n-gi>
+				</n-grid>
+			</div>
+		</div>
+	</div>
 </template>
 
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { NGrid, NGi, NCard, NTag, NButton } from 'naive-ui';
 import {
-	NLayout,
-	NLayoutContent,
-	NGrid,
-	NGi,
-	NCard,
-	NButton,
-	NBadge,
-	NInput,
-	NTag,
-} from 'naive-ui';
-import {
-	Search,
-	Bell,
 	CheckCircle2,
 	Clock,
 	AlertTriangle,
@@ -352,7 +318,6 @@ import {
 	ArrowDownRight,
 	ChevronRight,
 	Trophy,
-	Flame,
 	Plus,
 	Play,
 	Zap,
@@ -366,9 +331,7 @@ const workflowsStore = useWorkflowsStore();
 const templatesStore = useTemplatesStore();
 const userAgentMappingsStore = useUserAgentMappingsStore();
 
-const search = ref('');
-
-/* n8n bindings – DO NOT TOUCH */
+/* n8n bindings – unchanged */
 const workflows = computed(() => workflowsStore.allWorkflows);
 const loading = computed(() => workflowsStore.isLoading);
 
@@ -392,7 +355,7 @@ function publishAsTemplate(id) {
 	templatesStore.publishAsTemplate(id);
 }
 
-/* ACTIVITY STREAM DATA */
+/* ACTIVITY STREAM DATA – same as before */
 const activities = computed(() => {
 	if (!workflows.value || workflows.value.length === 0) {
 		return [
@@ -432,7 +395,7 @@ const activities = computed(() => {
 		});
 });
 
-/* LIVE METRICS */
+/* LIVE METRICS – unchanged */
 const metricsLoading = ref(false);
 
 const metrics = ref({
@@ -512,12 +475,11 @@ const metricCards = computed(() => [
 	},
 ]);
 
-/* MY-AGENTS: MVP AGENTS DATA */
+/* MVP AGENTS – unchanged */
 const agentsLoading = ref(false);
 
 const rawAgents = computed(() => userAgentMappingsStore.getUserAgentMappings());
 
-// Map API result into a normalized shape
 const normalizedAgents = computed(() =>
 	rawAgents.value.map((item) => ({
 		id: item.id,
@@ -527,7 +489,6 @@ const normalizedAgents = computed(() =>
 	})),
 );
 
-// Top 5 agents by success rate (and runs as tiebreaker)
 const mvpAgents = computed(() =>
 	normalizedAgents.value
 		.slice()
@@ -544,7 +505,7 @@ const mvpAgents = computed(() =>
 		})),
 );
 
-/* TREND DATA (static for now) */
+/* TREND DATA – unchanged */
 const trendData = [
 	{ label: 'Thu', success: 85, failure: 20 },
 	{ label: 'Fri', success: 90, failure: 25 },
@@ -573,113 +534,12 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.page-shell {
-	width: 100%;
-	height: 100vh;
-	background: var(--color--background--light-2);
-	display: flex;
-	justify-content: flex-start;
-	align-items: flex-start;
-}
+/* removed: page-shell, page-inner, dashboard-scroll, dashboard, dashboard-inner */
 
-.page-inner {
-	flex: 1;
-	display: flex;
-}
+/* keep all your card styles exactly as before */
 
-.dashboard-scroll {
-	flex: 1;
-	overflow-y: auto;
-}
-
-/* outer container spans full width; no horizontal padding */
-.dashboard {
-	width: 100%;
-	min-height: 100%;
-	padding-top: 16px;
-	padding-bottom: 24px;
-	background: var(--color--background--light-2);
-}
-
-/* inner container keeps all cards aligned and away from edges */
-.dashboard-inner {
-	padding-left: 32px;
-	padding-right: 100px;
-}
-
-/* HEADER */
-.header {
-	position: sticky;
-	top: 0;
-	z-index: 8;
-	background: var(--color--background--light-3);
-	padding: 12px 32px;
-	border-radius: 0;
-	margin-top: -16px;
-	margin-bottom: 16px;
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 8px;
-	box-shadow: 0 1px 0 rgba(15, 23, 42, 0.06);
-	border-bottom: 1px solid rgba(148, 163, 184, 0.25);
-}
-
-.page-title {
-	font-size: 18px;
-	font-weight: 600;
-	color: var(--color--text--shade-1);
-}
-
-.search-wrapper {
-	position: relative;
-	flex: 1;
-	max-width: 460px;
-	margin: 0 auto;
-}
-
-.search-icon {
-	position: absolute;
-	left: 12px;
-	top: 50%;
-	transform: translateY(-50%);
-	width: 16px;
-	height: 16px;
-	color: var(--color--text--tint-1);
-}
-
-.search-input {
-	padding-left: 32px;
-	border-radius: 999px;
-	--n-border-radius: 999px;
-}
-
-.header-right {
-	position: relative;
-	flex-shrink: 0;
-	padding-right: 0;
-}
-
-.notification-btn {
-	width: 32px;
-	height: 32px;
-	border-radius: 999px;
-	border: 1px solid var(--border-color--light);
-	background: var(--color--background--light-3);
-}
-.notif-icon {
-	width: 20px;
-	height: 20px;
-}
-
-/* METRICS STRIP */
 .metrics-strip {
-	background: var(--color--background--light-3);
-	border-radius: 16px;
-	border: 1px solid var(--border-color--light);
-	padding: 18px 20px;
-	box-shadow: var(--shadow--light);
-	margin-bottom: 16px;
+	/* now handled by Tailwind wrapper, keep empty or remove */
 }
 
 .metric-card {
@@ -798,12 +658,6 @@ onMounted(async () => {
 }
 
 /* ACTION BUTTONS */
-.action-buttons {
-	display: flex;
-	gap: 8px;
-	margin-bottom: 16px;
-}
-
 .action-btn {
 	display: inline-flex;
 	align-items: center;
@@ -811,6 +665,7 @@ onMounted(async () => {
 	font-weight: 600;
 	border-radius: 9px;
 	padding: 7px 18px;
+	cursor: pointer;
 }
 
 .btn-icon {
@@ -846,11 +701,7 @@ onMounted(async () => {
 	background: var(--color--background--light-2) !important;
 }
 
-/* MAIN GRID */
-.main-grid {
-	margin-top: 0;
-}
-
+/* MAIN GRID columns */
 .left-column,
 .right-column {
 	display: flex;

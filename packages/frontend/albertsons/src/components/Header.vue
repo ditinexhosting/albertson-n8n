@@ -9,12 +9,18 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { NBadge, NInput } from 'naive-ui';
 import { Bell } from 'lucide-vue-next';
+
 const route = useRoute();
-const { title, showBack } = route?.meta?.header;
+
+const headerMeta = computed(() => route.meta?.header ?? {});
+
+const title = computed(() => headerMeta.value.title ?? '');
+const showSearch = computed(() => headerMeta.value.showSearch ?? false);
+const showNotifications = computed(() => headerMeta.value.showNotifications ?? false);
 </script>
 
 <style scoped>
