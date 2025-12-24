@@ -167,13 +167,13 @@ export const routes: RouteRecordRaw[] = [
 		name: 'ALBERTSONS_PROJECTS',
 		components: {
 			default: () => import('@src/views/ProjectsView.vue'),
-			header: Header, // ✅ ADD THIS
+			header: Header,
 			sidebar: MainSidebar,
 		},
 		meta: {
 			middleware: ['authenticated'],
 			header: {
-				title: 'Projects', // ✅ ADD THIS
+				title: 'Projects',
 				showBack: false,
 			},
 		},

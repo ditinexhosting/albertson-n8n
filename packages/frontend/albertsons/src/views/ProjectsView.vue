@@ -24,7 +24,7 @@
 							class="cursor-pointer"
 							trigger="click"
 							:options="dotMenu"
-							@select="handleAction"
+							@select="(key) => handleAction(key, project)"
 						>
 							<MoreVertical class="cursor-pointer" />
 						</n-dropdown>
@@ -41,7 +41,9 @@
 						</n-tag>
 					</n-space>
 					<n-divider />
-					<div class="mb-4! text-secondary">{{ project?.description || '-' }}</div>
+					<div class="mb-4! text-secondary text-sm wrap-break-words line-clamp-2 min-h-[2.4rem]">
+						{{ project?.description || '-' }}
+					</div>
 					<n-grid x-gap="2" :cols="3">
 						<n-gi>
 							<div class="text-xs flex items-center justify-start! gap-2">
@@ -69,7 +71,7 @@
 											firstName?.charAt(0).toUpperCase() + ' ' + lastName?.charAt(0).toUpperCase()
 										}}</n-avatar>
 									</template>
-									{{ name }}
+									{{ firstName + ' ' + lastName }}
 								</n-tooltip>
 							</template>
 							<template>
@@ -225,6 +227,7 @@ const dotMenu = [
 	{
 		label: 'Delete',
 		key: 'delete',
+		disabled: true,
 	},
 ];
 
@@ -284,16 +287,16 @@ const handleAction = async (key, row) => {
 	try {
 		switch (key) {
 			case 'edit':
-				// showEditUserModal.value = true;
-				// addUserFormValue.value = {
-				// 	ownerId: row.owner?.id,
-				// 	first_name: row.owner?.firstName,
-				// 	last_name: row.owner?.lastName,
-				// 	email: row.owner?.email,
-				// 	roleId: row.roleId,
-				// };
+				showEditProjectModal.value = true;
+				formValue.value = {
+					ownerId: usersStore.currentUser?.id,
+					projectId: row.id,
+					name: row.name,
+					description: row.description,
+					status: row.status,
+				};
 				break;
-			case 'reset-password':
+			case 'delete':
 				break;
 			default:
 				console.error(`Unknown action key: ${key}`);
@@ -361,7 +364,7 @@ const onEdit = async () => {
 			formValue.value,
 		);
 		if (apiResult) {
-			isModalOpen.value = false;
+			showProjectModal.value = false;
 			formValue.value = {
 				ownerId: usersStore.currentUser?.id,
 				name: '',
@@ -374,7 +377,7 @@ const onEdit = async () => {
 				message: 'Updated successfully.',
 				type: 'success',
 			});
-			fetchAllUser();
+			fetchAllProjects();
 		}
 	} catch (e) {
 		console.error('Failed to update project.', e.message, e);
