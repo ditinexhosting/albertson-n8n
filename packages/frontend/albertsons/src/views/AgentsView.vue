@@ -2,7 +2,7 @@
 import { computed, onMounted, ref, h } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserAgentMappingsStore } from '@src/stores/userAgentMappings.store';
-import { NIcon, NButton, NDataTable, NDropdown, NProgress, NInput } from 'naive-ui';
+import { NIcon, NButton, NDataTable, NDropdown, NProgress, NInput, NGradientText } from 'naive-ui';
 import { Play, EllipsisVertical, Search, ClockCheck, Pause, Edit, Plus } from 'lucide-vue-next';
 import dayjs from 'dayjs';
 
@@ -46,10 +46,11 @@ function goToEditWorkflow(id) {
 	router.push(`/workflow/${id}`);
 }
 
+const tableHeader = (text) => h('span', { class: 'text-secondary' }, text);
 function createColumns() {
 	return [
 		{
-			title: 'NAME',
+			title: () => tableHeader('NAME'),
 			key: 'workflow.name',
 			render: (row) =>
 				h('span', [
@@ -59,14 +60,14 @@ function createColumns() {
 				]),
 		},
 		{
-			title: 'PROJECT',
+			title: () => tableHeader('PROJECT'),
 			key: 'workflow.project',
 			render: () => {
 				return 'Sample Project';
 			},
 		},
 		{
-			title: 'STATUS',
+			title: () => tableHeader('STATUS'),
 			key: 'workflow.active',
 			render: (row) => {
 				const isActive = !row?.workflow?.active;
@@ -75,21 +76,21 @@ function createColumns() {
 					'span',
 					{
 						class: [
-							'p-1.5! flex items-center justify-center w-[4.5rem] rounded-full text-[10px]! gap-1',
+							'p-1.5! flex items-center justify-center w-[4.5rem] rounded-full text-[11px]! gap-1!',
 							isActive
 								? 'bg-[var(--color-light-green)]! text-[var(--color--success)]'
 								: 'bg-[var(--color-light-orange)]! text-[var(--color-warning-orange)]!',
 						],
 					},
 					[
-						isActive ? h(ClockCheck, { size: 10 }) : h(Pause, { size: 10 }),
+						isActive ? h(ClockCheck, { size: 11 }) : h(Pause, { size: 11 }),
 						isActive ? 'Active' : 'Inactive',
 					],
 				);
 			},
 		},
 		{
-			title: 'TRIGGER',
+			title: () => tableHeader('TRIGGER'),
 			key: 'workflow.nodes',
 			render: (row) =>
 				row?.workflow?.nodes?.[0]?.type
@@ -98,7 +99,7 @@ function createColumns() {
 					?.replace(/^\w/, (c) => c.toUpperCase()) || '-',
 		},
 		{
-			title: 'LAST RUN',
+			title: () => tableHeader('LAST RUN'),
 			key: 'last_execution',
 			render: (row) =>
 				row?.last_execution?.startedAt
@@ -106,7 +107,7 @@ function createColumns() {
 					: '-',
 		},
 		{
-			title: 'SUCCESS RATE',
+			title: () => tableHeader('SUCCESS RATE'),
 			key: 'success_rate',
 			render: (row) =>
 				h(
@@ -145,10 +146,12 @@ function createColumns() {
 
 <template>
 	<div class="p-4! w-full">
-		<div class="flex items-center justify-between py-4!">
+		<div class="flex items-center justify-between pb-4!">
 			<div class="flex items-start flex-col gap-2">
-				<h2 class="font-bold">Agents</h2>
-				<n-p class="text-secondary"> Automate your business processes with intelligent agents </n-p>
+				<div class="text-2xl font-bold">Agents</div>
+				<div class="text-base text-secondary">
+					Automate your business processes with intelligent agents
+				</div>
 			</div>
 
 			<n-button type="primary" @click="goToNewWorkflow"
@@ -172,8 +175,6 @@ function createColumns() {
 			</button> -->
 		</div>
 
-		<n-scrollbar x-scrollable>
-			<n-data-table :columns="columns" :data="filteredUserAgentMappings" />
-		</n-scrollbar>
+		<n-data-table :columns="columns" :data="filteredUserAgentMappings" :scroll-x="900" />
 	</div>
 </template>
