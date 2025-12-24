@@ -60,7 +60,7 @@
 						</n-gi>
 					</n-grid>
 					<n-divider />
-					<div class="flex flex-row justify-between">
+					<div class="flex flex-row justify-between items-center">
 						<NAvatarGroup :options="memberOptions(project.members)" :size="40" :max="3">
 							<template #avatar="{ option: { firstName, lastName } }">
 								<n-tooltip>
