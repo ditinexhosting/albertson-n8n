@@ -1,10 +1,20 @@
 <script lang="ts" setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, h } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from '@/app/composables/useToast';
 import { albertsonsRestApiRequest } from '@src/utils/albertsonsRestApiRequest';
 import { VIEWS } from '@/app/constants';
-import { useUsersStore } from '@/features/settings/users/users.store'; // <-- add this
+import { useUsersStore } from '@/features/settings/users/users.store';
+import { NButton, NDataTable, NInput, NIcon, NTag, type DataTableColumns } from 'naive-ui';
+import {
+	Search,
+	RotateCcw,
+	CheckCircle2,
+	XCircle,
+	Loader2,
+	Clock,
+	SlidersHorizontal,
+} from 'lucide-vue-next';
 
 const usersStore = useUsersStore();
 
@@ -24,15 +34,94 @@ interface ExecutionRow {
 const toast = useToast();
 const router = useRouter();
 
-/* top search */
-const globalSearch = ref('');
-
-/* in-card search */
 const search = ref('');
 const statusFilter = ref<'all' | 'success' | 'error' | 'running' | 'waiting'>('all');
 const isLoading = ref(false);
 const executions = ref<ExecutionRow[]>([]);
 const total = ref(0);
+
+function statusType(status: string) {
+	if (status === 'success') return 'success';
+	if (status === 'error') return 'error';
+	if (status === 'running') return 'info';
+	return 'warning';
+}
+
+function statusIcon(status: string) {
+	if (status === 'success') return CheckCircle2;
+	if (status === 'error') return XCircle;
+	if (status === 'running') return Loader2;
+	return Clock;
+}
+
+const columns: DataTableColumns<ExecutionRow> = [
+	{
+		title: 'STATUS',
+		key: 'status',
+		className: 'col-status',
+		render: (row) => {
+			const Icon = statusIcon(row.status);
+			return h(
+				NTag,
+				{
+					type: statusType(row.status),
+					round: true,
+					bordered: true,
+					class: ['status-badge', `status-badge--${row.status}`],
+				},
+				{
+					icon: () => h(NIcon, { size: 14, class: 'mr-1' }, { default: () => h(Icon) }),
+					default: () => formatStatus(row.status),
+				},
+			);
+		},
+	},
+	{
+		title: 'AGENT',
+		key: 'agent',
+		className: 'col-agent',
+		render: (row) =>
+			h(
+				'span',
+				{
+					class: 'agent-text',
+					title: row.workflowName || row.workflowId,
+					onClick: () => openExecution(row),
+				},
+				row.workflowName || row.workflowId,
+			),
+	},
+	{
+		title: 'PROJECT',
+		key: 'project',
+		className: 'col-project',
+		render: () => '–',
+	},
+	{
+		title: 'TRIGGERED BY',
+		key: 'mode',
+		className: 'col-triggered',
+		render: (row) => formatStatus(row.mode || 'manual'),
+	},
+	{
+		title: 'STARTED',
+		key: 'startedAt',
+		className: 'col-started',
+		render: (row) => formatDate(row.startedAt),
+	},
+	{
+		title: 'DURATION',
+		key: 'durationMs',
+		className: 'col-duration',
+		render: (row) => formatDuration(row.durationMs),
+	},
+	{
+		title: 'RETRIES',
+		key: 'retryOf',
+		className: 'col-retries',
+		render: (row) => (row.retryOf ? 1 : 0),
+	},
+];
 
 async function fetchExecutions() {
 	try {
@@ -40,10 +129,9 @@ async function fetchExecutions() {
 
 		const params = new URLSearchParams();
 
-		// required: current logged‑in user id
-		const ownerId = usersStore.currentUser?.id; // adjust field if needed
+		const ownerId = usersStore.currentUser?.id;
 		if (ownerId) {
-			params.append('ownerId', ownerId); // MUST be ownerId to match FastAPI
+			params.append('ownerId', ownerId);
 		}
 
 		if (search.value) params.append('search', search.value);
@@ -88,7 +176,6 @@ function onRefresh() {
 	fetchExecutions();
 }
 
-/* re-query when filters or in-card search change */
 watch([search, statusFilter], () => {
 	fetchExecutions();
 });
@@ -97,14 +184,12 @@ onMounted(() => {
 	fetchExecutions();
 });
 
-/** Open the executions tab for that workflow, like n8n */
 function openExecution(row: ExecutionRow) {
 	router.push({
-		name: VIEWS.EXECUTION_PREVIEW, // -> /workflow/:name/executions/:executionId/:nodeId?
+		name: VIEWS.EXECUTION_PREVIEW,
 		params: {
-			name: row.workflowId, // matches :name in route
-			executionId: row.id, // matches :executionId
-			// nodeId is optional; omit it
+			name: row.workflowId,
+			executionId: row.id,
 		},
 	});
 }
@@ -128,21 +213,15 @@ function formatDuration(ms?: number) {
 		return '0s';
 	}
 
-	if (msNum < 1000) {
-		return `${msNum}ms`;
-	}
+	if (msNum < 1000) return `${msNum}ms`;
 
 	const seconds = Math.floor(msNum / 1000);
-	if (seconds < 60) {
-		return `${seconds}s`;
-	}
+	if (seconds < 60) return `${seconds}s`;
 
 	const minutes = Math.floor(seconds / 60);
 	const remainingSeconds = seconds % 60;
 
-	if (remainingSeconds > 0) {
-		return `${minutes}m ${remainingSeconds}s`;
-	}
+	if (remainingSeconds > 0) return `${minutes}m ${remainingSeconds}s`;
 
 	return `${minutes}m`;
 }
@@ -186,341 +265,211 @@ function formatDate(dateString: string | null) {
 
 <template>
 	<div class="executions-page">
-		<div class="executions-container">
-			<!-- Card header -->
-			<div class="executions-header">
-				<div class="executions-header-left">
-					<h2 class="executions-title">Executions</h2>
-					<p class="executions-subtitle">Monitor agent execution history</p>
-				</div>
-
-				<div class="executions-header-right">
-					<div class="search-container">
-						<input
-							v-model="search"
-							type="text"
-							class="search-input"
-							placeholder="Search executions..."
-						/>
-					</div>
-
-					<button class="refresh-btn" @click="onRefresh">Refresh</button>
-				</div>
+		<!-- Top bar: title + Refresh -->
+		<div class="executions-top">
+			<div>
+				<h2 class="executions-title">Executions</h2>
+				<p class="executions-subtitle">Monitor agent execution history</p>
 			</div>
 
-			<!-- Status filters -->
-			<div class="status-filters">
-				<button
-					v-for="s in ['all', 'success', 'error', 'running', 'waiting']"
-					:key="s"
-					class="status-filter"
-					:class="{ 'status-filter--active': statusFilter === s }"
-					@click="statusFilter = s"
+			<n-button class="top-refresh" secondary round size="small" @click="onRefresh">
+				<template #icon>
+					<n-icon>
+						<RotateCcw />
+					</n-icon>
+				</template>
+				Refresh
+			</n-button>
+		</div>
+
+		<!-- Second row: search + filters + status pills -->
+		<div class="executions-controls">
+			<div class="controls-left">
+				<n-input
+					v-model:value="search"
+					class="exec-search"
+					placeholder="Search executions..."
+					size="small"
+					round
+					clearable
 				>
-					{{ s }}
-				</button>
+					<template #prefix>
+						<n-icon>
+							<Search />
+						</n-icon>
+					</template>
+				</n-input>
+
+				<n-button class="filters-btn" size="small" secondary>
+					<template #icon>
+						<n-icon>
+							<SlidersHorizontal />
+						</n-icon>
+					</template>
+					Filters
+				</n-button>
 			</div>
 
-			<!-- Table -->
+			<div class="controls-right">
+				<div class="status-pills">
+					<button
+						v-for="s in ['all', 'success', 'error', 'running', 'waiting']"
+						:key="s"
+						class="status-pill"
+						:class="{ 'status-pill--active': statusFilter === s }"
+						@click="statusFilter = s as any"
+					>
+						{{ s === 'all' ? 'All' : formatStatus(s) }}
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<div class="table-card">
 			<div class="table-container">
-				<table class="executions-table">
-					<thead>
-						<tr>
-							<th>STATUS</th>
-							<th>AGENT</th>
-							<th>PROJECT</th>
-							<th>TRIGGERED</th>
-							<th>STARTED</th>
-							<th>DURATION</th>
-							<th>RETRIES</th>
-						</tr>
-					</thead>
-
-					<tbody>
-						<tr
-							v-for="row in executions"
-							:key="row.id"
-							:class="{ 'row-error': row.status === 'error' }"
-						>
-							<td>
-								<span :class="['status-badge', `status-badge--${row.status}`]">
-									{{ formatStatus(row.status) }}
-								</span>
-							</td>
-
-							<td class="clickable" @click="openExecution(row)">
-								<strong>{{ row.workflowName || row.workflowId }}</strong>
-							</td>
-
-							<td>–</td>
-							<td>{{ formatStatus(row.mode || 'manual') }}</td>
-							<td>{{ formatDate(row.startedAt) }}</td>
-							<td>
-								<strong>{{ formatDuration(row.durationMs) }}</strong>
-							</td>
-							<td>{{ row.retryOf ? 1 : 0 }}</td>
-						</tr>
-
-						<tr v-if="!isLoading && executions.length === 0">
-							<td colspan="7" class="empty-state">No executions to display</td>
-						</tr>
-					</tbody>
-				</table>
+				<n-data-table
+					:columns="columns"
+					:data="executions"
+					:loading="isLoading"
+					:bordered="false"
+					:single-line="false"
+					size="small"
+					:row-class-name="(row: ExecutionRow) => (row.status === 'error' ? 'row-error' : '')"
+				/>
 			</div>
 		</div>
 	</div>
 </template>
 
 <style scoped>
-/* Base styles */
 .executions-page {
-	min-height: 100vh;
-	background-color: #f8fafc;
-	padding: 0;
-	width: 100%;
-	overflow-x: hidden;
-	overflow-y: auto;
-}
-
-/* Main header (top of page) */
-.main-header {
-	padding: 20px 24px;
-	background-color: #ffffff;
-	border-bottom: 1px solid #e2e8f0;
+	height: 100%;
 	width: 100%;
 	box-sizing: border-box;
+	padding: 24px 32px 24px;
+	background-color: var(--color--background);
 }
 
-.main-header-content {
-	width: 100%;
-}
-
-.main-header-row {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 24px;
-}
-
-.main-title {
-	margin: 0 0 4px 0;
-	font-size: 24px;
-	font-weight: 600;
-	color: #1e293b;
-}
-
-.main-subtitle {
-	margin: 0;
-	font-size: 14px;
-	color: #64748b;
-}
-
-/* right side of top header */
-.main-header-right {
-	display: flex;
-	align-items: center;
-	gap: 12px;
-}
-
-/* global search */
-.global-search-input {
-	width: 360px;
-	padding: 8px 16px;
-	border-radius: 999px;
-	border: 1px solid #e2e8f0;
-	background-color: #f8fafc;
-	font-size: 14px;
-	color: #1e293b;
-}
-
-.global-search-input::placeholder {
-	color: #94a3b8;
-}
-
-/* Executions container (main card) */
-.executions-container {
-	margin: 20px 24px;
-	border-radius: 12px;
-	background-color: #ffffff;
-	border: 1px solid #e2e8f0;
-	box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-	width: calc(100% - 48px);
-	box-sizing: border-box;
-	display: flex;
-	flex-direction: column;
-	max-height: calc(100vh - 140px);
-}
-
-/* Executions header */
-.executions-header {
+.executions-top {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	padding: 16px 20px 8px;
-	border-bottom: 1px solid #e2e8f0;
-	width: 100%;
-	box-sizing: border-box;
-}
-
-.executions-header-left {
-	flex: 1;
+	margin-bottom: 12px;
 }
 
 .executions-title {
 	margin: 0 0 4px 0;
 	font-size: 18px;
 	font-weight: 600;
-	color: #1e293b;
+	color: var(--color--text--shade-1);
 }
 
 .executions-subtitle {
 	margin: 0;
 	font-size: 13px;
-	color: #64748b;
+	color: var(--color--text--tint-1);
 }
 
-/* card search + filters + refresh inside card */
-.executions-header-right {
+.executions-controls {
 	display: flex;
+	justify-content: space-between;
 	align-items: center;
-	gap: 12px;
-	justify-content: flex-start;
+	margin-bottom: 12px;
 }
 
-.search-container {
-	position: relative;
-	width: 260px;
-}
-
-.search-input {
-	width: 100%;
-	padding: 8px 16px;
-	padding-left: 40px;
-	border-radius: 6px;
-	border: 1px solid #e2e8f0;
-	background-color: #f8fafc;
-	font-size: 14px;
-	color: #1e293b;
-	height: 36px;
-	box-sizing: border-box;
-	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E");
-	background-repeat: no-repeat;
-	background-position: 12px center;
-	background-size: 16px;
-}
-
-.search-input::placeholder {
-	color: #94a3b8;
-}
-
-.filters-btn-icon {
-	padding: 8px;
-	border-radius: 6px;
-	border: 1px solid #e2e8f0;
-	background-color: #ffffff;
-	color: #475569;
-	cursor: pointer;
-	font-weight: 500;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 36px;
-	height: 36px;
-}
-
-.filters-btn-icon:hover {
-	background-color: #f1f5f9;
-}
-
-.filter-icon {
-	width: 16px;
-	height: 16px;
-	color: #64748b;
-}
-
-.refresh-btn {
-	padding: 8px 16px;
-	border-radius: 999px;
-	border: 1px solid #e2e8f0;
-	background-color: #ffffff;
-	font-size: 14px;
-	color: #475569;
-	cursor: pointer;
-	font-weight: 500;
-	min-width: 80px;
-	height: 36px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-
-.refresh-btn:hover {
-	background-color: #f1f5f9;
-}
-
-/* Status filters - pills like wireframe */
-.status-filters {
+.controls-left {
 	display: flex;
 	align-items: center;
 	gap: 8px;
-	padding: 8px 20px 12px;
-	border-bottom: 1px solid #e5e7eb;
-	justify-content: flex-end;
 }
 
-.status-filter {
+.exec-search :deep(.n-input) {
+	border-radius: 999px;
+	background-color: var(--color--background--light-3);
+}
+
+.filters-btn {
+	border-radius: var(--radius);
+}
+
+.controls-right {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.status-pills {
+	display: flex;
+	gap: 6px;
+}
+
+.status-pill {
 	padding: 6px 18px;
 	border-radius: 999px;
-	border: 1px solid #e5e7eb;
-	background-color: #ffffff;
+	border: 1px solid var(--border-color--light);
+	background-color: var(--color--background--light-3);
 	font-size: 14px;
-	color: #4b5563;
+	color: var(--color--text);
 	cursor: pointer;
 	font-weight: 500;
 	line-height: 1;
-	transition:
-		background-color 0.15s ease,
-		color 0.15s ease,
-		border-color 0.15s ease;
 }
 
-/* ACTIVE pill */
-.status-filter--active {
-	background-color: #01529f;
-	border-color: #01529f;
-	color: #ffffff;
+.status-pill--active {
+	background-color: var(--color--primary);
+	border-color: var(--color--primary);
+	color: var(--color--text--tint-3);
 }
 
-/* Hover only for inactive pills */
-.status-filter:hover:not(.status-filter--active) {
-	background-color: #f9fafb;
-}
-
-.runs-count {
-	margin-left: 16px;
-	font-size: 14px;
-	color: #64748b;
+/* Refresh button: pill, white, light border like wireframe */
+.top-refresh {
+	border-radius: 999px;
+	padding: 0 14px;
 	font-weight: 500;
 }
 
-/* Table container */
+.top-refresh :deep(.n-button__border),
+.top-refresh :deep(.n-button__state-border) {
+	border-color: var(--border-color--light);
+}
+
+.top-refresh :deep(.n-button__content) {
+	gap: 6px;
+	color: var(--color--text--shade-1);
+}
+
+.table-card {
+	border-radius: var(--radius--lg);
+	background-color: var(--color--background--light-3);
+	border: 1px solid var(--border-color--light);
+	box-shadow: var(--shadow);
+	max-height: calc(100vh - 190px);
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	min-width: 100%;
+	overflow: hidden;
+}
+
 .table-container {
 	width: 100%;
-	overflow-x: auto;
-	overflow-y: auto;
 	flex: 1;
-	padding: 0;
-	box-sizing: border-box;
+	overflow-y: auto;
+	overflow-x: hidden;
 }
 
-.executions-table {
-	width: 100%;
-	border-collapse: collapse;
-	table-layout: fixed;
+:deep(.n-data-table) {
+	--n-border-radius: 0;
+	--n-merged-border-color: transparent;
+	border-radius: 0;
 }
 
-/* Header cells */
-.executions-table th {
+:deep(.n-data-table-wrapper),
+:deep(.n-data-table-base-table) {
+	border: none;
+}
+
+:deep(.n-data-table-th) {
 	font-family:
 		Inter,
 		system-ui,
@@ -529,20 +478,18 @@ function formatDate(dateString: string | null) {
 		'Segoe UI',
 		sans-serif;
 	font-weight: 600;
-	color: #6b7280;
+	color: var(--color--text--tint-1);
 	text-transform: uppercase;
 	font-size: 12px;
 	letter-spacing: 0.06em;
 	padding: 16px 20px;
-	background-color: #f8fafc;
-	white-space: nowrap;
-	border-bottom: 1px solid #e2e8f0;
+	background-color: var(--table--header--color--background);
+	border-bottom: 1px solid var(--border-color--light);
 	text-align: left;
-	box-sizing: border-box;
+	white-space: nowrap;
 }
 
-/* Body cells */
-.executions-table td {
+:deep(.n-data-table-td) {
 	font-family:
 		Inter,
 		system-ui,
@@ -550,101 +497,43 @@ function formatDate(dateString: string | null) {
 		BlinkMacSystemFont,
 		'Segoe UI',
 		sans-serif;
-	color: #4b5563;
+	color: var(--color--text);
 	font-size: 14px;
+	font-weight: 400;
 	line-height: 1.5;
-	vertical-align: middle;
-	white-space: nowrap;
-	overflow: visible;
-	text-overflow: clip;
 	padding: 12px 20px;
-	border-bottom: 1px solid #e2e8f0;
-	box-sizing: border-box;
+	border-bottom: 1px solid var(--border-color--light);
+	border-right: none;
 }
 
-/* clickable agent */
-.clickable {
+:deep(.n-data-table-tr:hover > .n-data-table-td) {
+	background-color: var(--table--row--color--background--hover);
+}
+
+.row-error > .n-data-table-td {
+	background-color: var(--color--danger--tint-4);
+}
+
+.row-error:hover > .n-data-table-td {
+	background-color: var(--color--danger--tint-3);
+}
+
+:deep(.n-data-table-td.col-agent) {
+	max-width: 260px;
+}
+
+.agent-text {
+	display: inline-block;
+	max-width: 260px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	color: var(--color--text--shade-1);
+	font-weight: 600;
 	cursor: pointer;
 }
 
-/* Error row background like n8n */
-.row-error {
-	background-color: #fef2f2;
-}
-
-.row-error:hover {
-	background-color: #fee2e2;
-}
-
-/* Agent column: bold, darker */
-.col-agent {
-	width: 20%;
-	min-width: 180px;
-	color: #1a1a1a;
-	font-weight: 600;
-	letter-spacing: -0.01em;
-}
-
-.col-agent strong {
-	font-weight: 600;
-}
-
-/* Supporting columns: lighter secondary text */
-.col-project,
-.col-triggered,
-.col-started,
-.col-retries {
-	color: #6b7280;
-	font-weight: 400;
-}
-
-/* Duration column: bold */
-.col-duration {
-	width: 10%;
-	min-width: 100px;
-	color: #1a1a1a;
-	font-weight: 600;
-}
-
-/* Widths for other columns */
-.col-status {
-	width: 10%;
-	min-width: 100px;
-}
-
-.col-project {
-	width: 15%;
-	min-width: 120px;
-}
-
-.col-triggered {
-	width: 15%;
-	min-width: 120px;
-}
-
-.col-started {
-	width: 20%;
-	min-width: 180px;
-}
-
-.col-retries {
-	width: 10%;
-	min-width: 80px;
-}
-
-.executions-table tr:last-child td {
-	border-bottom: none;
-}
-
-.empty-state {
-	text-align: center;
-	padding: 40px 0;
-	color: #64748b;
-	font-size: 14px;
-}
-
-/* Status badges */
-.status-badge {
+:deep(.status-badge) {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -654,67 +543,65 @@ function formatDate(dateString: string | null) {
 	font-weight: 600;
 	min-width: 70px;
 	text-transform: capitalize;
-	white-space: nowrap;
+	border-width: 1px;
 }
 
-.status-badge--success {
-	background-color: #d1fae5;
-	color: #065f46;
-	border: 1px solid #a7f3d0;
+:deep(.status-badge--success) {
+	background-color: var(--color--success--tint-4);
+	color: var(--color--success--shade-1);
+	border-color: var(--color--success--tint-3);
 }
 
-.status-badge--error {
-	background-color: #fee2e2;
-	color: #991b1b;
-	border: 1px solid #fecaca;
+:deep(.status-badge--error) {
+	background-color: var(--color--danger--tint-4);
+	color: var(--color--danger--shade-1);
+	border-color: var(--color--danger--tint-3);
 }
 
-.status-badge--running {
-	background-color: #dbeafe;
-	color: #1e40af;
-	border: 1px solid #bfdbfe;
+:deep(.status-badge--running) {
+	background-color: var(--color--primary--tint-3);
+	color: var(--color--primary--shade-1);
+	border-color: var(--color--primary--tint-2);
 }
 
-.status-badge--waiting {
-	background-color: #fef3c7;
-	color: #92400e;
-	border: 1px solid #fde68a;
+:deep(.status-badge--waiting) {
+	background-color: var(--color--warning--tint-2);
+	color: var(--color--warning--shade-1);
+	border-color: var(--color--warning--tint-1);
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-	.main-header-row {
-		flex-direction: column;
-		align-items: flex-start;
-		gap: 12px;
-	}
+:deep(.col-status) {
+	width: 10%;
+	min-width: 100px;
+}
 
-	.main-header-right {
-		width: 100%;
-		justify-content: flex-start;
-	}
+:deep(.col-agent) {
+	width: 20%;
+	min-width: 160px;
+}
 
-	.global-search-input {
-		width: 100%;
-	}
+:deep(.col-project) {
+	width: 15%;
+	min-width: 120px;
+}
 
-	.executions-header {
-		flex-direction: column;
-		gap: 16px;
-	}
+:deep(.col-triggered) {
+	width: 15%;
+	min-width: 120px;
+}
 
-	.executions-header-right {
-		width: 100%;
-		justify-content: flex-start;
-	}
+:deep(.col-started) {
+	width: 20%;
+	min-width: 180px;
+}
 
-	.search-container {
-		flex: 1;
-	}
+:deep(.col-duration) {
+	width: 10%;
+	min-width: 100px;
+}
 
-	.status-filters {
-		justify-content: flex-start;
-		flex-wrap: wrap;
-	}
+:deep(.col-retries) {
+	width: 10%;
+	min-width: 80px;
 }
 </style>
