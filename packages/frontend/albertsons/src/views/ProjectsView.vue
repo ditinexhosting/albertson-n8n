@@ -17,7 +17,10 @@
 			<n-gi>
 				<div class="shadow! hover:shadow-lg! border border-secondary rounded-lg p-4! bg-white!">
 					<div class="flex justify-between items-center gap-4 mb-4!">
-						<div class="text-ellipsis cursor-pointer text-secondary text-md break-all font-bold">
+						<div
+							v-on:click="() => viewProject(project.id)"
+							class="text-ellipsis cursor-pointer text-secondary text-md break-all font-bold"
+						>
 							{{ project.name }}
 						</div>
 						<n-dropdown
@@ -225,9 +228,8 @@ const dotMenu = [
 		key: 'edit',
 	},
 	{
-		label: 'Delete',
-		key: 'delete',
-		disabled: true,
+		label: 'View',
+		key: 'view',
 	},
 ];
 
@@ -283,6 +285,10 @@ onMounted(async () => {
 	}
 });
 
+const viewProject = (project_id) => {
+	router.push(`projects/${project_id}`);
+};
+
 const handleAction = async (key, row) => {
 	try {
 		switch (key) {
@@ -296,7 +302,8 @@ const handleAction = async (key, row) => {
 					status: row.status,
 				};
 				break;
-			case 'delete':
+			case 'view':
+				viewProject(row.id);
 				break;
 			default:
 				console.error(`Unknown action key: ${key}`);

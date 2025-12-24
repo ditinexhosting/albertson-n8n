@@ -28,6 +28,7 @@ import { ROUTERS } from '@src/utils/constants.ts';
 
 /** custom components */
 const Header = async () => await import('@src/components/Header.vue');
+const Projects = async () => await import('@src/views/ProjectsView.vue');
 
 /** custom components */
 const ChangePasswordView = async () =>
@@ -166,7 +167,7 @@ export const routes: RouteRecordRaw[] = [
 		path: '/projects',
 		name: 'ALBERTSONS_PROJECTS',
 		components: {
-			default: () => import('@src/views/ProjectsView.vue'),
+			default: Projects,
 			header: Header,
 			sidebar: MainSidebar,
 		},
@@ -174,6 +175,22 @@ export const routes: RouteRecordRaw[] = [
 			middleware: ['authenticated'],
 			header: {
 				title: 'Projects',
+				showBack: false,
+			},
+		},
+	},
+	{
+		path: '/projects/:id',
+		name: 'ALBERTSONS_PROJECTS_DETAILS',
+		components: {
+			default: () => import('@src/views/ProjectDetailsView.vue'),
+			header: Header,
+			sidebar: MainSidebar,
+		},
+		meta: {
+			middleware: ['authenticated'],
+			header: {
+				title: 'Project Details',
 				showBack: false,
 			},
 		},
