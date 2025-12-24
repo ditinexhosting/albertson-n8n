@@ -1,5 +1,8 @@
 import { defineStore } from 'pinia';
 import { albertsonsRestApiRequest } from '@src/utils/albertsonsRestApiRequest';
+import { useUsersStore } from '@/features/settings/users/users.store';
+
+const usersStore = useUsersStore();
 
 export const useUserAgentMappingsStore = defineStore('albertsonsUserAgentMappings', {
 	state: () => ({
@@ -9,7 +12,12 @@ export const useUserAgentMappingsStore = defineStore('albertsonsUserAgentMapping
 	actions: {
 		async fetchUserAgentMappings() {
 			// IMPORTANT: await the request and log it
-			const result = await albertsonsRestApiRequest('GET', '/v1/my-agents/all');
+			// required: current logged‑in user id
+			const ownerId = usersStore.currentUser?.id;
+
+			const result = await albertsonsRestApiRequest('POST', '/v1/my-agents/all', {
+				ownerId: ownerId,
+			});
 
 			console.log('userAgentMappings/all result', result);
 
