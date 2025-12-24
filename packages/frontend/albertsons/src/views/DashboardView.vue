@@ -1,6 +1,8 @@
 <template>
 	<!-- Page shell -->
-	<div class="flex flex-1 p-4! flex-col gap-4 bg-[var(--color--background--light-2)]">
+	<div
+		class="dashboard-scroll-container flex flex-1 p-4! flex-col gap-4 bg-[var(--color--background--light-2)]"
+	>
 		<!-- METRICS STRIP: white container with ONLY metric cards -->
 		<div class="metrics-strip">
 			<n-grid :cols="5" :x-gap="14" :y-gap="14">
@@ -79,7 +81,7 @@
 		</div>
 
 		<!-- SCROLLABLE MAIN GRID -->
-		<div class="w-full max-w-[1400px] mx-auto" style="padding-bottom: 80px">
+		<div class="w-full max-w-[1400px] mx-auto" style="padding-bottom: 260px">
 			<n-grid :cols="24" :x-gap="20" :y-gap="20">
 				<!-- LEFT COLUMN -->
 				<n-gi :span="16">
@@ -504,28 +506,35 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* Thin, rounded scrollbar for the whole page */
-:global(html),
-:global(body) {
-	scrollbar-width: thin;
-	scrollbar-color: var(--border-color--light) transparent;
+/* Dashboard scroll container */
+.dashboard-scroll-container {
+	height: 100vh;
+	overflow-y: auto;
+	overflow-x: hidden;
 }
 
-:global(body::-webkit-scrollbar) {
-	width: 4px;
+/* Custom scrollbar styling */
+.dashboard-scroll-container::-webkit-scrollbar {
+	width: 8px;
 }
 
-:global(body::-webkit-scrollbar-track) {
+.dashboard-scroll-container::-webkit-scrollbar-track {
 	background: transparent;
 }
 
-:global(body::-webkit-scrollbar-thumb) {
-	background-color: var(--border-color--light);
-	border-radius: 999px;
+.dashboard-scroll-container::-webkit-scrollbar-thumb {
+	background-color: rgba(0, 0, 0, 0.2);
+	border-radius: 4px;
 }
 
-:global(body::-webkit-scrollbar-thumb:hover) {
-	background-color: var(--color--text--tint-2);
+.dashboard-scroll-container::-webkit-scrollbar-thumb:hover {
+	background-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Firefox scrollbar */
+.dashboard-scroll-container {
+	scrollbar-width: thin;
+	scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
 }
 
 /* METRICS STRIP CONTAINER */
@@ -560,13 +569,12 @@ onMounted(async () => {
 	box-shadow: none;
 	display: flex;
 	flex-direction: column;
-	justify-content: center; /* vertical centering */
-	min-height: 96px; /* 🔑 key fix: slimmer cards */
-	padding: 14px 16px; /* consistent inner spacing */
+	justify-content: center;
+	min-height: 96px;
+	padding: 14px 16px;
 }
 
 /* SYSTEM HEALTH CARD */
-/* ===================== */
 .health-card {
 	border: 2px solid var(--color--success--tint-2);
 	background: var(--color--background--light-3);
@@ -633,14 +641,12 @@ onMounted(async () => {
 	height: 12px;
 }
 
-/* ===================== */
 /* COMPACT METRIC CARDS */
-/* ===================== */
 .compact-card {
 	display: flex;
 	flex-direction: column;
 	margin-top: 14px;
-	justify-content: center; /* vertical center */
+	justify-content: center;
 }
 
 .compact-header {
@@ -684,7 +690,7 @@ onMounted(async () => {
 }
 
 .compact-value {
-	font-size: 26px; /* reduced from 28–30 */
+	font-size: 26px;
 	font-weight: 700;
 	line-height: 1;
 	margin-bottom: 2px;
