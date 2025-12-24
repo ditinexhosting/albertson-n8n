@@ -13,3 +13,9 @@ export const PROJECT_STATUS = {
 	ACTIVE: 'Active',
 	INACTIVE: 'Inactive',
 };
+
+export const PROJECT_ROLE = {
+	OWNER: 'Owner',
+	EDITOR: 'Editor',
+	VIEWER: 'Viewer',
+};
