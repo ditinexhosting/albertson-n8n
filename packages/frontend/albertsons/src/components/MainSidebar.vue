@@ -1,22 +1,60 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, h } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import albertsonsLogo from '../assets/albertsons-logo.png';
+import { NIcon, NDropdown } from 'naive-ui';
+import {
+	Activity,
+	Bot,
+	FolderKanban,
+	Play,
+	LayoutTemplate,
+	Users,
+	Store,
+	ShieldCheck,
+	Settings,
+	ChevronLeft,
+	ChevronRight,
+	ChevronDown,
+	CircleUserRound,
+	LogOut,
+} from 'lucide-vue-next';
 
 const router = useRouter();
 const route = useRoute();
 const isCollapsed = ref(false);
 
+function renderIcon(icon) {
+	return () => {
+		return h(NIcon, null, {
+			default: () => h(icon),
+		});
+	};
+}
+
+const options = [
+	{
+		label: 'User Profile',
+		key: 'profile',
+		icon: renderIcon(CircleUserRound),
+	},
+	{
+		label: 'Logout',
+		key: 'logout',
+		icon: renderIcon(LogOut),
+	},
+];
+
 const menuItems = ref([
-	{ label: 'Pulse', key: 'pulse', path: '/dashboard', active: false },
-	{ label: 'My Agents', key: 'agents', path: '/agents', active: false },
-	{ label: 'Projects', key: 'projects', path: '/projects', active: false },
-	{ label: 'Executions', key: 'executions', path: '/executions', active: false },
-	{ label: 'Templates', key: 'templates', path: '/templates', active: false },
-	{ label: 'Agent Library', key: 'library', path: '/agent-library', active: false },
-	{ label: 'Teams', key: 'teams', path: '/teams', active: false },
-	{ label: 'Settings', key: 'settings', path: '/settings', active: false },
-	{ label: 'Super Admin Console', key: 'superadmin', path: '/superadmin', active: false },
+	{ label: 'Pulse', icon: Activity, path: '/dashboard', active: false },
+	{ label: 'My Agents', icon: Bot, path: '/agents', active: false },
+	{ label: 'Projects', icon: FolderKanban, path: '/projects', active: false },
+	{ label: 'Executions', icon: Play, path: '/executions', active: false },
+	{ label: 'Templates', icon: LayoutTemplate, path: '/templates', active: false },
+	{ label: 'Agent Library', icon: Store, path: '/agent-library', active: false },
+	{ label: 'Teams', icon: Users, path: '/teams', active: false },
+	{ label: 'Settings', icon: Settings, path: '/settings', active: false },
+	{ label: 'Super Admin Console', icon: ShieldCheck, path: '/superadmin', active: false },
 ]);
 
 function navigate(item) {
@@ -36,124 +74,76 @@ function toggleSidebar() {
 }
 
 watch(() => route.path, updateActiveState, { immediate: true });
-
-const renderIcon = (key) => {
-	switch (key) {
-		case 'pulse':
-			return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-				<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-			</svg>`;
-		case 'agents':
-			return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-				<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-				<circle cx="12" cy="7" r="4"/>
-			</svg>`;
-		case 'projects':
-			return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-				<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-			</svg>`;
-		case 'executions':
-			return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-				<polygon points="5 3 19 12 5 21 5 3"/>
-			</svg>`;
-		case 'templates':
-			return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-				<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-				<line x1="9" y1="3" x2="9" y2="21"/>
-			</svg>`;
-		case 'library':
-			return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-				<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-				<path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-			</svg>`;
-		case 'teams':
-			return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-				<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-				<circle cx="9" cy="7" r="4"/>
-				<path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-				<path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-			</svg>`;
-		case 'settings':
-			return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-				<circle cx="12" cy="12" r="3"/>
-				<path d="M12 1v6m0 6v6m9-11h-6m-6 0H3"/>
-			</svg>`;
-		default:
-			return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-				<circle cx="12" cy="12" r="10"/>
-			</svg>`;
-	}
-};
 </script>
 
 <template>
 	<aside class="sidebar" :class="{ 'sidebar--collapsed': isCollapsed }">
 		<!-- Header -->
-		<div class="sidebar-header">
-			<img :src="albertsonsLogo" alt="Albertsons" class="sidebar-logo" />
-			<div v-if="!isCollapsed" class="sidebar-title">
-				<div class="sidebar-title-main">Albertsons</div>
+		<div class="pt-5! px-4! pb-3! flex items-center gap-1.5">
+			<img :src="albertsonsLogo" alt="Albertsons" class="h-8 w-8 object-contain shrink-0" />
+			<div v-if="!isCollapsed" class="overflow-hidden whitespace-nowrap">
+				<div class="text-base font-bold text-(--color--primary)">Albertsons</div>
 			</div>
 		</div>
 
 		<!-- AI AgentSpace Title -->
-		<div v-if="!isCollapsed" class="sidebar-subtitle">AI AgentSpace</div>
+		<div
+			v-if="!isCollapsed"
+			class="px-3.75 pt-0 pb-4! pl-8! block m-auto text-[15px] text-(--color--primary) font-semibold"
+		>
+			AI AgentSpace
+		</div>
 
 		<!-- Navigation -->
 		<nav class="sidebar-nav">
-			<button
-				v-for="item in menuItems"
-				:key="item.key"
-				class="sidebar-nav-item"
-				:class="{ 'sidebar-nav-item--active': item.active }"
-				@click="navigate(item)"
-				:title="isCollapsed ? item.label : ''"
-			>
-				<span class="sidebar-nav-icon" v-html="renderIcon(item.key)" />
-				<span v-if="!isCollapsed" class="sidebar-nav-label">{{ item.label }}</span>
-			</button>
+			<template v-for="item in menuItems" :key="item.key">
+				<button
+					class="w-full border-0 bg-transparent flex items-center gap-3 px-3 py-2 mb-1 rounded-(--radius) text-(--color--text) text-sm cursor-pointer transition-all duration-200 text-left"
+					:class="{ 'sidebar-nav-item--active': item.active }"
+					@click="navigate(item)"
+					:title="isCollapsed ? item.label : ''"
+				>
+					<NIcon>
+						<component :is="item.icon" />
+					</NIcon>
+
+					<span v-if="!isCollapsed" class="whitespace-nowrap overflow-hidden text-ellipsis">
+						{{ item.label }}
+					</span>
+				</button>
+
+				<!-- Divider after Executions -->
+				<div v-if="item.label === 'Executions'" class="my-2! h-px! bg-border-primary!" />
+			</template>
 		</nav>
 
 		<!-- Footer with User Profile -->
 		<div class="sidebar-footer">
-			<div class="sidebar-user">
-				<div class="sidebar-user-avatar">SJ</div>
-				<div v-if="!isCollapsed" class="sidebar-user-info">
-					<div class="sidebar-user-name">Sarah Johnson</div>
-					<div class="sidebar-user-role">Engineering</div>
+			<n-dropdown trigger="click" placement="right-end" teleport="body" :options="options">
+				<div class="sidebar-user cursor-pointer">
+					<div class="sidebar-user-avatar">SJ</div>
+
+					<div v-if="!isCollapsed" class="sidebar-user-info">
+						<div class="sidebar-user-name">Sarah Johnson</div>
+						<div class="sidebar-user-role">Engineering</div>
+					</div>
+
+					<NIcon>
+						<component :is="ChevronDown" />
+					</NIcon>
 				</div>
-				<svg
-					v-if="!isCollapsed"
-					class="sidebar-user-dropdown"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-				>
-					<polyline points="6 9 12 15 18 9" />
-				</svg>
-			</div>
+			</n-dropdown>
 		</div>
 
 		<!-- Toggle Button - Right Side Middle -->
 		<button
-			class="sidebar-collapse-toggle"
+			class="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full border border-(--border-color--light) bg-(--color--background--light-3) text-(--color--text) cursor-pointer flex items-center justify-center transition-all duration-200 z-10 shadow-(--shadow--light) hover:bg-(--color--background--light-2) hover:border-(--border-color) hover:shadow-(--shadow)"
 			@click="toggleSidebar"
 			:title="isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
 		>
-			<svg
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-			>
-				<polyline v-if="!isCollapsed" points="15 18 9 12 15 6" />
-				<polyline v-else points="9 18 15 12 9 6" />
-			</svg>
+			<NIcon>
+				<component :is="isCollapsed ? ChevronRight : ChevronLeft" />
+			</NIcon>
 		</button>
 	</aside>
 </template>
@@ -174,62 +164,11 @@ const renderIcon = (key) => {
 	width: 64px;
 }
 
-/* Header */
-.sidebar-header {
-	padding: 20px 16px 12px;
-	display: flex;
-	align-items: center;
-	gap: 12px;
-}
-
-.sidebar-logo {
-	height: 32px;
-	width: 32px;
-	object-fit: contain;
-	flex-shrink: 0;
-}
-
-.sidebar-title {
-	overflow: hidden;
-	white-space: nowrap;
-}
-
-.sidebar-title-main {
-	font-size: 16px;
-	font-weight: 700;
-	color: var(--color--primary);
-}
-
-/* AI AgentSpace Subtitle */
-.sidebar-subtitle {
-	padding: 0px 15px 15px 34px;
-	font-size: 15px;
-	color: var(--color--primary);
-	font-weight: 500;
-}
-
 /* Navigation */
 .sidebar-nav {
 	padding: 8px 12px;
 	flex: 1;
 	overflow-y: auto;
-}
-
-.sidebar-nav-item {
-	width: 100%;
-	border: none;
-	background: transparent;
-	display: flex;
-	align-items: center;
-	gap: 12px;
-	padding: 10px 12px;
-	margin-bottom: 4px;
-	border-radius: var(--radius);
-	color: var(--color--text);
-	font-size: 14px;
-	cursor: pointer;
-	transition: all 0.2s;
-	text-align: left;
 }
 
 .sidebar--collapsed .sidebar-nav-item {
@@ -245,27 +184,6 @@ const renderIcon = (key) => {
 	background-color: var(--color--background--light-1);
 	color: var(--color--primary);
 	font-weight: 500;
-}
-
-.sidebar-nav-icon {
-	width: 20px;
-	height: 20px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	flex-shrink: 0;
-	color: currentColor;
-}
-
-.sidebar-nav-icon svg {
-	width: 20px;
-	height: 20px;
-}
-
-.sidebar-nav-label {
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
 }
 
 /* Footer with User Profile */
@@ -333,38 +251,6 @@ const renderIcon = (key) => {
 	height: 16px;
 	color: var(--color--text--tint-1);
 	flex-shrink: 0;
-}
-
-/* Collapse Toggle Button - Right Side Middle */
-.sidebar-collapse-toggle {
-	position: absolute;
-	right: -12px;
-	top: 50%;
-	transform: translateY(-50%);
-	width: 24px;
-	height: 24px;
-	border: 1px solid var(--border-color--light);
-	border-radius: 50%;
-	background: var(--color--background--light-3);
-	color: var(--color--text);
-	cursor: pointer;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	transition: all 0.2s;
-	z-index: 10;
-	box-shadow: var(--shadow--light);
-}
-
-.sidebar-collapse-toggle:hover {
-	background: var(--color--background--light-2);
-	border-color: var(--border-color);
-	box-shadow: var(--shadow);
-}
-
-.sidebar-collapse-toggle svg {
-	width: 14px;
-	height: 14px;
 }
 
 /* Scrollbar */
