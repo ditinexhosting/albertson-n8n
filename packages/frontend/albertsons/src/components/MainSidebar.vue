@@ -20,13 +20,11 @@ import {
 	LogOut,
 } from 'lucide-vue-next';
 import { useUsersStore } from '@/features/settings/users/users.store';
-import { useUserSessionStore } from '../stores/userSession.js';
-const { currentUser } = useUsersStore();
+const { currentUser, logout } = useUsersStore();
 
 const router = useRouter();
 const route = useRoute();
 const isCollapsed = ref(false);
-const sessionStore = useUserSessionStore();
 
 function renderIcon(icon) {
 	return () => {
@@ -81,7 +79,7 @@ function toggleSidebar() {
 async function handleSelect(key) {
 	if (key === 'logout') {
 		try {
-			await sessionStore.logoutUser();
+			await logout();
 			router.push('/login');
 		} catch (err) {
 			console.error('Error while logging out ->', err);

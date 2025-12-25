@@ -5,7 +5,6 @@ import albertsonsLogo from '../assets/albertsons-logo.png';
 import { NButton, NInput } from 'naive-ui';
 
 import { useUsersStore } from '@/features/settings/users/users.store';
-import { useUserSessionStore } from '../stores/userSession.js';
 
 const router = useRouter();
 const usersStore = useUsersStore();
@@ -16,7 +15,6 @@ const password = ref('');
 const confirmPassword = ref('');
 const error = ref('');
 const loading = ref(false);
-const sessionStore = useUserSessionStore();
 
 const toggleMode = () => {
 	isLogin.value = !isLogin.value;
@@ -50,10 +48,6 @@ const handleSubmit = async () => {
 		loading.value = true;
 
 		const result = await usersStore.loginWithCreds(payload);
-
-		console.log('LOGIN SUCCESS →', result);
-
-		await sessionStore.loadUser();
 
 		loading.value = false;
 
