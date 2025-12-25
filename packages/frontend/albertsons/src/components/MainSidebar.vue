@@ -103,7 +103,7 @@ watch(() => route.path, updateActiveState, { immediate: true });
 					@click="navigate(item)"
 					:title="isCollapsed ? item.label : ''"
 				>
-					<NIcon>
+					<NIcon :size="18">
 						<component :is="item.icon" />
 					</NIcon>
 
@@ -119,7 +119,14 @@ watch(() => route.path, updateActiveState, { immediate: true });
 
 		<!-- Footer with User Profile -->
 		<div class="sidebar-footer">
-			<n-dropdown trigger="click" placement="right-end" teleport="body" :options="options">
+			<n-dropdown
+				trigger="click"
+				placement="right-end"
+				size="large"
+				teleport="body"
+				:options="options"
+				class="p-2! rounded-md!"
+			>
 				<div class="sidebar-user cursor-pointer">
 					<div class="sidebar-user-avatar">SJ</div>
 
