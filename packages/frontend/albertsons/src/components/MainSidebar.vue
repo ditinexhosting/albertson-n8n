@@ -19,10 +19,14 @@ import {
 	CircleUserRound,
 	LogOut,
 } from 'lucide-vue-next';
+import { useUsersStore } from '@/features/settings/users/users.store';
+import { useUserSessionStore } from '../stores/userSession.js';
+const { currentUser } = useUsersStore();
 
 const router = useRouter();
 const route = useRoute();
 const isCollapsed = ref(false);
+const sessionStore = useUserSessionStore();
 
 function renderIcon(icon) {
 	return () => {
@@ -37,6 +41,7 @@ const options = [
 		label: 'User Profile',
 		key: 'profile',
 		icon: renderIcon(CircleUserRound),
+		disabled: true,
 	},
 	{
 		label: 'Logout',
@@ -71,6 +76,17 @@ function updateActiveState() {
 
 function toggleSidebar() {
 	isCollapsed.value = !isCollapsed.value;
+}
+
+async function handleSelect(key) {
+	if (key === 'logout') {
+		try {
+			await sessionStore.logoutUser();
+			router.push('/login');
+		} catch (err) {
+			console.error('Error while logging out ->', err);
+		}
+	}
 }
 
 watch(() => route.path, updateActiveState, { immediate: true });
@@ -125,14 +141,25 @@ watch(() => route.path, updateActiveState, { immediate: true });
 				size="large"
 				teleport="body"
 				:options="options"
+				@select="handleSelect"
 				class="p-2! rounded-md!"
 			>
 				<div class="sidebar-user cursor-pointer">
-					<div class="sidebar-user-avatar">SJ</div>
+					<div class="sidebar-user-avatar">
+						{{
+							currentUser?.fullName
+								?.split(' ')
+								.filter((_, i, arr) => i === 0 || i === arr.length - 1)
+								.map((name) => name[0])
+								.join('')
+						}}
+					</div>
 
 					<div v-if="!isCollapsed" class="sidebar-user-info">
-						<div class="sidebar-user-name">Sarah Johnson</div>
-						<div class="sidebar-user-role">Engineering</div>
+						<div class="sidebar-user-name">{{ currentUser?.fullName }}</div>
+						<div class="sidebar-user-role">
+							{{ currentUser?.personalizationAnswers?.companyType }}
+						</div>
 					</div>
 
 					<NIcon>
@@ -251,6 +278,7 @@ watch(() => route.path, updateActiveState, { immediate: true });
 	color: var(--color--text);
 	overflow: hidden;
 	text-overflow: ellipsis;
+	text-transform: capitalize;
 }
 
 .sidebar-user-dropdown {

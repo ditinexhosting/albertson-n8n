@@ -26,7 +26,7 @@ import { setLanguage } from '@n8n/i18n';
 import { useRootStore } from '@n8n/stores/useRootStore';
 import axios from 'axios';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useStyles } from '@/app/composables/useStyles';
 import { useExposeCssVar } from '@/app/composables/useExposeCssVar';
 import { useFloatingUiOffsets } from '@/app/composables/useFloatingUiOffsets';
@@ -36,8 +36,10 @@ import * as settingsApi from '@n8n/rest-api-client/api/settings';
 import { useNodeTypesStore } from '@/app/stores/nodeTypes.store';
 import { NConfigProvider, GlobalThemeOverrides } from 'naive-ui';
 import { NThemeEditor, NDialogProvider } from 'naive-ui';
+import { useUserSessionStore } from './stores/userSession.js';
 
 const route = useRoute();
+const router = useRouter();
 const rootStore = useRootStore();
 const nodeTypesStore = useNodeTypesStore();
 const assistantStore = useAssistantStore();
@@ -45,6 +47,7 @@ const chatPanelStore = useChatPanelStore();
 const uiStore = useUIStore();
 const usersStore = useUsersStore();
 const settingsStore = useSettingsStore();
+const sessionStore = useUserSessionStore();
 const ndvStore = useNDVStore();
 const { APP_Z_INDEXES } = useStyles();
 
@@ -156,6 +159,24 @@ watch(
 		axios.defaults.headers.common['Accept-Language'] = newLocale;
 
 		void locale.use(newLocale);
+	},
+	{ immediate: true },
+);
+
+//load user
+onMounted(async () => {
+	await sessionStore.loadUser();
+});
+
+// redirect to login page, when user is signed out.
+watch(
+	() => sessionStore.isLoaded,
+	(loaded) => {
+		if (!loaded) return;
+
+		if (!sessionStore.user && router.currentRoute.value.path !== '/login') {
+			router.push('/login');
+		}
 	},
 	{ immediate: true },
 );
