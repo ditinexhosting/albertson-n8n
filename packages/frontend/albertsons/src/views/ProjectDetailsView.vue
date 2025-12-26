@@ -50,7 +50,7 @@
 		<n-divider />
 		<n-tabs type="line" animated>
 			<n-tab-pane name="agents" :tab="`Agents (${project.agents?.length || 0})`">
-				Wonderwall
+				<n-data-table :columns="agentsColumns" :data="project.agents" :scroll-x="900" />
 			</n-tab-pane>
 			<n-tab-pane name="members" :tab="`Team Members (${project.members?.length || 0})`">
 				<n-data-table :columns="columns" :data="sortedMembers" />
@@ -92,6 +92,37 @@
 				</div>
 			</template>
 		</n-modal>
+		<n-modal
+			v-model:show="showAddAgentModal"
+			:mask-closable="false"
+			preset="card"
+			size="huge"
+			style="width: 600px"
+		>
+			<template #header> {{ 'Add Agent' }} </template>
+			<n-form :ref="formRef2" :label-width="80" :model="formValue" size="medium">
+				<n-grid x-gap="12" :cols="1">
+					<n-gi>
+						<n-form-item label="Agents" path="agentIds">
+							<n-select
+								multiple
+								filterable
+								v-model:value="formValue2.agentIds"
+								:options="availableAgentsToAddInProject"
+							/>
+						</n-form-item>
+					</n-gi>
+				</n-grid>
+			</n-form>
+			<template #footer>
+				<div class="flex flex-row flex-1 gap-4 justify-end!">
+					<n-button ghost type="primary" @click="showAddAgentModal = false">Close</n-button>
+					<n-button :loading="modalSubmitLoading" type="primary" @click="onAddAgent"
+						>Submit</n-button
+					>
+				</div>
+			</template>
+		</n-modal>
 	</div>
 </template>
 
@@ -126,6 +157,7 @@ import {
 	NTabPane,
 	useDialog,
 	NDialogProvider,
+	NProgress,
 } from 'naive-ui';
 import {
 	Plus,
@@ -139,6 +171,8 @@ import {
 	GitBranch,
 	ArrowLeft,
 	Settings,
+	ClockCheck,
+	Pause,
 } from 'lucide-vue-next';
 import { PROJECT_STATUS } from '@src/utils/constants';
 import { useToast } from '@/app/composables/useToast';
@@ -155,15 +189,20 @@ const usersStore = useUsersStore();
 const toast = useToast();
 
 const formRef = ref(null);
+const formRef2 = ref(null);
 const formValue = ref({
 	users: [],
 	role: null,
 });
-
+const formValue2 = ref({
+	agentIds: [],
+});
 const dialog = useDialog();
 const columns = createColumns();
+const agentsColumns = createAgentsColumns();
 const project = ref([]);
 const users = ref([]);
+const agents = ref([]);
 const availableRoles = computed(() => {
 	return Object.entries(PROJECT_ROLE)
 		.filter(([key, value]) => value != PROJECT_ROLE.OWNER)
@@ -178,6 +217,14 @@ const availableUsersToAddAsMember = computed(() => {
 		.map((user) => ({
 			label: user?.owner?.firstName + ' ' + user?.owner?.lastName + ' (' + user?.owner?.email + ')',
 			value: user?.ownerId,
+		}));
+});
+const availableAgentsToAddInProject = computed(() => {
+	return agents.value
+		.filter((agent) => !project.value?.agents?.some((pagent) => pagent.id === agent.id))
+		.map((agent) => ({
+			label: agent.workflow?.name,
+			value: agent.workflow?.id,
 		}));
 });
 const meOnCurrentProject = computed(() => {
@@ -254,6 +301,95 @@ function createColumns() {
 		},
 	];
 }
+const tableHeader = (text) => h('span', { class: 'text-secondary' }, text);
+function createAgentsColumns() {
+	return [
+		{
+			title: () => tableHeader('NAME'),
+			key: 'name',
+			render: (row) =>
+				h('span', [
+					row.name,
+					h('br'),
+					h('small', { class: 'text-secondary' }, `${row.description || ''}`),
+				]),
+		},
+		{
+			title: () => tableHeader('STATUS'),
+			key: 'active',
+			render: (row) => {
+				const isActive = !row?.active;
+
+				return h(
+					'span',
+					{
+						class: [
+							'p-1.5! flex items-center justify-center w-[4.5rem] rounded-full text-[11px]! gap-1!',
+							isActive
+								? 'bg-[var(--color-light-green)]! text-[var(--color--success)]'
+								: 'bg-[var(--color-light-orange)]! text-[var(--color-warning-orange)]!',
+						],
+					},
+					[
+						isActive ? h(ClockCheck, { size: 11 }) : h(Pause, { size: 11 }),
+						isActive ? 'Active' : 'Inactive',
+					],
+				);
+			},
+		},
+		{
+			title: () => tableHeader('TRIGGER'),
+			key: 'nodes',
+			render: (row) =>
+				row?.nodes?.[0]?.type
+					?.split('.')
+					?.pop()
+					?.replace(/^\w/, (c) => c.toUpperCase()) || '-',
+		},
+		// {
+		// 	title: () => tableHeader('LAST RUN'),
+		// 	key: 'last_execution',
+		// 	render: (row) =>
+		// 		row?.last_execution?.startedAt
+		// 			? dayjs(row.last_execution.startedAt).format('MMM DD, hh:mm A')
+		// 			: '-',
+		// },
+		{
+			title: () => tableHeader('SUCCESS RATE'),
+			key: 'success_rate',
+			render: (row) =>
+				h(
+					'div',
+					{ class: 'w-4' },
+					h(NProgress, {
+						type: 'line',
+						status: 'success',
+						percentage: row.success_rate,
+						indicatorPlacement: 'inside',
+					}),
+				),
+		},
+		// {
+		// 	title: ' ',
+		// 	key: 'actions',
+		// 	render: (row) =>
+		// 		h('div', { class: 'flex items-center gap-3 text-gray-400' }, [
+		// 			h(Play, { class: 'w-4 cursor-pointer' }),
+		// 			h(
+		// 				NDropdown,
+		// 				{
+		// 					trigger: 'hover',
+		// 					options,
+		// 					onSelect: () => goToEditWorkflow(row.workflowId),
+		// 				},
+		// 				{
+		// 					default: () => h(EllipsisVertical, { class: 'w-4 cursor-pointer' }),
+		// 				},
+		// 			),
+		// 		]),
+		// },
+	];
+}
 
 const sortByRole = (users = []) => {
 	return users.sort(
@@ -306,6 +442,7 @@ onMounted(async () => {
 	try {
 		fetchProjectDetails();
 		fetchAllUsers();
+		fetchAllAgents();
 	} catch (e) {
 		console.error('Failed to load initial api data', e);
 	}
@@ -344,6 +481,7 @@ function handleConfirm(row) {
 const fetchProjectDetails = async () => {
 	try {
 		const apiResult = await albertsonsRestApiRequest('GET', `/v1/projects/${projectId}`);
+		console.log('>>>', apiResult);
 		if (apiResult.length > 0) {
 			project.value = apiResult[0];
 		}
@@ -355,9 +493,21 @@ const fetchProjectDetails = async () => {
 const fetchAllUsers = async () => {
 	try {
 		const apiResult = await albertsonsRestApiRequest('GET', `/v1/user-metadata/all`);
-		console.log('>>>apiResult', apiResult);
 		if (apiResult.length > 0) {
 			users.value = apiResult;
+		}
+	} catch (e) {
+		console.error('Failed to load initial api data', e);
+	}
+};
+
+const fetchAllAgents = async () => {
+	try {
+		const apiResult = await albertsonsRestApiRequest('POST', `/v1/my-agents/all`, {
+			ownerId: usersStore.currentUser.id,
+		});
+		if (apiResult.length > 0) {
+			agents.value = apiResult;
 		}
 	} catch (e) {
 		console.error('Failed to load initial api data', e);
@@ -390,6 +540,38 @@ const onAddMember = async () => {
 		toast.showMessage({
 			title: `Project`,
 			message: e.message || 'Failed to add member.',
+			type: 'error',
+		});
+	} finally {
+		modalSubmitLoading.value = false;
+	}
+};
+
+const onAddAgent = async () => {
+	try {
+		modalSubmitLoading.value = true;
+		const apiResult = await albertsonsRestApiRequest(
+			'POST',
+			`/v1/projects/${projectId}/add-agents`,
+			formValue2.value,
+		);
+		if (apiResult) {
+			showAddAgentModal.value = false;
+			formValue.value = {
+				agentIds: [],
+			};
+			toast.showMessage({
+				title: `Project`,
+				message: 'Agents added successfully.',
+				type: 'success',
+			});
+			fetchProjectDetails();
+		}
+	} catch (e) {
+		console.error('Failed to create project.', e.message, e);
+		toast.showMessage({
+			title: `Project`,
+			message: e.message || 'Failed to add agent.',
 			type: 'error',
 		});
 	} finally {
