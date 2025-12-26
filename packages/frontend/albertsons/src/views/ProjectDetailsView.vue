@@ -173,11 +173,14 @@ import {
 	Settings,
 	ClockCheck,
 	Pause,
+	EllipsisVertical,
+	Edit,
 } from 'lucide-vue-next';
 import { PROJECT_STATUS } from '@src/utils/constants';
 import { useToast } from '@/app/composables/useToast';
 import { albertsonsRestApiRequest } from '@src/utils/albertsonsRestApiRequest';
 import { PROJECT_ROLE } from '@src/utils/constants';
+import { runWorkflow } from '@src/utils/runWorkflow';
 
 const router = useRouter();
 const route = useRoute();
@@ -219,9 +222,10 @@ const availableUsersToAddAsMember = computed(() => {
 			value: user?.ownerId,
 		}));
 });
+
 const availableAgentsToAddInProject = computed(() => {
 	return agents.value
-		.filter((agent) => !project.value?.agents?.some((pagent) => pagent.id === agent.id))
+		.filter((agent) => !project.value?.agents?.some((pagent) => pagent.id === agent.workflowId))
 		.map((agent) => ({
 			label: agent.workflow?.name,
 			value: agent.workflow?.id,
@@ -302,6 +306,48 @@ function createColumns() {
 	];
 }
 const tableHeader = (text) => h('span', { class: 'text-secondary' }, text);
+const agentOptions = [
+	{
+		label: 'Remove All',
+		key: 'remove_all',
+		disabled: true,
+	},
+	{
+		label: 'Remove Agent',
+		key: 'remove_agent',
+	},
+];
+
+const handleAgentsAction = async (key, row) => {
+	try {
+		switch (key) {
+			case 'remove_agent':
+				handleAgentRemoveConfirm(row);
+				break;
+			case 'remove_all':
+				break;
+			default:
+				console.error(`Unknown action key for agents: ${key}`);
+		}
+	} catch (e) {
+		console.error('handle action failed for agents', e);
+	}
+};
+
+function handleAgentRemoveConfirm(row) {
+	dialog.error({
+		title: 'Removing Agent',
+		content: 'Are you sure ?',
+		positiveText: 'Delete',
+		negativeText: 'Cancel',
+		draggable: true,
+		onPositiveClick: () => {
+			onRemoveAgent(row.id);
+		},
+		onNegativeClick: () => {},
+	});
+}
+
 function createAgentsColumns() {
 	return [
 		{
@@ -346,14 +392,12 @@ function createAgentsColumns() {
 					?.pop()
 					?.replace(/^\w/, (c) => c.toUpperCase()) || '-',
 		},
-		// {
-		// 	title: () => tableHeader('LAST RUN'),
-		// 	key: 'last_execution',
-		// 	render: (row) =>
-		// 		row?.last_execution?.startedAt
-		// 			? dayjs(row.last_execution.startedAt).format('MMM DD, hh:mm A')
-		// 			: '-',
-		// },
+		{
+			title: () => tableHeader('LAST RUN'),
+			key: 'last_execution',
+			render: (row) =>
+				row?.lastRun?.startedAt ? dayjs(row?.lastRun?.startedAt).format('MMM DD, hh:mm A') : '-',
+		},
 		{
 			title: () => tableHeader('SUCCESS RATE'),
 			key: 'success_rate',
@@ -364,30 +408,33 @@ function createAgentsColumns() {
 					h(NProgress, {
 						type: 'line',
 						status: 'success',
-						percentage: row.success_rate,
+						percentage: row?.successRate,
 						indicatorPlacement: 'inside',
 					}),
 				),
 		},
-		// {
-		// 	title: ' ',
-		// 	key: 'actions',
-		// 	render: (row) =>
-		// 		h('div', { class: 'flex items-center gap-3 text-gray-400' }, [
-		// 			h(Play, { class: 'w-4 cursor-pointer' }),
-		// 			h(
-		// 				NDropdown,
-		// 				{
-		// 					trigger: 'hover',
-		// 					options,
-		// 					onSelect: () => goToEditWorkflow(row.workflowId),
-		// 				},
-		// 				{
-		// 					default: () => h(EllipsisVertical, { class: 'w-4 cursor-pointer' }),
-		// 				},
-		// 			),
-		// 		]),
-		// },
+		{
+			title: ' ',
+			key: 'actions',
+			render: (row) =>
+				h('div', { class: 'flex items-center gap-3 text-gray-400' }, [
+					h(Play, {
+						class: 'w-4 cursor-pointer',
+						onClick: () => runWorkflow(router, row),
+					}),
+					h(
+						NDropdown,
+						{
+							trigger: 'hover',
+							options: agentOptions,
+							onSelect: (key) => handleAgentsAction(key, row),
+						},
+						{
+							default: () => h(EllipsisVertical, { class: 'w-4 cursor-pointer' }),
+						},
+					),
+				]),
+		},
 	];
 }
 
@@ -557,7 +604,7 @@ const onAddAgent = async () => {
 		);
 		if (apiResult) {
 			showAddAgentModal.value = false;
-			formValue.value = {
+			formValue2.value = {
 				agentIds: [],
 			};
 			toast.showMessage({
@@ -576,6 +623,30 @@ const onAddAgent = async () => {
 		});
 	} finally {
 		modalSubmitLoading.value = false;
+	}
+};
+
+const onRemoveAgent = async (agentId) => {
+	try {
+		const apiResult = await albertsonsRestApiRequest(
+			'DELETE',
+			`/v1/projects/remove-agent/${projectId}/${agentId}`,
+		);
+		if (apiResult) {
+			toast.showMessage({
+				title: `Project`,
+				message: 'Agent removed successfully.',
+				type: 'success',
+			});
+			fetchProjectDetails();
+		}
+	} catch (e) {
+		console.error('Failed.', e.message, e);
+		toast.showMessage({
+			title: `Project`,
+			message: e.message || 'Failed to remove agent.',
+			type: 'error',
+		});
 	}
 };
 
