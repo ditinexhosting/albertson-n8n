@@ -26,7 +26,7 @@ import { setLanguage } from '@n8n/i18n';
 import { useRootStore } from '@n8n/stores/useRootStore';
 import axios from 'axios';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useStyles } from '@/app/composables/useStyles';
 import { useExposeCssVar } from '@/app/composables/useExposeCssVar';
 import { useFloatingUiOffsets } from '@/app/composables/useFloatingUiOffsets';
@@ -38,6 +38,7 @@ import { NConfigProvider, GlobalThemeOverrides } from 'naive-ui';
 import { NThemeEditor, NDialogProvider } from 'naive-ui';
 
 const route = useRoute();
+const router = useRouter();
 const rootStore = useRootStore();
 const nodeTypesStore = useNodeTypesStore();
 const assistantStore = useAssistantStore();
