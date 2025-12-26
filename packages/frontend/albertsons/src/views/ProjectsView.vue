@@ -50,12 +50,12 @@
 					<n-grid x-gap="2" :cols="3">
 						<n-gi>
 							<div class="text-xs flex items-center justify-start! gap-2">
-								<GitBranch :size="14" />12 Agents
+								<GitBranch :size="14" />{{ project?.agents }} Agents
 							</div>
 						</n-gi>
 						<n-gi>
 							<div class="text-xs flex items-center justify-start! gap-2">
-								<Play :size="14" /> 4521 Runs
+								<Play :size="14" /> {{ project?.executions }} Runs
 							</div>
 						</n-gi>
 						<n-gi>
