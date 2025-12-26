@@ -156,7 +156,7 @@ watch(() => route.path, updateActiveState, { immediate: true });
 					<div v-if="!isCollapsed" class="sidebar-user-info">
 						<div class="sidebar-user-name">{{ currentUser?.fullName }}</div>
 						<div class="sidebar-user-role">
-							{{ currentUser?.personalizationAnswers?.companyType }}
+							{{ currentUser?.email }}
 						</div>
 					</div>
 
@@ -276,7 +276,6 @@ watch(() => route.path, updateActiveState, { immediate: true });
 	color: var(--color--text);
 	overflow: hidden;
 	text-overflow: ellipsis;
-	text-transform: capitalize;
 }
 
 .sidebar-user-dropdown {

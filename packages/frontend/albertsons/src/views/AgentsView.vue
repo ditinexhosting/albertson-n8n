@@ -1,12 +1,16 @@
 <script setup>
-import { computed, onMounted, ref, h } from 'vue';
+import { computed, onMounted, ref, h, toRaw } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserAgentMappingsStore } from '@src/stores/userAgentMappings.store';
 import { NIcon, NButton, NDataTable, NDropdown, NProgress, NInput, NGradientText } from 'naive-ui';
 import { Play, EllipsisVertical, Search, ClockCheck, Pause, Edit, Plus } from 'lucide-vue-next';
 import dayjs from 'dayjs';
+import { makeRestApiRequest } from '@n8n/rest-api-client';
+import { useRootStore } from '@n8n/stores/useRootStore';
+import { useToast } from '@/app/composables/useToast';
 
 const router = useRouter();
+const toast = useToast();
 const searchQuery = ref('');
 const userAgentMappingsStore = useUserAgentMappingsStore();
 
@@ -44,6 +48,30 @@ function goToNewWorkflow() {
 
 function goToEditWorkflow(id) {
 	router.push(`/workflow/${id}`);
+}
+
+async function runWorkflow(workflow) {
+	const rootStore = useRootStore();
+
+	const triggerData = {
+		workflowData: toRaw(workflow),
+		triggerToStartFrom: { name: workflow?.nodes?.[0]?.name },
+	};
+
+	const triggerRes = await makeRestApiRequest(
+		rootStore,
+		'POST',
+		`/rest/workflows/${workflow?.id}/run`,
+		triggerData,
+	);
+	if (triggerRes?.executionId) {
+		toast.showMessage({
+			title: `Execution`,
+			message: `Execution trigger with Id: ${triggerRes?.executionId}`,
+			type: 'success',
+		});
+		router.push(`/workflow/${workflow?.id}/executions/${triggerRes?.executionId}`);
+	}
 }
 
 const tableHeader = (text) => h('span', { class: 'text-secondary' }, text);
@@ -126,7 +154,10 @@ function createColumns() {
 			key: 'actions',
 			render: (row) =>
 				h('div', { class: 'flex items-center gap-3 text-gray-400' }, [
-					h(Play, { class: 'w-4 cursor-pointer' }),
+					h(Play, {
+						class: 'w-4 cursor-pointer',
+						onClick: () => runWorkflow(row.workflow),
+					}),
 					h(
 						NDropdown,
 						{
