@@ -19,8 +19,6 @@ export const useUserAgentMappingsStore = defineStore('albertsonsUserAgentMapping
 				ownerId: ownerId,
 			});
 
-			console.log('userAgentMappings/all result', result);
-
 			// If backend returns { status, data }, match that shape
 			if (result) {
 				this.userAgentMappings = result;

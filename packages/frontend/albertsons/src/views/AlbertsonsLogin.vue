@@ -1,86 +1,13 @@
-<template>
-	<div class="auth-page">
-		<!-- Brand on top -->
-		<div class="auth-brand">
-			<img :src="albertsonsLogo" alt="Albertsons" class="auth-logo" />
-			<span class="auth-brand-text">Albertsons AI Agent Space</span>
-		</div>
-
-		<!-- Card -->
-		<div class="auth-card">
-			<h2 class="auth-card-title">
-				{{ isLogin ? 'Sign in' : 'Create account' }}
-			</h2>
-
-			<form @submit.prevent="handleSubmit" class="auth-form">
-				<!-- Email -->
-				<div class="field">
-					<label class="field-label">Email</label>
-					<input v-model="email" type="email" placeholder="you@company.com" class="field-input" />
-				</div>
-
-				<!-- Password -->
-				<div class="field">
-					<label class="field-label">Password</label>
-					<input v-model="password" type="password" placeholder="••••••••" class="field-input" />
-				</div>
-
-				<!-- Confirm password -->
-				<div v-if="!isLogin" class="field">
-					<label class="field-label">Confirm password</label>
-					<input
-						v-model="confirmPassword"
-						type="password"
-						placeholder="••••••••"
-						class="field-input"
-					/>
-				</div>
-
-				<!-- Error -->
-				<p v-if="error" class="error-text">
-					{{ error }}
-				</p>
-
-				<!-- Submit -->
-				<button type="submit" class="primary-button" :disabled="loading">
-					<span v-if="loading">Signing in...</span>
-					<span v-else>{{ isLogin ? 'Sign in' : 'Create account' }}</span>
-				</button>
-			</form>
-
-			<!-- Forgot -->
-			<button v-if="isLogin" class="link-button mt-12" type="button">Forgot my password</button>
-
-			<!-- Divider -->
-			<div class="divider"></div>
-
-			<!-- Toggle -->
-			<div class="toggle-text">
-				<span v-if="isLogin">
-					Don’t have an account?
-					<button type="button" @click="toggleMode" class="link-inline">Create an account</button>
-				</span>
-				<span v-else>
-					Already have an account?
-					<button type="button" @click="toggleMode" class="link-inline">Sign in</button>
-				</span>
-			</div>
-		</div>
-	</div>
-</template>
-
 <script setup>
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import albertsonsLogo from '../assets/albertsons-logo.png';
+import { NButton, NInput } from 'naive-ui';
 
 import { useUsersStore } from '@/features/settings/users/users.store';
-import { useSettingsStore } from '@/app/stores/settings.store';
-import { useUserSessionStore } from '../stores/userSession.js';
 
 const router = useRouter();
 const usersStore = useUsersStore();
-const settingsStore = useSettingsStore();
 
 const isLogin = ref(true);
 const email = ref('');
@@ -88,7 +15,6 @@ const password = ref('');
 const confirmPassword = ref('');
 const error = ref('');
 const loading = ref(false);
-const sessionStore = useUserSessionStore();
 
 const toggleMode = () => {
 	isLogin.value = !isLogin.value;
@@ -123,10 +49,6 @@ const handleSubmit = async () => {
 
 		const result = await usersStore.loginWithCreds(payload);
 
-		console.log('LOGIN SUCCESS →', result);
-
-		await sessionStore.loadUser();
-
 		loading.value = false;
 
 		router.push('/dashboard');
@@ -137,6 +59,94 @@ const handleSubmit = async () => {
 	}
 };
 </script>
+
+<template>
+	<div class="auth-page">
+		<!-- Card -->
+		<div class="auth-card">
+			<div class="flex items-center justify-center gap-1.5">
+				<img :src="albertsonsLogo" alt="Albertsons" class="h-8 w-8 object-contain shrink-0" />
+				<div class="text-base font-bold text-primary">Albertsons</div>
+			</div>
+			<div class="my-4! h-px! bg-border-primary!" />
+
+			<h2 class="text-xl! font-semibold! text-primary! pb-4!">
+				{{ isLogin ? 'Sign in' : 'Create account' }}
+			</h2>
+
+			<form @submit.prevent="handleSubmit" class="auth-form">
+				<!-- Email -->
+				<div class="field">
+					<label class="field-label">Email</label>
+					<n-input
+						v-model:value="email"
+						type="email"
+						size="large"
+						placeholder="you@example.com"
+						class="field-input"
+					/>
+				</div>
+
+				<!-- Password -->
+				<div class="field">
+					<label class="field-label">Password</label>
+					<n-input
+						v-model:value="password"
+						type="password"
+						size="large"
+						placeholder="••••••••"
+						class="field-input"
+					/>
+				</div>
+
+				<!-- Confirm password -->
+				<div v-if="!isLogin" class="field">
+					<label class="field-label">Confirm password</label>
+					<n-input
+						v-model:value="confirmPassword"
+						type="password"
+						size="large"
+						placeholder="••••••••"
+						class="field-input"
+					/>
+				</div>
+
+				<!-- Error -->
+				<p v-if="error" class="p-0.5! text-sm! text-warning-orange text-center">
+					{{ error }}
+				</p>
+
+				<n-button type="primary" size="large" attr-type="submit" class="rounded-sm! my-2!">
+					<span v-if="loading">Signing in...</span>
+					<span v-else>{{ isLogin ? 'Sign in' : 'Create account' }}</span>
+				</n-button>
+			</form>
+
+			<!-- Forgot -->
+			<button
+				v-if="isLogin"
+				class="mt-3 font-normal! bg-transparent border-0 text-sm! text-primary cursor-pointer"
+				type="button"
+			>
+				Forgot my password
+			</button>
+
+			<div class="my-4! h-px! bg-border-primary!" />
+
+			<!-- Toggle -->
+			<div class="text-sm text-secondary">
+				<span v-if="isLogin">
+					Don’t have an account?
+					<button type="button" @click="toggleMode" class="link-inline">Create an account</button>
+				</span>
+				<span v-else>
+					Already have an account?
+					<button type="button" @click="toggleMode" class="link-inline">Sign in</button>
+				</span>
+			</div>
+		</div>
+	</div>
+</template>
 
 <style scoped>
 .auth-page {
@@ -149,41 +159,16 @@ const handleSubmit = async () => {
 	justify-content: center;
 }
 
-/* top logo + text */
-.auth-brand {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	margin-bottom: 32px;
-}
-
-.auth-logo {
-	height: 32px;
-}
-
-.auth-brand-text {
-	font-size: 18px;
-	font-weight: 600;
-	color: var(--color-primary);
-}
-
 /* card */
 .auth-card {
 	width: 100%;
 	max-width: 380px;
 	background: var(--color-background-base);
 	border-radius: 16px;
-	padding: 28px 32px 24px;
+	padding: 25px 35px;
 	border: 1px solid var(--color-border-base);
 	box-shadow: 0 18px 45px rgba(0, 0, 0, 0.12);
 	text-align: center;
-}
-
-.auth-card-title {
-	font-size: 20px;
-	font-weight: 600;
-	color: var(--color-text-primary);
-	margin-bottom: 24px;
 }
 
 /* form fields */
@@ -198,71 +183,19 @@ const handleSubmit = async () => {
 	display: flex;
 	flex-direction: column;
 	gap: 4px;
+	margin-bottom: 8px;
 }
 
 .field-label {
-	font-size: 13px;
+	font-size: 14px;
 	color: var(--color-text-secondary);
+	padding-bottom: 6px;
+	font-weight: 600;
 }
 
 .field-input {
-	padding: 9px 11px;
 	border-radius: 8px;
-	border: 1px solid var(--color-border-base);
 	font-size: 14px;
-	background: var(--color-background-secondary);
-	color: var(--color-text-primary);
-}
-
-.field-input:focus {
-	outline: none;
-	border-color: var(--color-primary);
-	box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.15);
-}
-
-/* error text */
-.error-text {
-	font-size: 13px;
-	color: var(--color-danger);
-	text-align: center;
-}
-
-/* primary button */
-.primary-button {
-	margin-top: 6px;
-	width: 100%;
-	padding: 9px 0;
-	border-radius: 999px;
-	border: none;
-	background: var(--color-primary);
-	color: var(--color-background-base);
-	font-size: 14px;
-	font-weight: 500;
-	cursor: pointer;
-}
-
-.primary-button:hover {
-	filter: brightness(0.95);
-}
-
-/* links / footer */
-.link-button {
-	margin-top: 10px;
-	background: transparent;
-	border: none;
-	font-size: 13px;
-	color: var(--color-primary);
-	cursor: pointer;
-}
-
-.divider {
-	margin: 18px 0 12px;
-	border-top: 1px solid var(--color-border-base);
-}
-
-.toggle-text {
-	font-size: 13px;
-	color: var(--color-text-secondary);
 }
 
 .link-inline {
@@ -270,7 +203,7 @@ const handleSubmit = async () => {
 	border: none;
 	color: var(--color-primary);
 	font-weight: 500;
-	margin-left: 4px;
 	cursor: pointer;
+	text-decoration: underline;
 }
 </style>

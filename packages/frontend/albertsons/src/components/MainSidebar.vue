@@ -19,6 +19,8 @@ import {
 	CircleUserRound,
 	LogOut,
 } from 'lucide-vue-next';
+import { useUsersStore } from '@/features/settings/users/users.store';
+const { currentUser, logout } = useUsersStore();
 
 const router = useRouter();
 const route = useRoute();
@@ -37,6 +39,7 @@ const options = [
 		label: 'User Profile',
 		key: 'profile',
 		icon: renderIcon(CircleUserRound),
+		disabled: true,
 	},
 	{
 		label: 'Logout',
@@ -73,6 +76,17 @@ function toggleSidebar() {
 	isCollapsed.value = !isCollapsed.value;
 }
 
+async function handleSelect(key) {
+	if (key === 'logout') {
+		try {
+			await logout();
+			router.push('/login');
+		} catch (err) {
+			console.error('Error while logging out ->', err);
+		}
+	}
+}
+
 watch(() => route.path, updateActiveState, { immediate: true });
 </script>
 
@@ -103,7 +117,7 @@ watch(() => route.path, updateActiveState, { immediate: true });
 					@click="navigate(item)"
 					:title="isCollapsed ? item.label : ''"
 				>
-					<NIcon>
+					<NIcon :size="18">
 						<component :is="item.icon" />
 					</NIcon>
 
@@ -119,13 +133,31 @@ watch(() => route.path, updateActiveState, { immediate: true });
 
 		<!-- Footer with User Profile -->
 		<div class="sidebar-footer">
-			<n-dropdown trigger="click" placement="right-end" teleport="body" :options="options">
+			<n-dropdown
+				trigger="click"
+				placement="right-end"
+				size="large"
+				teleport="body"
+				:options="options"
+				@select="handleSelect"
+				class="p-2! rounded-md!"
+			>
 				<div class="sidebar-user cursor-pointer">
-					<div class="sidebar-user-avatar">SJ</div>
+					<div class="sidebar-user-avatar">
+						{{
+							currentUser?.fullName
+								?.split(' ')
+								.filter((_, i, arr) => i === 0 || i === arr.length - 1)
+								.map((name) => name[0])
+								.join('')
+						}}
+					</div>
 
 					<div v-if="!isCollapsed" class="sidebar-user-info">
-						<div class="sidebar-user-name">Sarah Johnson</div>
-						<div class="sidebar-user-role">Engineering</div>
+						<div class="sidebar-user-name">{{ currentUser?.fullName }}</div>
+						<div class="sidebar-user-role">
+							{{ currentUser?.email }}
+						</div>
 					</div>
 
 					<NIcon>

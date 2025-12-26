@@ -23,7 +23,7 @@ import { useCalloutHelpers } from '@/app/composables/useCalloutHelpers';
 import { useRecentResources } from '@/features/shared/commandBar/composables/useRecentResources';
 import { usePostHog } from '@/app/stores/posthog.store';
 import { TEMPLATE_SETUP_EXPERIENCE } from '@/app/constants/experiments';
-
+import { useUsersStore } from '@/features/settings/users/users.store';
 import { ROUTERS } from '@src/utils/constants.ts';
 
 /** custom components */
@@ -1092,6 +1092,18 @@ const router = createRouter({
 router.beforeEach(async (to: RouteLocationNormalized, from, next) => {
 	try {
 		await initializeCore();
+		const usersStore = useUsersStore();
+
+		// wait for auth check
+		if (!usersStore.initialized) {
+			await usersStore.initialize();
+		}
+
+		// redirect unauthenticated users
+		if (!usersStore.currentUser && to.path !== '/login') {
+			return next({ path: '/login' });
+		}
+
 		await initializeAuthenticatedFeatures(undefined, to.name as string);
 
 		const settingsStore = useSettingsStore();
