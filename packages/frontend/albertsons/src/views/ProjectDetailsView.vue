@@ -530,11 +530,11 @@ function handleConfirm(row) {
 const fetchProjectDetails = async () => {
 	try {
 		const apiResult = await albertsonsRestApiRequest('GET', `/v1/projects/${projectId}`);
-		console.log('>>>', apiResult);
 		if (apiResult.length > 0) {
 			project.value = apiResult[0];
 		}
 	} catch (e) {
+		router.push('/projects');
 		console.error('Failed to load initial api data', e);
 	}
 };

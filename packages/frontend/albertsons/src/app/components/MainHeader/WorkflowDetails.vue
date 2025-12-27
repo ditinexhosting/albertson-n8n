@@ -27,7 +27,7 @@ import { useNpsSurveyStore } from '@/app/stores/npsSurvey.store';
 import { ProjectTypes } from '@/features/collaboration/projects/projects.types';
 import type { PathItem } from '@n8n/design-system/components/N8nBreadcrumbs/Breadcrumbs.vue';
 import WorkflowHeaderActions from '@/app/components/MainHeader/WorkflowHeaderActions.vue';
-import WorkflowHeaderDraftPublishActions from '@src/app/components/MainHeader/WorkflowHeaderDraftPublishActions.vue';
+import WorkflowHeaderDraftPublishActions from '@/app/components/MainHeader/WorkflowHeaderDraftPublishActions.vue';
 import { useI18n } from '@n8n/i18n';
 import { getResourcePermissions } from '@n8n/permissions';
 import { createEventBus } from '@n8n/utils/event-bus';
@@ -41,7 +41,7 @@ import {
 	watch,
 } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-
+import { N8nButton, N8nIcon, N8nTooltip } from '@n8n/design-system';
 import { N8nBadge, N8nInlineTextEdit } from '@n8n/design-system';
 import { useSettingsStore } from '@/app/stores/settings.store';
 import { useUIStore } from '@/app/stores/ui.store';
@@ -49,6 +49,7 @@ import { useWorkflowsStore } from '@/app/stores/workflows.store';
 import { getWorkflowId } from '@/app/components/MainHeader/utils';
 import { useUsersStore } from '@/features/settings/users/users.store';
 import { albertsonsRestApiRequest } from '@src/utils/albertsonsRestApiRequest';
+import PublishAgentButton from '@src/views/PublishAgentButton.vue';
 const WORKFLOW_NAME_BP_TO_WIDTH: { [key: string]: number } = {
 	XS: 150,
 	SM: 200,
@@ -529,8 +530,8 @@ onBeforeUnmount(() => {
 		>
 			<template #default="{ bp }">
 				<FolderBreadcrumbs
-					:current-folder="currentFolderForBreadcrumbs"
-					:current-folder-as-link="true"
+					:current-folder="null"
+					:current-folder-as-link="false"
 					@item-selected="onBreadcrumbsItemSelected"
 				>
 					<template #append>
@@ -609,7 +610,8 @@ onBeforeUnmount(() => {
 		</span>
 
 		<PushConnectionTracker class="actions">
-			<WorkflowProductionChecklist v-if="!isNewWorkflow" :workflow="workflowsStore.workflow" />
+			<WorkflowProductionChecklist v-if="false" :workflow="workflowsStore.workflow" />
+			<PublishAgentButton />
 			<WorkflowHeaderDraftPublishActions
 				v-if="IS_DRAFT_PUBLISH_ENABLED"
 				:id="id"

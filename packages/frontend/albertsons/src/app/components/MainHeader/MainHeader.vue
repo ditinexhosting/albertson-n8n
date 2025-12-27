@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import TabBar from '@src/app/components/MainHeader/TabBar.vue';
+import TabBar from '@/app/components/MainHeader/TabBar.vue';
 import WorkflowDetails from '@src/app/components/MainHeader/WorkflowDetails.vue';
 import { useI18n } from '@n8n/i18n';
 import { usePushConnection } from '@/app/composables/usePushConnection';
