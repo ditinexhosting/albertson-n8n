@@ -389,7 +389,7 @@ defineExpose({
 					</div> -->
 					<span :class="$style.betaTag">AI Builder</span>
 				</div>
-				<slot name="header" />
+				<!-- <slot name="header" /> -->
 			</div>
 			<div :class="$style.back" data-test-id="close-chat-button" @click="onClose">
 				<N8nIcon icon="arrow-right" color="text-base" />
