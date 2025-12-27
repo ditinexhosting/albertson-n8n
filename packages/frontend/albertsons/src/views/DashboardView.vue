@@ -297,18 +297,30 @@ import {
 import { useWorkflowsStore } from '@/app/stores/workflows.store';
 import { useTemplatesStore } from '../stores/templates.store';
 import { useUserAgentMappingsStore } from '@src/stores/userAgentMappings.store';
+import { albertsonsRestApiRequest } from '@src/utils/albertsonsRestApiRequest';
 
 const router = useRouter();
 const workflowsStore = useWorkflowsStore();
 const templatesStore = useTemplatesStore();
 const userAgentMappingsStore = useUserAgentMappingsStore();
 
-/* n8n bindings – unchanged */
+/* n8n bindings */
 const workflows = computed(() => workflowsStore.allWorkflows);
 const loading = computed(() => workflowsStore.isLoading);
 
 async function loadWorkflows() {
-	await workflowsStore.fetchWorkflows();
+	try {
+		// Check if the method exists before calling
+		if (typeof workflowsStore.fetchWorkflows === 'function') {
+			await workflowsStore.fetchWorkflows();
+		} else if (typeof workflowsStore.fetchAllWorkflows === 'function') {
+			await workflowsStore.fetchAllWorkflows();
+		} else {
+			console.warn('No fetchWorkflows method found in workflowsStore');
+		}
+	} catch (e) {
+		console.error('Failed to load workflows:', e);
+	}
 }
 
 function goToNewWorkflow() {
@@ -367,8 +379,14 @@ const activities = computed(() => {
 		});
 });
 
-/* LIVE METRICS */
+/* LIVE METRICS WITH REAL EXECUTION DATA */
 const metricsLoading = ref(false);
+const executionStats = ref({
+	success: 0,
+	failure: 0,
+	total: 0,
+	successRate: 0,
+});
 
 const metrics = ref({
 	systemHealth: 0,
@@ -382,26 +400,98 @@ const metrics = ref({
 	activeAgentsDelta: 0,
 });
 
+// Fetch execution statistics from your API using the utility function
+async function loadExecutionStats() {
+	try {
+		console.log('📊 Fetching execution stats...');
+
+		// Fetch success executions
+		const successData = await albertsonsRestApiRequest(
+			'GET',
+			'/v1/executions/list?status=success&limit=1&offset=0',
+		);
+		console.log('✅ Success data:', successData);
+		const successCount = successData?.total || 0; // Changed from successData.data?.total
+
+		// Fetch error/failure executions
+		const failureData = await albertsonsRestApiRequest(
+			'GET',
+			'/v1/executions/list?status=error&limit=1&offset=0',
+		);
+		console.log('❌ Failure data:', failureData);
+		const failureCount = failureData?.total || 0; // Changed from failureData.data?.total
+
+		// Calculate totals
+		const total = successCount + failureCount;
+		const successRate = total > 0 ? (successCount / total) * 100 : 0;
+
+		executionStats.value = {
+			success: successCount,
+			failure: failureCount,
+			total,
+			successRate,
+		};
+
+		console.log('📈 Final Execution Stats:', executionStats.value);
+		return executionStats.value;
+	} catch (e) {
+		console.error('❌ Failed to load execution stats:', e);
+		return null;
+	}
+}
+
+// Load metrics using only execution data (no agent-metrics endpoint)
 async function loadMetrics() {
 	try {
 		metricsLoading.value = true;
 
-		const res = await fetch('/rest/agent-metrics');
-		const data = await res.json();
+		// Load execution stats from API
+		const execStats = await loadExecutionStats();
 
-		metrics.value = {
-			systemHealth: data.systemHealth ?? 92,
-			executions7d: data.executions7d ?? 10816,
-			executionsDelta: data.executionsDelta ?? 12.3,
-			successRate: data.successRate ?? 97.4,
-			successDelta: data.successDelta ?? 2.1,
-			failures7d: data.failures7d ?? 254,
-			failuresDelta: data.failuresDelta ?? -5.2,
-			activeAgents: data.activeAgents ?? 7,
-			activeAgentsDelta: data.activeAgentsDelta ?? 16.7,
-		};
+		if (execStats) {
+			// Use real execution data
+			metrics.value = {
+				systemHealth: 92, // Default value
+				executions7d: execStats.total,
+				executionsDelta: 0, // We don't have historical data yet
+				successRate: execStats.successRate,
+				successDelta: 0, // We don't have historical data yet
+				failures7d: execStats.failure,
+				failuresDelta: 0, // We don't have historical data yet
+				activeAgents: workflows.value?.length ?? 0,
+				activeAgentsDelta: 0,
+			};
+		} else {
+			// Fallback to default values if API fails
+			metrics.value = {
+				systemHealth: 92,
+				executions7d: 0,
+				executionsDelta: 0,
+				successRate: 0,
+				successDelta: 0,
+				failures7d: 0,
+				failuresDelta: 0,
+				activeAgents: workflows.value?.length ?? 0,
+				activeAgentsDelta: 0,
+			};
+		}
+
+		console.log('📊 Final Metrics:', metrics.value);
 	} catch (e) {
 		console.error('Failed to load metrics', e);
+
+		// Set default values on error
+		metrics.value = {
+			systemHealth: 92,
+			executions7d: 0,
+			executionsDelta: 0,
+			successRate: 0,
+			successDelta: 0,
+			failures7d: 0,
+			failuresDelta: 0,
+			activeAgents: workflows.value?.length ?? 0,
+			activeAgentsDelta: 0,
+		};
 	} finally {
 		metricsLoading.value = false;
 	}
@@ -431,7 +521,7 @@ const metricCards = computed(() => [
 		label: 'FAILURES (7D)',
 		value: metrics.value.failures7d.toLocaleString(),
 		delta: (metrics.value.failuresDelta >= 0 ? '+' : '') + metrics.value.failuresDelta + '%',
-		positive: metrics.value.failuresDelta < 0 ? false : true,
+		positive: metrics.value.failuresDelta < 0,
 		colorClass: 'bar-red',
 		bars: [70, 50, 90, 60, 40, 55, 45],
 	},
@@ -449,7 +539,6 @@ const metricCards = computed(() => [
 
 /* MVP AGENTS */
 const agentsLoading = ref(false);
-
 const rawAgents = computed(() => userAgentMappingsStore.getUserAgentMappings());
 
 const normalizedAgents = computed(() =>
