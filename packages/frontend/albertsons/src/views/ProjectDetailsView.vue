@@ -416,8 +416,9 @@ function createAgentsColumns() {
 		{
 			title: ' ',
 			key: 'actions',
-			render: (row) =>
-				h('div', { class: 'flex items-center gap-3 text-gray-400' }, [
+			render: (row) => {
+				if (!canManageProject.value) return '';
+				return h('div', { class: 'flex items-center gap-3 text-gray-400' }, [
 					h(Play, {
 						class: 'w-4 cursor-pointer',
 						onClick: () => runWorkflow(router, row),
@@ -433,7 +434,8 @@ function createAgentsColumns() {
 							default: () => h(EllipsisVertical, { class: 'w-4 cursor-pointer' }),
 						},
 					),
-				]),
+				]);
+			},
 		},
 	];
 }
