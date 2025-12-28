@@ -298,6 +298,9 @@ import { useWorkflowsStore } from '@/app/stores/workflows.store';
 import { useTemplatesStore } from '../stores/templates.store';
 import { useUserAgentMappingsStore } from '@src/stores/userAgentMappings.store';
 import { albertsonsRestApiRequest } from '@src/utils/albertsonsRestApiRequest';
+import { useUsersStore } from '@/features/settings/users/users.store'; // <-- add this
+
+const usersStore = useUsersStore();
 
 const router = useRouter();
 const workflowsStore = useWorkflowsStore();
@@ -405,21 +408,40 @@ async function loadExecutionStats() {
 	try {
 		console.log('📊 Fetching execution stats...');
 
+		// Get the current logged-in user id
+		const ownerId = usersStore.currentUser?.id;
+
+		if (!ownerId) {
+			console.warn('⚠️ No owner ID found, cannot fetch execution stats');
+			return null;
+		}
+
+		// Build query parameters
+		const successParams = new URLSearchParams({
+			ownerId: ownerId,
+			status: 'success',
+		});
+
+		const failureParams = new URLSearchParams({
+			ownerId: ownerId,
+			status: 'error',
+		});
+
 		// Fetch success executions
 		const successData = await albertsonsRestApiRequest(
 			'GET',
-			'/v1/executions/list?status=success&limit=1&offset=0',
+			`/v1/executions/list?${successParams.toString()}`,
 		);
 		console.log('✅ Success data:', successData);
-		const successCount = successData?.total || 0; // Changed from successData.data?.total
+		const successCount = successData?.total || 0;
 
 		// Fetch error/failure executions
 		const failureData = await albertsonsRestApiRequest(
 			'GET',
-			'/v1/executions/list?status=error&limit=1&offset=0',
+			`/v1/executions/list?${failureParams.toString()}`,
 		);
 		console.log('❌ Failure data:', failureData);
-		const failureCount = failureData?.total || 0; // Changed from failureData.data?.total
+		const failureCount = failureData?.total || 0;
 
 		// Calculate totals
 		const total = successCount + failureCount;
