@@ -62,16 +62,13 @@ function createColumns() {
 		},
 		{
 			title: () => tableHeader('PROJECT'),
-			key: 'workflow.project',
-			render: () => {
-				return 'Sample Project';
-			},
+			key: 'project.name',
 		},
 		{
 			title: () => tableHeader('STATUS'),
 			key: 'workflow.active',
 			render: (row) => {
-				const isActive = !row?.workflow?.active;
+				const isActive = row?.workflow?.active;
 
 				return h(
 					'span',

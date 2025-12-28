@@ -22,6 +22,8 @@ interface ExecutionRow {
 	id: string;
 	workflowId: string;
 	workflowName: string | null;
+	projectId: string;
+	projectName: string | null;
 	status: string;
 	mode?: string;
 	startedAt: string | null;
@@ -95,7 +97,7 @@ const columns: DataTableColumns<ExecutionRow> = [
 		title: 'PROJECT',
 		key: 'project',
 		className: 'col-project',
-		render: () => '–',
+		render: (row) => row.projectName ?? '-',
 	},
 	{
 		title: 'TRIGGERED BY',
@@ -151,6 +153,8 @@ async function fetchExecutions() {
 			id: row.id,
 			workflowId: row.workflowId,
 			workflowName: row.workflowName,
+			projectId: row.projectId,
+			projectName: row.projectName,
 			status: row.status,
 			mode: row.mode,
 			startedAt: row.startedAt,
