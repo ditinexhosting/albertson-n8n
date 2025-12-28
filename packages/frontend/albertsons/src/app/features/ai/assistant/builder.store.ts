@@ -24,6 +24,7 @@ import {
 	useBuilderTodos,
 	type TodosTrackingPayload,
 } from '@/features/ai/assistant/composables/useBuilderTodos';
+import { useUIStore } from '@/app/stores/ui.store';
 import { useRootStore } from '@n8n/stores/useRootStore';
 import type { WorkflowDataUpdate } from '@n8n/rest-api-client/api/workflows';
 import pick from 'lodash/pick';
@@ -100,6 +101,7 @@ export const useBuilderStore = defineStore('albertsons_' + STORES.BUILDER, () =>
 		success: 0,
 		error: 0,
 	});
+	const uiStore = useUIStore();
 
 	/**
 	 * NEW CORE STATES STARTS HERE
@@ -931,79 +933,32 @@ export const useBuilderStore = defineStore('albertsons_' + STORES.BUILDER, () =>
 
 		streamingAbortController.value = new AbortController();
 		try {
-			// TODO : Our custom API call here
+			const message_history = chatMessages.value
+				.filter((message: any) => message.role === 'user' || message.role === 'assistant')
+				.slice(-5);
 			const conversation = {
-				messages: [{ role: payload.role, content: payload.text }],
+				messages: message_history,
 				id: userMessageId,
+				workflow: {
+					id: workflowsStore.workflow?.id,
+					name: workflowsStore.workflow?.name,
+					nodes: workflowsStore.workflow?.nodes ?? [],
+					connections: workflowsStore.workflow?.connections ?? [],
+					//usedCredentials: workflowsStore.workflow?.usedCredentials ?? [],
+				},
 			};
+
 			console.log('>>>conversation', conversation);
 			let apiResponse = await aiBuilderChatApi(conversation);
-			console.log('>>>>api response', apiResponse);
-			// Dummy response below
-			//await sleep(5000);
-
-			// let apiResponse = {
-			// 	id: generateMessageId(),
-			// 	message:
-			// 		'Hello. How can I assist you today? I am here to help you create an agent and build a workflow. Please let me know what kind of agent you are trying to create?',
-			// 	agentData: {
-			// 		nodes: [],
-			// 		connections: [],
-			// 	},
-			// };
-			// if (text.toLocaleLowerCase() !== 'hi') {
-			// 	apiResponse = {
-			// 		id: generateMessageId(),
-			// 		message:
-			// 			'The node has been created. The workflow has been updated with new nodes and connections.',
-			// 		agentData: {
-			// 			nodes: [
-			// 				{
-			// 					parameters: {},
-			// 					type: 'n8n-nodes-base.manualTrigger',
-			// 					typeVersion: 1,
-			// 					position: [0, 0],
-			// 					id: 'ed155b4e-21ef-40fa-b6bd-f982dde54ed7',
-			// 					name: 'When clicking ‘Execute workflow’',
-			// 				},
-			// 				{
-			// 					parameters: {
-			// 						jsCode:
-			// 							"// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.myNewField = 1;\n}\n\nreturn $input.all();",
-			// 					},
-			// 					type: 'n8n-nodes-base.code',
-			// 					typeVersion: 2,
-			// 					position: [208, 0],
-			// 					id: 'b8583dd3-55aa-4faf-96b1-fe52371c27e7',
-			// 					name: 'Code in JavaScript',
-			// 				},
-			// 			] as any,
-			// 			connections: {
-			// 				'When clicking ‘Execute workflow’': {
-			// 					main: [
-			// 						[
-			// 							{
-			// 								node: 'Code in JavaScript',
-			// 								type: 'main',
-			// 								index: 0,
-			// 							},
-			// 						],
-			// 					],
-			// 				},
-			// 			} as any,
-			// 		},
-			// 	};
-			// }
-
+			console.log('>>>>apiResponse', apiResponse);
 			onAssistantMessage(apiResponse.message, apiResponse.id);
 
-			if (apiResponse.agentData?.nodes?.length > 0) {
+			if (apiResponse.agentData?.nodes) {
 				streaming.value = true;
 				addLoadingAssistantMessage(AI_THINKING_STATUS.GENERATING);
 				workflowsStore.setConnections(apiResponse.agentData?.connections);
 				workflowsStore.setNodes(apiResponse.agentData?.nodes);
-				await sleep(4000);
-				// TODO : Generate new nodes if any
+				uiStore.stateIsDirty = true;
 			}
 			stopStreaming();
 		} catch (e: unknown) {

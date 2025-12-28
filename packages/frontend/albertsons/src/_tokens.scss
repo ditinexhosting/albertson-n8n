@@ -21,7 +21,9 @@
 @mixin theme {
 	--color-primary: #01529f;
 	--color--orange-400: #013d6e;
-	--color--orange-300: #007ee7;
+	--color--orange-300: #01529f;
+	--button--color--background--disabled: #013d6e;
+	--button--border-color--disabled: #013d6e;
 	/* stylelint-disable-next-line @n8n/css-var-naming */
 	--color--primary--h: 7;
 	/* stylelint-disable-next-line @n8n/css-var-naming */

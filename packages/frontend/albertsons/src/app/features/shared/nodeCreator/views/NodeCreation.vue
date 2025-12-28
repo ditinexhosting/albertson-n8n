@@ -192,7 +192,7 @@ function openCommandBar(event: MouseEvent) {
 			/>
 		</KeyboardShortcutTooltip>
 		<N8nTooltip v-if="chatPanelStore.canShowAiButtonOnCanvas" placement="left">
-			<template #content> {{ i18n.baseText('aiAssistant.tooltip') }}</template>
+			<template #content> Albertsons AI Builder </template>
 			<N8nButton
 				type="tertiary"
 				size="large"

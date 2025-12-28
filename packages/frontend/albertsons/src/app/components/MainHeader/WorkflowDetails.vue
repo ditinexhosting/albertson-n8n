@@ -49,7 +49,7 @@ import { useWorkflowsStore } from '@/app/stores/workflows.store';
 import { getWorkflowId } from '@/app/components/MainHeader/utils';
 import { useUsersStore } from '@/features/settings/users/users.store';
 import { albertsonsRestApiRequest } from '@src/utils/albertsonsRestApiRequest';
-import PublishAgentButton from '@src/views/PublishAgentButton.vue';
+
 const WORKFLOW_NAME_BP_TO_WIDTH: { [key: string]: number } = {
 	XS: 150,
 	SM: 200,
@@ -611,7 +611,6 @@ onBeforeUnmount(() => {
 
 		<PushConnectionTracker class="actions">
 			<WorkflowProductionChecklist v-if="false" :workflow="workflowsStore.workflow" />
-			<PublishAgentButton />
 			<WorkflowHeaderDraftPublishActions
 				v-if="IS_DRAFT_PUBLISH_ENABLED"
 				:id="id"
