@@ -175,7 +175,8 @@ function createColumns() {
 				Filters
 			</button> -->
 		</div>
-
-		<n-data-table :columns="columns" :data="filteredUserAgentMappings" :scroll-x="900" />
+		<div class="overflow-y-scroll h-130">
+			<n-data-table :columns="columns" :data="filteredUserAgentMappings" :scroll-x="900" />
+		</div>
 	</div>
 </template>
