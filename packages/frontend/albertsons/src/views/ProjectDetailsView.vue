@@ -308,9 +308,8 @@ function createColumns() {
 const tableHeader = (text) => h('span', { class: 'text-secondary' }, text);
 const agentOptions = [
 	{
-		label: 'Remove All',
-		key: 'remove_all',
-		disabled: true,
+		label: 'View/Edit Agent',
+		key: 'view',
 	},
 	{
 		label: 'Remove Agent',
@@ -324,7 +323,8 @@ const handleAgentsAction = async (key, row) => {
 			case 'remove_agent':
 				handleAgentRemoveConfirm(row);
 				break;
-			case 'remove_all':
+			case 'view':
+				router.push(`/workflow/${row.id}`);
 				break;
 			default:
 				console.error(`Unknown action key for agents: ${key}`);
