@@ -35,7 +35,7 @@
 					v-for="cat in categories"
 					:key="cat.id"
 					@click="activeCategory = cat.id"
-					class="text-sm font-medium transition-colors flex items-center gap-1 bg-transparent border-0"
+					class="cursor-pointer text-sm font-medium transition-colors flex items-center gap-1 bg-transparent border-0"
 					:class="
 						activeCategory === cat.id ? 'text-primary border-b-2 border-primary' : 'text-secondary'
 					"
@@ -49,13 +49,7 @@
 		<!-- Agent Count -->
 		<p class="text-sm text-secondary py-3! pl-0.5!">{{ filteredAgents.length }} agents</p>
 
-		<!-- Content Area -->
-		<div v-if="loading" class="text-center py-20 text-secondary">Loading agents...</div>
-
-		<div
-			v-else-if="filteredAgents.length === 0"
-			class="text-center py-20 text-secondary font-semibold"
-		>
+		<div v-if="filteredAgents.length === 0" class="text-center py-20 text-secondary font-semibold">
 			No agents found.
 		</div>
 
@@ -75,7 +69,12 @@
 							{{ card?.agent?.name }}
 						</h3>
 
-						<BadgeCheck :size="16" class="text-primary" />
+						<n-tooltip trigger="hover">
+							<template #trigger>
+								<BadgeCheck :size="16" class="text-primary" />
+							</template>
+							Verified Agent.
+						</n-tooltip>
 					</div>
 				</template>
 
@@ -132,7 +131,7 @@
 						</template>
 						Verified
 					</n-tag>
-					<span class="text-xs bg-gray-100! p-1! px-2!">v2.1.0</span>
+					<span class="text-xs bg-gray-100! p-1! px-2!">{{ selectedAgent?.version }}</span>
 				</div>
 			</template>
 			<h2 class="text-lg font-bold! mb-3!">
@@ -201,9 +200,11 @@
 				</div>
 			</div>
 
-			<!-- Creator Info -->
+			<!-- Owner Info -->
 			<div class="flex items-center gap-3 p-3! bg-gray-100! rounded-lg my-5!">
-				<n-avatar round size="small" color="#01529f">SJ</n-avatar>
+				<n-avatar round size="small" color="#01529f" class="p-5!">{{
+					(selectedAgent?.owner?.firstName?.[0] || '') + (selectedAgent?.owner?.lastName?.[0] || '')
+				}}</n-avatar>
 				<div>
 					<div class="text-sm font-medium">
 						{{ selectedAgent?.owner?.firstName + ' ' + selectedAgent?.owner?.lastName }}
@@ -216,13 +217,16 @@
 			<template #footer>
 				<div class="flex justify-end gap-2">
 					<n-button @click="closeModal">Cancel</n-button>
-					<n-button @click="() => {}">
+					<n-button @click="() => HandleActions('show_toast')">
 						<template #icon>
 							<n-icon :size="14"><FolderPlus /></n-icon>
 						</template>
 						Add to Project</n-button
 					>
-					<n-button type="primary" @click="() => {}">
+					<n-button
+						type="primary"
+						@click="() => HandleActions('show_navigation', selectedAgent?.agentId)"
+					>
 						<template #icon>
 							<n-icon :size="14"><Play /></n-icon>
 						</template>
@@ -290,7 +294,14 @@
 			<template #footer>
 				<div class="flex gap-4 justify-end">
 					<n-button ghost type="primary" @click="showPublishModal = false">Close </n-button>
-					<n-button type="primary" :loading="showPublishModal"> Publish </n-button>
+					<n-button
+						type="primary"
+						:loading="loading"
+						:disabled="loading"
+						@click="PublishAgentLibrary"
+					>
+						Publish Agent
+					</n-button>
 				</div>
 			</template>
 		</n-modal>
@@ -299,7 +310,9 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { useUsersStore } from '@/features/settings/users/users.store';
+import { useToast } from '@/app/composables/useToast';
 import { albertsonsRestApiRequest } from '@src/utils/albertsonsRestApiRequest';
 
 import {
@@ -324,20 +337,23 @@ import {
 	NSelect,
 	NGrid,
 	NGi,
+	NTooltip,
 	NForm,
 	NDynamicTags,
 	NFormItem,
 } from 'naive-ui';
 
-const searchQuery = ref('');
-const activeCategory = ref('all');
-const showModal = ref(false);
-const showPublishModal = ref(false);
-const selectedAgent = ref<any | null>(null);
-const loading = ref(false);
+const toast = useToast();
 const usersStore = useUsersStore();
+const router = useRouter();
+const activeCategory = ref('all');
+const showPublishModal = ref(false);
 const agentLibraries = ref([]);
 const agents = ref([]);
+const loading = ref(false);
+const showModal = ref(false);
+const searchQuery = ref('');
+const selectedAgent = ref<any | null>(null);
 
 const formValue = ref({
 	agentId: '',
@@ -404,20 +420,29 @@ function closeModal() {
 	showModal.value = false;
 }
 
+function HandleActions(action: string, id?: string) {
+	if (action == 'show_toast') {
+		toast.showMessage({
+			title: `Upcoming Feature`,
+			message: 'Upcoming feature.',
+			type: 'info',
+		});
+	} else if (action == 'show_navigation') {
+		router.push(`/workflow/${id}`);
+	}
+}
+
 // Load initial data
 onMounted(async () => {
 	try {
 		fetchAgentLibraries();
-		// fetchAllUsers();
 		fetchAllAgents();
 	} catch (e) {
-		console.error('Failed to load initial api data', e);
+		console.error('Failed to load initial api data for agent library', e);
 	}
 });
 
 const availableAgentsToAddInProject = computed(() => {
-	console.log('agents', agents.value);
-	console.log('agents lib', agentLibraries.value);
 	return agents.value
 		.filter((agent) => !agentLibraries.value?.some((pagent) => pagent.agentId === agent.workflowId))
 		.map((agent) => ({
@@ -449,6 +474,39 @@ const fetchAgentLibraries = async () => {
 			agentLibraries.value = apiResult;
 		}
 	} catch (e) {
+		console.error('Failed to load initial api data', e);
+	}
+};
+const PublishAgentLibrary = async () => {
+	try {
+		loading.value = true;
+
+		//publish agent api
+		const apiResult = await albertsonsRestApiRequest(
+			'POST',
+			`/v1/agent-library/publish`,
+			formValue.value,
+		);
+		if (apiResult) {
+			loading.value = false;
+			showPublishModal.value = false;
+			formValue.value = {
+				agentId: '',
+				ownerId: usersStore.currentUser?.id,
+				category: '',
+				capabilities: [],
+				integrations: [],
+				version: '',
+			};
+			toast.showMessage({
+				title: `Agent Library`,
+				message: 'Published successfully.',
+				type: 'success',
+			});
+			fetchAgentLibraries();
+		}
+	} catch (e) {
+		loading.value = false;
 		console.error('Failed to load initial api data', e);
 	}
 };

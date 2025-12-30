@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, h, toRaw } from 'vue';
+import { computed, onMounted, ref, h, toRaw, render } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserAgentMappingsStore } from '@src/stores/userAgentMappings.store';
 import { NIcon, NButton, NDataTable, NDropdown, NProgress, NInput, NGradientText } from 'naive-ui';
@@ -63,6 +63,7 @@ function createColumns() {
 		{
 			title: () => tableHeader('PROJECT'),
 			key: 'project.name',
+			render: (row) => row.project?.name ?? '-',
 		},
 		{
 			title: () => tableHeader('STATUS'),
