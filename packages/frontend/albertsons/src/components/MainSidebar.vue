@@ -57,7 +57,7 @@ const menuItems = ref([
 	{ label: 'Agent Library', icon: Store, path: '/agent-library', active: false },
 	{ label: 'Teams', icon: Users, path: '/teams', active: false },
 	{ label: 'Settings', icon: Settings, path: '/settings', active: false },
-	{ label: 'Super Admin Console', icon: ShieldCheck, path: '/superadmin', active: false },
+	{ label: 'Admin Console', icon: ShieldCheck, path: '/superadmin', active: false },
 ]);
 
 function navigate(item) {
@@ -182,7 +182,7 @@ watch(() => route.path, updateActiveState, { immediate: true });
 
 <style scoped>
 .sidebar {
-	width: 240px;
+	width: 190px;
 	min-height: 100vh;
 	border-right: 1px solid var(--border-color--light);
 	background-color: var(--color--background--light-3);
