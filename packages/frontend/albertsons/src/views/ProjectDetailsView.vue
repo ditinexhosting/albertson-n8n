@@ -357,7 +357,11 @@ function createAgentsColumns() {
 				h('span', [
 					row.name,
 					h('br'),
-					h('small', { class: 'text-secondary' }, `${row.description || ''}`),
+					h(
+						'small',
+						{ class: 'text-secondary block max-w-52 truncate' },
+						`${row.description || ''}`,
+					),
 				]),
 		},
 		{
