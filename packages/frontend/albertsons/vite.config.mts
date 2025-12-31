@@ -201,6 +201,8 @@ export default mergeConfig(
     	allowedHosts: 'all',
   	},
 		server: {
+			host: true,
+    	allowedHosts: 'all',
 			port: 8080,
 			proxy: {
 				'/rest': {
