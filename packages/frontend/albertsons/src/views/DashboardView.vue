@@ -1,32 +1,12 @@
 <template>
 	<!-- Page shell -->
-	<div
-		class="dashboard-scroll-container flex flex-1 p-4! flex-col gap-4 bg-[var(--color--background--light-2)]"
-	>
+	<div class="dashboard-scroll-container flex flex-1 p-4! flex-col gap-4">
 		<!-- METRICS STRIP: white container with ONLY metric cards -->
-		<div class="metrics-strip">
-			<n-grid :cols="5" :x-gap="14" :y-gap="14">
-				<!-- System Health -->
-				<n-gi>
-					<div class="metric-card health-card">
-						<div class="health-value">
-							{{ metrics.systemHealth ? metrics.systemHealth : 92 }}<span class="percent">%</span>
-						</div>
-						<div class="health-label">
-							<CheckCircle2 class="health-icon" />
-							<span>System Health</span>
-						</div>
-						<n-tag size="small" round type="success" class="health-status"> Good </n-tag>
-						<div class="health-time">
-							<Clock class="time-icon" />
-							Updated 2s ago
-						</div>
-					</div>
-				</n-gi>
-
+		<div class="metrics-strip p-4! rounded-lg">
+			<n-grid :cols="4" :x-gap="14" :y-gap="14">
 				<!-- Other metrics -->
 				<n-gi v-for="card in metricCards" :key="card.key">
-					<div class="metric-card compact-card">
+					<div class="metric-card compact-card cursor-pointer" @click="onMetricCardClick(card.key)">
 						<div class="compact-header">
 							<span class="card-label">
 								{{ card.label }}
@@ -55,28 +35,29 @@
 		</div>
 
 		<!-- ACTION BUTTONS: outside metrics strip, unchanged -->
-		<div class="max-w-[1400px] mx-auto w-full">
-			<div class="flex flex-row gap-2">
-				<n-button
-					type="primary"
-					size="small"
-					round
-					class="action-btn primary"
-					@click="goToNewWorkflow"
+		<div class="max-w-350 mx-auto w-full">
+			<div class="flex flex-row gap-4">
+				<n-button type="primary" @click="goToNewWorkflow"
+					><template #icon>
+						<NIcon>
+							<Plus />
+						</NIcon> </template
+					>Create Agent</n-button
 				>
-					<Plus class="btn-icon" />
-					Create Agent
-				</n-button>
-
-				<n-button size="small" round class="action-btn secondary" @click="goToExecutions">
-					<Play class="btn-icon btn-icon-outline" />
-					View Executions
-				</n-button>
-
-				<n-button size="small" round class="action-btn secondary" @click="router.push('/projects')">
-					<Zap class="btn-icon" />
-					Projects
-				</n-button>
+				<n-button type="default" @click="goToExecutions"
+					><template #icon>
+						<NIcon>
+							<Play class="btn-icon btn-icon-outline" />
+						</NIcon> </template
+					>View Executions</n-button
+				>
+				<n-button type="default" @click="goToExecutions"
+					><template #icon>
+						<NIcon>
+							<Zap class="btn-icon" />
+						</NIcon> </template
+					>Projects</n-button
+				>
 			</div>
 		</div>
 
@@ -149,7 +130,7 @@
 									<span class="live-text">LIVE</span>
 									Activity Stream
 								</div>
-								<button class="view-all">
+								<button @click="goToAgents" class="view-all">
 									View all
 									<ChevronRight class="view-all-icon" />
 								</button>
@@ -212,7 +193,7 @@
 								<div v-if="agentsLoading && !mvpAgents.length" class="state">Loading agents...</div>
 
 								<div v-else-if="!agentsLoading && !mvpAgents.length" class="state">
-									No agents yet. Create your first agent to see stats here.
+									MVP agents coming soon.
 								</div>
 
 								<div v-else v-for="agent in mvpAgents" :key="agent.id" class="mvp-item">
@@ -236,7 +217,7 @@
 								</div>
 							</div>
 
-							<button class="mvp-footer-link">View all agents</button>
+							<!-- <button class="mvp-footer-link">View all agents</button> -->
 						</n-card>
 
 						<!-- 7‑DAY TREND -->
@@ -330,6 +311,10 @@ function goToNewWorkflow() {
 	router.push('/workflow/new');
 }
 
+function goToAgents() {
+	router.push('/agents');
+}
+
 function goToExecutions() {
 	router.push('/executions');
 }
@@ -338,20 +323,21 @@ function openWorkflow(id) {
 	router.push(`/workflow/${id}`);
 }
 
-function publishAsTemplate(id) {
-	templatesStore.publishAsTemplate(id);
-}
+const onMetricCardClick = (key) => {
+	if (key == 'agents') goToAgents();
+	else goToExecutions();
+};
 
 /* ACTIVITY STREAM DATA */
 const activities = computed(() => {
-	if (!workflows.value || workflows.value.length === 0) {
+	if (true) {
 		return [
 			{
 				id: 'placeholder-1',
 				type: 'info',
 				icon: '📋',
 				title: 'No activities yet',
-				subtitle: 'Create your first agent to see activity here',
+				subtitle: 'Activity Stream is coming soon.',
 				date: new Date().toLocaleDateString('en-GB'),
 				time: '',
 			},
@@ -406,8 +392,6 @@ const metrics = ref({
 // Fetch execution statistics from your API using the utility function
 async function loadExecutionStats() {
 	try {
-		console.log('📊 Fetching execution stats...');
-
 		// Get the current logged-in user id
 		const ownerId = usersStore.currentUser?.id;
 
@@ -432,7 +416,6 @@ async function loadExecutionStats() {
 			'GET',
 			`/v1/executions/list?${successParams.toString()}`,
 		);
-		console.log('✅ Success data:', successData);
 		const successCount = successData?.total || 0;
 
 		// Fetch error/failure executions
@@ -440,7 +423,6 @@ async function loadExecutionStats() {
 			'GET',
 			`/v1/executions/list?${failureParams.toString()}`,
 		);
-		console.log('❌ Failure data:', failureData);
 		const failureCount = failureData?.total || 0;
 
 		// Calculate totals
@@ -453,8 +435,6 @@ async function loadExecutionStats() {
 			total,
 			successRate,
 		};
-
-		console.log('📈 Final Execution Stats:', executionStats.value);
 		return executionStats.value;
 	} catch (e) {
 		console.error('❌ Failed to load execution stats:', e);
@@ -550,7 +530,7 @@ const metricCards = computed(() => [
 	{
 		key: 'agents',
 		label: 'ACTIVE AGENTS',
-		value: String(metrics.value.activeAgents),
+		value: String(rawAgents.value?.length ?? 0),
 		delta:
 			(metrics.value.activeAgentsDelta >= 0 ? '+' : '') + metrics.value.activeAgentsDelta + '%',
 		positive: metrics.value.activeAgentsDelta >= 0,
@@ -573,19 +553,20 @@ const normalizedAgents = computed(() =>
 );
 
 const mvpAgents = computed(() =>
-	normalizedAgents.value
-		.slice()
-		.sort((a, b) => {
-			if ((b.successRate ?? 0) === (a.successRate ?? 0)) {
-				return (b.runs ?? 0) - (a.runs ?? 0);
-			}
-			return (b.successRate ?? 0) - (a.successRate ?? 0);
-		})
-		.slice(0, 5)
-		.map((agent, index) => ({
-			...agent,
-			rank: index + 1,
-		})),
+	// normalizedAgents.value
+	// 	.slice()
+	// 	.sort((a, b) => {
+	// 		if ((b.successRate ?? 0) === (a.successRate ?? 0)) {
+	// 			return (b.runs ?? 0) - (a.runs ?? 0);
+	// 		}
+	// 		return (b.successRate ?? 0) - (a.successRate ?? 0);
+	// 	})
+	// 	.slice(0, 5)
+	// 	.map((agent, index) => ({
+	// 		...agent,
+	// 		rank: index + 1,
+	// 	})),
+	[],
 );
 
 /* TREND DATA */
@@ -651,10 +632,8 @@ onMounted(async () => {
 /* METRICS STRIP CONTAINER */
 .metrics-strip {
 	background: white;
-	border-radius: 18px;
 	border: 1px solid var(--border-color--light);
 	box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
-	padding: 20px 28px;
 	max-width: 1400px;
 	margin: 0 auto;
 	width: 100%;
@@ -756,7 +735,6 @@ onMounted(async () => {
 .compact-card {
 	display: flex;
 	flex-direction: column;
-	margin-top: 14px;
 	justify-content: center;
 }
 

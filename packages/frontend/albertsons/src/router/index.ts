@@ -158,7 +158,7 @@ export const routes: RouteRecordRaw[] = [
 		meta: {
 			middleware: ['authenticated'],
 			header: {
-				title: 'Super Admin Console',
+				title: 'Super Admin',
 				showBack: false,
 			},
 		},
@@ -208,6 +208,8 @@ export const routes: RouteRecordRaw[] = [
 			middleware: ['authenticated'],
 			header: {
 				title: 'My Agents',
+				subtitle: 'Automate your business processes with intelligent agents',
+				showSearch: false,
 				showBack: false,
 			},
 		},

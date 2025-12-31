@@ -959,6 +959,7 @@ export const useBuilderStore = defineStore('albertsons_' + STORES.BUILDER, () =>
 				workflowsStore.setConnections(apiResponse.agentData?.connections);
 				workflowsStore.setNodes(apiResponse.agentData?.nodes);
 				uiStore.stateIsDirty = true;
+				await sleep(2000);
 			}
 			stopStreaming();
 		} catch (e: unknown) {

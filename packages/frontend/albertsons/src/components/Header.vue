@@ -1,7 +1,12 @@
 <template>
 	<div class="shadow bg-white! p-4! flex flex-row justify-between items-center">
-		<div class="font-bold! text-lg">{{ title }}</div>
-		<div><n-input round placeholder="Search workflows, projects .." /></div>
+		<div>
+			<div class="font-bold! text-lg">{{ title }}</div>
+			<div v-if="subtitle" class="text-base text-secondary">
+				{{ subtitle }}
+			</div>
+		</div>
+		<div><n-input v-if="showSearch" round placeholder="Search workflows, projects .." /></div>
 		<div class="cursor-pointer hover:text-primary transition-all">
 			<n-badge :value="3" :max="15"><Bell /></n-badge>
 		</div>
@@ -19,6 +24,7 @@ const route = useRoute();
 const headerMeta = computed(() => route.meta?.header ?? {});
 
 const title = computed(() => headerMeta.value.title ?? '');
+const subtitle = computed(() => headerMeta.value?.subtitle ?? null);
 const showSearch = computed(() => headerMeta.value.showSearch ?? false);
 const showNotifications = computed(() => headerMeta.value.showNotifications ?? false);
 </script>

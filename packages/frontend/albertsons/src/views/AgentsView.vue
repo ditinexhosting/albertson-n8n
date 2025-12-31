@@ -2,7 +2,16 @@
 import { computed, onMounted, ref, h, toRaw, render } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserAgentMappingsStore } from '@src/stores/userAgentMappings.store';
-import { NIcon, NButton, NDataTable, NDropdown, NProgress, NInput, NGradientText } from 'naive-ui';
+import {
+	NIcon,
+	NButton,
+	NDataTable,
+	NDropdown,
+	NProgress,
+	NInput,
+	NGradientText,
+	NEmpty,
+} from 'naive-ui';
 import { Play, EllipsisVertical, Search, ClockCheck, Pause, Edit, Plus } from 'lucide-vue-next';
 import dayjs from 'dayjs';
 import { runWorkflow } from '@src/utils/runWorkflow';
@@ -149,12 +158,11 @@ function createColumns() {
 <template>
 	<div class="p-4! w-full">
 		<div class="flex items-center justify-between pb-4!">
-			<div class="flex items-start flex-col gap-2">
-				<div class="text-2xl font-bold">Agents</div>
-				<div class="text-base text-secondary">
-					Automate your business processes with intelligent agents
-				</div>
-			</div>
+			<n-input v-model:value="searchQuery" placeholder="Search agents" class="w-64!">
+				<template #prefix>
+					<n-icon :component="Search" />
+				</template>
+			</n-input>
 
 			<n-button type="primary" @click="goToNewWorkflow"
 				><template #icon>
@@ -164,20 +172,10 @@ function createColumns() {
 				>New Agent</n-button
 			>
 		</div>
-
-		<div class="py-4!">
-			<n-input v-model:value="searchQuery" placeholder="Search agents" class="w-64!">
-				<template #prefix>
-					<n-icon :component="Search" />
-				</template>
-			</n-input>
-			<!-- <button class="filter-btn">
-				<Funnel size="12" />
-				Filters
-			</button> -->
-		</div>
 		<div class="overflow-y-scroll h-130">
-			<n-data-table :columns="columns" :data="filteredUserAgentMappings" :scroll-x="900" />
+			<n-data-table :columns="columns" :data="filteredUserAgentMappings" :scroll-x="900">
+				<template #empty> <n-empty description="No agents found" /> </template>
+			</n-data-table>
 		</div>
 	</div>
 </template>
