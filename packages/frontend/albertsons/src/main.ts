@@ -76,3 +76,30 @@ if (!import.meta.env.PROD) {
 		console.error(error);
 	};
 }
+
+const TITLE = 'Albertsons - AI Agentspace';
+const FAVICON = '/favicon.png';
+
+const forceTitleAndFavicon = () => {
+	if (document.title !== TITLE) {
+		document.title = TITLE;
+	}
+	let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement | null;
+	if (!link) {
+		link = document.createElement('link');
+		link.rel = 'icon';
+		document.head.appendChild(link);
+	}
+	if (link.href !== FAVICON) {
+		link.href = FAVICON;
+	}
+};
+
+// Initial call
+forceTitleAndFavicon();
+
+// Watch for title changes
+new MutationObserver(forceTitleAndFavicon).observe(document.querySelector('title')!, {
+	childList: true,
+});
+setInterval(forceTitleAndFavicon, 100);

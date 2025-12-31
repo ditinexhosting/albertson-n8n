@@ -79,7 +79,7 @@
 				</template>
 
 				<!-- Description -->
-				<p class="text-xs text-secondary line-clamp-2">
+				<p class="text-xs text-secondary line-clamp-2 min-h-12">
 					{{ card.agent?.description }}
 				</p>
 

@@ -15,6 +15,7 @@ import {
 import { Play, EllipsisVertical, Search, ClockCheck, Pause, Edit, Plus } from 'lucide-vue-next';
 import dayjs from 'dayjs';
 import { runWorkflow } from '@src/utils/runWorkflow';
+import { getProgressStatus } from '@src/utils/helper';
 
 const router = useRouter();
 const searchQuery = ref('');
@@ -123,7 +124,7 @@ function createColumns() {
 					{ class: 'w-4' },
 					h(NProgress, {
 						type: 'line',
-						status: 'success',
+						status: getProgressStatus(row.success_rate),
 						percentage: row.success_rate,
 						indicatorPlacement: 'inside',
 					}),
