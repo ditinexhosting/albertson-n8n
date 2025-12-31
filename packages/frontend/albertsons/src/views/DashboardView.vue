@@ -2,11 +2,14 @@
 	<!-- Page shell -->
 	<div class="dashboard-scroll-container flex flex-1 p-4! flex-col gap-4">
 		<!-- METRICS STRIP: white container with ONLY metric cards -->
-		<div class="metrics-strip p-4! rounded-lg">
+		<div class="metrics-strip p-4! rounded-md">
 			<n-grid :cols="4" :x-gap="14" :y-gap="14">
 				<!-- Other metrics -->
 				<n-gi v-for="card in metricCards" :key="card.key">
-					<div class="metric-card compact-card cursor-pointer" @click="onMetricCardClick(card.key)">
+					<div
+						class="metric-card compact-card cursor-pointer rounded-md"
+						@click="onMetricCardClick(card.key)"
+					>
 						<div class="compact-header">
 							<span class="card-label">
 								{{ card.label }}
@@ -37,21 +40,21 @@
 		<!-- ACTION BUTTONS: outside metrics strip, unchanged -->
 		<div class="max-w-350 mx-auto w-full">
 			<div class="flex flex-row gap-4">
-				<n-button type="primary" @click="goToNewWorkflow"
+				<n-button class="rounded-md!" type="primary" @click="goToNewWorkflow"
 					><template #icon>
 						<NIcon>
 							<Plus />
 						</NIcon> </template
 					>Create Agent</n-button
 				>
-				<n-button type="default" @click="goToExecutions"
+				<n-button class="rounded-md!" type="default" @click="goToExecutions"
 					><template #icon>
 						<NIcon>
 							<Play class="btn-icon btn-icon-outline" />
 						</NIcon> </template
 					>View Executions</n-button
 				>
-				<n-button type="default" @click="goToExecutions"
+				<n-button class="rounded-md!" type="default" @click="goToExecutions"
 					><template #icon>
 						<NIcon>
 							<Zap class="btn-icon" />
@@ -68,7 +71,7 @@
 				<n-gi :span="16">
 					<div class="left-column">
 						<!-- NEEDS ATTENTION -->
-						<n-card size="small" class="needs-attention">
+						<n-card size="small" class="needs-attention rounded-md">
 							<div class="needs-header">
 								<div class="needs-title">
 									<AlertTriangle class="needs-title-icon" />
@@ -79,7 +82,7 @@
 
 							<div class="needs-list">
 								<!-- Card 1 -->
-								<div class="needs-item needs-critical">
+								<div class="needs-item needs-critical rounded-md!">
 									<div class="needs-left">
 										<div class="needs-icon critical-icon">
 											<XCircle class="needs-inner-icon" />
@@ -101,7 +104,7 @@
 								</div>
 
 								<!-- Card 2 -->
-								<div class="needs-item needs-warning">
+								<div class="needs-item needs-warning rounded-md!">
 									<div class="needs-left">
 										<div class="needs-icon warning-icon">
 											<AlertTriangle class="needs-inner-icon" />
@@ -123,7 +126,7 @@
 						</n-card>
 
 						<!-- ACTIVITY STREAM -->
-						<n-card size="small" class="activity-section">
+						<n-card size="small" class="activity-section rounded-md!">
 							<div class="activity-header">
 								<div class="activity-title">
 									<span class="live-dot"></span>
@@ -179,7 +182,7 @@
 				<n-gi :span="8">
 					<div class="right-column">
 						<!-- MVP AGENTS -->
-						<n-card size="small" class="mvp-card">
+						<n-card size="small" class="mvp-card rounded-md!">
 							<div class="mvp-header">
 								<div class="mvp-title">
 									<Trophy class="mvp-trophy" />
@@ -221,7 +224,7 @@
 						</n-card>
 
 						<!-- 7‑DAY TREND -->
-						<n-card size="small" class="trend-card">
+						<n-card size="small" class="trend-card rounded-md!">
 							<div class="trend-header">
 								<div class="trend-title">7-Day Trend</div>
 							</div>
@@ -641,7 +644,6 @@ onMounted(async () => {
 
 /* metric cards */
 .metric-card {
-	border-radius: 12px;
 	border: 1px solid var(--border-color--light);
 	box-shadow: none;
 	display: flex;
@@ -654,7 +656,6 @@ onMounted(async () => {
 
 /* shared metric card base */
 .metric-card {
-	border-radius: 14px;
 	border: 1px solid var(--border-color--light);
 	box-shadow: none;
 	display: flex;
@@ -862,7 +863,6 @@ onMounted(async () => {
 /* NEEDS ATTENTION */
 .needs-attention {
 	background: var(--color--background--light-3) !important;
-	border-radius: 16px;
 	border: 1px solid var(--color--danger--tint-1) !important;
 }
 

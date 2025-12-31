@@ -63,7 +63,7 @@ const handleSubmit = async () => {
 <template>
 	<div class="auth-page">
 		<!-- Card -->
-		<div class="auth-card">
+		<div class="auth-card rounded-md!">
 			<div class="flex items-center justify-center gap-1.5">
 				<img :src="albertsonsLogo" alt="Albertsons" class="h-8 w-8 object-contain shrink-0" />
 				<div class="text-base font-bold text-primary">Albertsons</div>
@@ -83,7 +83,7 @@ const handleSubmit = async () => {
 						type="email"
 						size="large"
 						placeholder="you@example.com"
-						class="field-input"
+						class="field-input rounded-md!"
 					/>
 				</div>
 
@@ -107,7 +107,7 @@ const handleSubmit = async () => {
 						type="password"
 						size="large"
 						placeholder="••••••••"
-						class="field-input"
+						class="field-input rounded-md!"
 					/>
 				</div>
 
@@ -116,7 +116,7 @@ const handleSubmit = async () => {
 					{{ error }}
 				</p>
 
-				<n-button type="primary" size="large" attr-type="submit" class="rounded-sm! my-2!">
+				<n-button type="primary" size="large" attr-type="submit" class="rounded-md! my-2!">
 					<span v-if="loading">Signing in...</span>
 					<span v-else>{{ isLogin ? 'Sign in' : 'Create account' }}</span>
 				</n-button>
@@ -131,10 +131,10 @@ const handleSubmit = async () => {
 				Forgot my password
 			</button>
 
-			<div class="my-4! h-px! bg-border-primary!" />
+			<!-- <div class="my-4! h-px! bg-border-primary!" /> -->
 
 			<!-- Toggle -->
-			<div class="text-sm text-secondary">
+			<!-- <div class="text-sm text-secondary">
 				<span v-if="isLogin">
 					Don’t have an account?
 					<button type="button" @click="toggleMode" class="link-inline">Create an account</button>
@@ -143,7 +143,7 @@ const handleSubmit = async () => {
 					Already have an account?
 					<button type="button" @click="toggleMode" class="link-inline">Sign in</button>
 				</span>
-			</div>
+			</div> -->
 		</div>
 	</div>
 </template>

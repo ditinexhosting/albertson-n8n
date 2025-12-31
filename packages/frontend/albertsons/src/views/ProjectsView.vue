@@ -2,10 +2,17 @@
 	<div class="flex flex-1 p-4! flex-col gap-4">
 		<div class="flex flex-row items-center justify-between">
 			<div>
-				<div class="text-2xl font-bold mb-1!">Projects</div>
-				<div class="text-base text-secondary">Manage your automation projects and agents.</div>
+				<n-input
+					v-model:value="searchQuery"
+					placeholder="Search projects"
+					class="w-64! rounded-md!"
+				>
+					<template #prefix>
+						<n-icon :component="Search" />
+					</template>
+				</n-input>
 			</div>
-			<n-button type="primary" @click="showAddProjectModal = true"
+			<n-button class="rounded-md!" type="primary" @click="showAddProjectModal = true"
 				><template #icon>
 					<NIcon>
 						<Plus />
@@ -15,7 +22,7 @@
 		</div>
 		<n-grid gap="4" :cols="4" v-for="project in projects" :key="project.id">
 			<n-gi>
-				<div class="shadow! hover:shadow-lg! border border-secondary rounded-lg p-4! bg-white!">
+				<div class="shadow! hover:shadow-lg! border border-secondary rounded-md p-4! bg-white!">
 					<div class="flex justify-between items-center gap-4 mb-4!">
 						<div
 							v-on:click="() => viewProject(project.id)"
@@ -171,6 +178,7 @@ import {
 	PenLine,
 	Eye,
 	GitBranch,
+	Search,
 } from 'lucide-vue-next';
 import { PROJECT_STATUS } from '@src/utils/constants';
 import { useToast } from '@/app/composables/useToast';
@@ -183,6 +191,7 @@ const showEditProjectModal = ref(false);
 const modalSubmitLoading = ref(false);
 const usersStore = useUsersStore();
 const toast = useToast();
+const searchQuery = ref('');
 const showProjectModal = computed({
 	get() {
 		return showAddProjectModal.value || showEditProjectModal.value;

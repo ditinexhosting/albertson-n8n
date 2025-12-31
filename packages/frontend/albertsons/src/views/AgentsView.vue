@@ -84,7 +84,7 @@ function createColumns() {
 					'span',
 					{
 						class: [
-							'p-1.5! flex items-center justify-center w-[4.5rem] rounded-full text-[11px]! gap-1!',
+							'p-1.5! flex items-center justify-center w-[4.5rem] rounded-md text-[11px]! gap-1!',
 							isActive
 								? 'bg-[var(--color-light-green)]! text-[var(--color--success)]'
 								: 'bg-[var(--color-light-orange)]! text-[var(--color-warning-orange)]!',
@@ -158,13 +158,13 @@ function createColumns() {
 <template>
 	<div class="p-4! w-full">
 		<div class="flex items-center justify-between pb-4!">
-			<n-input v-model:value="searchQuery" placeholder="Search agents" class="w-64!">
+			<n-input v-model:value="searchQuery" placeholder="Search agents" class="w-64! rounded-md!">
 				<template #prefix>
 					<n-icon :component="Search" />
 				</template>
 			</n-input>
 
-			<n-button type="primary" @click="goToNewWorkflow"
+			<n-button class="rounded-md!" type="primary" @click="goToNewWorkflow"
 				><template #icon>
 					<NIcon>
 						<Plus />
@@ -172,7 +172,7 @@ function createColumns() {
 				>New Agent</n-button
 			>
 		</div>
-		<div class="overflow-y-scroll h-130">
+		<div class="overflow-y-scroll h-140">
 			<n-data-table :columns="columns" :data="filteredUserAgentMappings" :scroll-x="900">
 				<template #empty> <n-empty description="No agents found" /> </template>
 			</n-data-table>

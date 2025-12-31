@@ -25,21 +25,21 @@
 			{{ project.description }}
 		</div>
 		<n-space v-if="canManageProject">
-			<n-button :disabled="true"
+			<n-button class="rounded-md!" :disabled="true"
 				><template #icon>
 					<NIcon>
 						<Settings />
 					</NIcon> </template
 				>Settings</n-button
 			>
-			<n-button type="primary" @click="showAddAgentModal = true"
+			<n-button class="rounded-md!" type="primary" @click="showAddAgentModal = true"
 				><template #icon>
 					<NIcon>
 						<Plus />
 					</NIcon> </template
 				>Add Agent</n-button
 			>
-			<n-button type="primary" @click="showAddMemberModal = true"
+			<n-button class="rounded-md!" type="primary" @click="showAddMemberModal = true"
 				><template #icon>
 					<NIcon>
 						<Plus />
@@ -85,8 +85,14 @@
 			</n-form>
 			<template #footer>
 				<div class="flex flex-row flex-1 gap-4 justify-end!">
-					<n-button ghost type="primary" @click="showAddMemberModal = false">Close</n-button>
-					<n-button :loading="modalSubmitLoading" type="primary" @click="onAddMember"
+					<n-button class="rounded-md!" ghost type="primary" @click="showAddMemberModal = false"
+						>Close</n-button
+					>
+					<n-button
+						class="rounded-md!"
+						:loading="modalSubmitLoading"
+						type="primary"
+						@click="onAddMember"
 						>Submit</n-button
 					>
 				</div>
@@ -116,8 +122,14 @@
 			</n-form>
 			<template #footer>
 				<div class="flex flex-row flex-1 gap-4 justify-end!">
-					<n-button ghost type="primary" @click="showAddAgentModal = false">Close</n-button>
-					<n-button :loading="modalSubmitLoading" type="primary" @click="onAddAgent"
+					<n-button class="rounded-md!" ghost type="primary" @click="showAddAgentModal = false"
+						>Close</n-button
+					>
+					<n-button
+						class="rounded-md!"
+						:loading="modalSubmitLoading"
+						type="primary"
+						@click="onAddAgent"
 						>Submit</n-button
 					>
 				</div>
@@ -374,7 +386,7 @@ function createAgentsColumns() {
 					'span',
 					{
 						class: [
-							'p-1.5! flex items-center justify-center w-[4.5rem] rounded-full text-[11px]! gap-1!',
+							'p-1.5! flex items-center justify-center w-[4.5rem] rounded-md text-[11px]! gap-1!',
 							isActive
 								? 'bg-[var(--color-light-green)]! text-[var(--color--success)]'
 								: 'bg-[var(--color-light-orange)]! text-[var(--color-warning-orange)]!',
