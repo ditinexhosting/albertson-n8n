@@ -335,21 +335,17 @@ const handleAction = async (key, row) => {
 
 <template>
 	<div class="flex flex-1 p-4! flex-col gap-4">
-		<div>
-			<div class="text-2xl font-bold mb-1!">Super Admin Console</div>
-			<div class="text-base text-secondary">Manage users, credentials and other things.</div>
-		</div>
 		<div class="flex flex-row flex-1 gap-4">
 			<div>
 				<n-menu :options="menuOptions" value="superadmin-manage-user" />
 			</div>
 			<div class="flex-1 bg-white shadow rounded-lg p-4! border! border-border-primary!">
-				<div class="flex flex-row items-center justify-between p-4!">
+				<div class="flex flex-row items-center justify-between mb-4!">
 					<div>
 						<div class="text-xl font-semibold mb-1!">Manage Users</div>
 						<div class="text-xs text-secondary">Add, Edit, Deactivate users</div>
 					</div>
-					<n-button type="primary" @click="showAddUserModal = true"
+					<n-button class="rounded-md!" type="primary" @click="showAddUserModal = true"
 						><template #icon>
 							<NIcon>
 								<Plus />

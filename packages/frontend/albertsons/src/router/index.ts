@@ -159,7 +159,8 @@ export const routes: RouteRecordRaw[] = [
 		meta: {
 			middleware: ['authenticated'],
 			header: {
-				title: 'Super Admin',
+				title: 'Admin Console',
+				subtitle: 'Manage users, credentials and other things.',
 				showBack: false,
 			},
 		},
