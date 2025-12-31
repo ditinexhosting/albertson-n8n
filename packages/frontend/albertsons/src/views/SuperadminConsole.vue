@@ -336,7 +336,7 @@ const handleAction = async (key, row) => {
 <template>
 	<div class="flex flex-1 p-4! flex-col gap-4">
 		<div>
-			<div class="text-2xl font-bold mb-1!">Super Admin Console</div>
+			<div class="text-2xl font-bold mb-1!">Admin Console</div>
 			<div class="text-base text-secondary">Manage users, credentials and other things.</div>
 		</div>
 		<div class="flex flex-row flex-1 gap-4">

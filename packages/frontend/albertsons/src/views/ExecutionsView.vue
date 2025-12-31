@@ -339,7 +339,14 @@ function formatDate(dateString: string | null) {
 					:single-line="false"
 					size="small"
 					:row-class-name="(row: ExecutionRow) => (row.status === 'error' ? 'row-error' : '')"
-				/>
+				>
+					<template #empty>
+						<div class="flex flex-col items-center justify-center py-24 text-secondary">
+							<div class="text-base font-semibold">No executions found</div>
+							<div class="text-sm mt-1">Run an agent to see execution</div>
+						</div>
+					</template>
+				</n-data-table>
 			</div>
 		</div>
 	</div>

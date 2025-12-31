@@ -176,7 +176,14 @@ function createColumns() {
 			</button> -->
 		</div>
 		<div class="overflow-y-scroll h-130">
-			<n-data-table :columns="columns" :data="filteredUserAgentMappings" :scroll-x="900" />
+			<n-data-table :columns="columns" :data="filteredUserAgentMappings" :scroll-x="900">
+				<template #empty>
+					<div class="flex flex-col items-center justify-center py-20 text-secondary">
+						<div class="text-base font-semibold">No agents available</div>
+						<div class="text-sm mt-1">Create an agent to get started</div>
+					</div>
+				</template>
+			</n-data-table>
 		</div>
 	</div>
 </template>

@@ -50,7 +50,14 @@
 		<n-divider />
 		<n-tabs type="line" animated>
 			<n-tab-pane name="agents" :tab="`Agents (${project.agents?.length || 0})`">
-				<n-data-table :columns="agentsColumns" :data="project.agents" :scroll-x="900" />
+				<n-data-table :columns="agentsColumns" :data="project.agents" :scroll-x="900">
+					<template #empty>
+						<div class="flex flex-col items-center justify-center py-24 text-secondary">
+							<div class="text-base font-semibold">No agents in this project</div>
+							<div class="text-sm mt-1">Add an agent to start using this project</div>
+						</div>
+					</template>
+				</n-data-table>
 			</n-tab-pane>
 			<n-tab-pane name="members" :tab="`Team Members (${project.members?.length || 0})`">
 				<n-data-table :columns="columns" :data="sortedMembers" />
@@ -100,16 +107,31 @@
 			style="width: 600px"
 		>
 			<template #header> {{ 'Add Agent' }} </template>
-			<n-form :ref="formRef2" :label-width="80" :model="formValue" size="medium">
+			<n-form :ref="formRef2" :label-width="80" :model="formValue2" size="medium">
 				<n-grid x-gap="12" :cols="1">
 					<n-gi>
 						<n-form-item label="Agents" path="agentIds">
-							<n-select
-								multiple
-								filterable
-								v-model:value="formValue2.agentIds"
-								:options="availableAgentsToAddInProject"
-							/>
+							<template v-if="availableAgentsToAddInProject.length > 0">
+								<n-select
+									multiple
+									filterable
+									placeholder="Select agents"
+									v-model:value="formValue2.agentIds"
+									:options="availableAgentsToAddInProject"
+								/>
+							</template>
+
+							<template v-else>
+								<div
+									class="w-full flex flex-col items-center justify-center border border-dashed border-secondary rounded-lg py-10 text-secondary"
+								>
+									<div class="text-sm font-semibold mb-1">No agents available</div>
+									<div class="text-xs text-center max-w-xs">
+										All your agents are already added to this project, or you don’t have any agents
+										yet.
+									</div>
+								</div>
+							</template>
 						</n-form-item>
 					</n-gi>
 				</n-grid>
