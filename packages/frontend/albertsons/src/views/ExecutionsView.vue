@@ -72,7 +72,7 @@ const columns: DataTableColumns<ExecutionRow> = [
 							: row.status === 'running'
 								? 'bg-[var(--color-light-orange)]! text-[var(--color-warning-orange)]!'
 								: row.status === 'error'
-									? 'bg-[var(--color--danger--tint-1)]! text-[var(--color--danger--shade-1)]'
+									? 'bg-[var(--color-light-danger)]! text-[var(--color--danger)]'
 									: '',
 					],
 				},
