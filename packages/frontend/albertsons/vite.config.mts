@@ -197,12 +197,10 @@ export default mergeConfig(
 			BASE_PATH: `'${publicPath}'`,
 		},
 		preview: {
-    	host: true,
-    	allowedHosts: 'all',
+    	allowedHosts: true,
   	},
 		server: {
-			host: true,
-    	allowedHosts: 'all',
+    	allowedHosts: true,
 			port: 8080,
 			proxy: {
 				'/rest': {
