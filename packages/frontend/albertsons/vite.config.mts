@@ -196,6 +196,10 @@ export default mergeConfig(
 			...(NODE_ENV === 'development' ? { 'process.env': {} } : {}),
 			BASE_PATH: `'${publicPath}'`,
 		},
+		preview: {
+    	host: true,
+    	allowedHosts: 'all',
+  	},
 		server: {
 			port: 8080,
 			proxy: {
