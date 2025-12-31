@@ -68,6 +68,7 @@ const handleSubmit = async () => {
 				<img :src="albertsonsLogo" alt="Albertsons" class="h-8 w-8 object-contain shrink-0" />
 				<div class="text-base font-bold text-primary">Albertsons</div>
 			</div>
+			<div class="pt-2! block m-auto text-base text-primary font-semibold">AI AgentSpace</div>
 			<div class="my-4! h-px! bg-border-primary!" />
 
 			<h2 class="text-xl! font-semibold! text-primary! pb-4!">

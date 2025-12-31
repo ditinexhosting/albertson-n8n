@@ -193,6 +193,7 @@ import { useToast } from '@/app/composables/useToast';
 import { albertsonsRestApiRequest } from '@src/utils/albertsonsRestApiRequest';
 import { PROJECT_ROLE } from '@src/utils/constants';
 import { runWorkflow } from '@src/utils/runWorkflow';
+import { getProgressStatus } from '@src/utils/helper';
 
 const router = useRouter();
 const route = useRoute();
@@ -423,7 +424,7 @@ function createAgentsColumns() {
 					{ class: 'w-4' },
 					h(NProgress, {
 						type: 'line',
-						status: 'success',
+						status: getProgressStatus(row.successRate),
 						percentage: row?.successRate,
 						indicatorPlacement: 'inside',
 					}),
