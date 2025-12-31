@@ -8,7 +8,7 @@
     "clean": "rimraf dist .turbo .build",
     "dev": "pnpm serve",
     "buildProd": "cross-env VUE_APP_PUBLIC_PATH=\"/{{BASE_PATH}}/\" NODE_OPTIONS=\"--max-old-space-size=8192\" vite build",
-    "serve": "cross-env VUE_APP_URL_BASE_API=http://localhost:5678/ vite --host 0.0.0.0 --port 8080 dev"
+    "serve": "cross-env VUE_APP_URL_BASE_API=http://localhost:5678/ vite --host 0.0.0.0 --port 8080 dev",
     "preview": "cross-env VUE_APP_URL_BASE_API=https://albertsons.ditinex.com/ vite --host 0.0.0.0 --port 8000 preview"
   },
   "dependencies": {
