@@ -57,6 +57,9 @@ const menuItems = ref([
 	{ label: 'Agent Library', icon: Store, path: '/agent-library', active: false },
 	{ label: 'Teams', icon: Users, path: '/teams', active: false },
 	{ label: 'Settings', icon: Settings, path: '/settings', active: false },
+]);
+
+const menuItemsFooter = ref([
 	{ label: 'Admin Console', icon: ShieldCheck, path: '/superadmin', active: false },
 ]);
 
@@ -133,6 +136,25 @@ watch(() => route.path, updateActiveState, { immediate: true });
 
 		<!-- Footer with User Profile -->
 		<div class="sidebar-footer">
+			<template v-for="item in menuItemsFooter" :key="item.key">
+				<button
+					class="w-full border-0 bg-transparent flex items-center gap-3 px-3 py-2 mb-1 rounded-(--radius) text-(--color--text) text-sm cursor-pointer transition-all duration-200 text-left"
+					:class="{ 'sidebar-nav-item--active': item.active }"
+					@click="navigate(item)"
+					:title="isCollapsed ? item.label : ''"
+				>
+					<NIcon :size="18">
+						<component :is="item.icon" />
+					</NIcon>
+
+					<span v-if="!isCollapsed" class="whitespace-nowrap overflow-hidden text-ellipsis">
+						{{ item.label }}
+					</span>
+				</button>
+			</template>
+			<!-- Divider -->
+			<div class="sidebar-footer-divider" />
+
 			<n-dropdown
 				trigger="click"
 				placement="right-end"
@@ -221,6 +243,9 @@ watch(() => route.path, updateActiveState, { immediate: true });
 /* Footer with User Profile */
 .sidebar-footer {
 	padding: 12px 16px;
+}
+
+.sidebar-footer-divider {
 	border-top: 1px solid var(--border-color--light);
 }
 

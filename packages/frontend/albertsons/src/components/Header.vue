@@ -6,7 +6,9 @@
 				{{ subtitle }}
 			</div>
 		</div>
-		<div><n-input v-if="showSearch" round placeholder="Search workflows, projects .." /></div>
+		<div>
+			<n-input v-if="showSearch" class="rounded-md!" placeholder="Search workflows, projects .." />
+		</div>
 		<div class="cursor-pointer hover:text-primary transition-all">
 			<n-badge :value="3" :max="15"><Bell /></n-badge>
 		</div>
