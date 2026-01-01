@@ -141,7 +141,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, h } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUsersStore } from '@/features/settings/users/users.store';
 import dayjs from 'dayjs';
@@ -167,6 +167,8 @@ import {
 	NTooltip,
 	NSpace,
 	NDivider,
+	useDialog,
+	NDialogProvider,
 } from 'naive-ui';
 import {
 	Plus,
@@ -183,6 +185,8 @@ import {
 import { PROJECT_STATUS } from '@src/utils/constants';
 import { useToast } from '@/app/composables/useToast';
 import { albertsonsRestApiRequest } from '@src/utils/albertsonsRestApiRequest';
+import { handleAction as handleActionAPI } from '@src/utils/handleAction';
+import { deleteProject } from '@src/services/projects.service';
 import { PROJECT_ROLE } from '@src/utils/constants';
 
 const router = useRouter();
@@ -191,6 +195,7 @@ const showEditProjectModal = ref(false);
 const modalSubmitLoading = ref(false);
 const usersStore = useUsersStore();
 const toast = useToast();
+const dialog = useDialog();
 const searchQuery = ref('');
 const showProjectModal = computed({
 	get() {
@@ -239,6 +244,10 @@ const dotMenu = [
 	{
 		label: 'View',
 		key: 'view',
+	},
+	{
+		label: () => h('span', { class: 'text-danger' }, 'Delete'),
+		key: 'delete',
 	},
 ];
 
@@ -313,6 +322,9 @@ const handleAction = async (key, row) => {
 				break;
 			case 'view':
 				viewProject(row.id);
+				break;
+			case 'delete':
+				handleProjectDeleteConfirm(row.id);
 				break;
 			default:
 				console.error(`Unknown action key: ${key}`);
@@ -406,4 +418,39 @@ const onEdit = async () => {
 		modalSubmitLoading.value = false;
 	}
 };
+
+// ------------------- DELETE -------------------
+function handleProjectDeleteConfirm(projectId) {
+	dialog.error({
+		title: 'Delete Project',
+		content: 'Are you sure ?',
+		positiveText: 'Delete',
+		negativeText: 'Cancel',
+		draggable: true,
+		onPositiveClick: () => {
+			onDeleteProject(projectId);
+		},
+		onNegativeClick: () => {},
+	});
+}
+
+const onDeleteProject = (projectId) =>
+	handleActionAPI({
+		action: () => deleteProject(projectId),
+		onSuccess: () => {
+			toast.showMessage({
+				title: 'Project',
+				message: 'Project deleted successfully.',
+				type: 'success',
+			});
+			fetchAllProjects();
+		},
+		onError: (e) => {
+			toast.showMessage({
+				title: 'Project',
+				message: e.message || 'Failed to delete project.',
+				type: 'error',
+			});
+		},
+	});
 </script>

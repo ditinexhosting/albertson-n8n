@@ -10,6 +10,15 @@ export const getProjectDetails = (projectId: string) =>
 	albertsonsRestApiRequest('GET', `/v1/projects/${projectId}`);
 
 /**
+ * Delete project by project id
+ *
+ * @param projectId - Unique project id
+ * @returns success message
+ */
+export const deleteProject = (projectId: string) =>
+	albertsonsRestApiRequest('DELETE', `/v1/projects/delete/${projectId}`);
+
+/**
  * Fetch project list for logged in user
  *
  * @param userId - Unique user id

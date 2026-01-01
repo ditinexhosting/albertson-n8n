@@ -467,7 +467,7 @@ const categories = computed(() => {
 			id: c.toLowerCase().replace(/\s+/g, '-'),
 			label: c,
 		})),
-		{ id: 'more', label: 'More' },
+		...(unique.size > 0 ? [{ id: 'more', label: 'More' }] : []),
 	];
 });
 

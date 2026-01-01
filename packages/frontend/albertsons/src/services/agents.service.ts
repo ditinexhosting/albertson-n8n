@@ -45,3 +45,12 @@ export const addAgent = (projectId: string, payload: any) =>
  */
 export const removeAgent = (projectId: string, agentId: string) =>
 	albertsonsRestApiRequest('DELETE', `/v1/projects/remove-agent/${projectId}/${agentId}`);
+
+/**
+ * Delete agent by agent id
+ *
+ * @param agentId - Unique project id
+ * @returns success message
+ */
+export const deleteAgent = (agentId: string, workflowId: string) =>
+	albertsonsRestApiRequest('DELETE', `/v1/my-agents/delete/${agentId}/${workflowId}`);
