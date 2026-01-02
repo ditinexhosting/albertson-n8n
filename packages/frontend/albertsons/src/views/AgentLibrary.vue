@@ -79,7 +79,7 @@
 				</template>
 
 				<!-- Description -->
-				<p class="text-xs text-secondary line-clamp-2 min-h-12">
+				<p class="text-xs text-secondary line-clamp-2 min-h-13">
 					{{ card.agent?.description }}
 				</p>
 
@@ -267,7 +267,11 @@
 
 					<n-gi>
 						<n-form-item label="Agent" path="agentId">
-							<n-input :value="selectedAgent.agent?.name" readonly />
+							<n-input
+								:value="selectedAgent.agent?.name"
+								readonly
+								class="pointer-events-none border border-border-primary focus:border-border-primary focus:ring-0 hover:border-border-primary"
+							/>
 						</n-form-item>
 					</n-gi>
 				</n-grid>
@@ -369,7 +373,9 @@ import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUsersStore } from '@/features/settings/users/users.store';
 import { useToast } from '@/app/composables/useToast';
-import { albertsonsRestApiRequest } from '@src/utils/albertsonsRestApiRequest';
+import { handleAction } from '@src/utils/handleAction';
+import { getAllProjects, addAgentsToProject } from '@src/services/projects.service';
+import { getAllAgents, getAllAgentLibraries, publishAgentLib } from '@src/services/agents.service';
 
 import {
 	Search,
@@ -461,7 +467,7 @@ const categories = computed(() => {
 			id: c.toLowerCase().replace(/\s+/g, '-'),
 			label: c,
 		})),
-		{ id: 'more', label: 'More' },
+		...(unique.size > 0 ? [{ id: 'more', label: 'More' }] : []),
 	];
 });
 
@@ -533,58 +539,37 @@ const availableProjectsToMapWithAgent = computed(() => {
 	else return;
 });
 
-const fetchAllAgents = async () => {
-	try {
-		const apiResult = await albertsonsRestApiRequest('POST', `/v1/my-agents/all`, {
-			ownerId: usersStore.currentUser.id,
-		});
-		if (apiResult.length > 0) {
-			agents.value = apiResult;
-		}
-	} catch (e) {
-		console.error('Failed to load initial api data', e);
-	}
-};
+// ------------------- FETCH APIS -------------------
+const fetchAllProjects = () =>
+	handleAction({
+		action: () => getAllProjects(usersStore.currentUser.id),
+		onSuccess: (res) => {
+			projects.value = res || [];
+		},
+	});
 
-const fetchAgentLibraries = async () => {
-	try {
-		const apiResult = await albertsonsRestApiRequest(
-			'GET',
-			`/v1/agent-library/all/${usersStore.currentUser?.id}`,
-		);
-		if (apiResult.length > 0) {
-			agentLibraries.value = apiResult;
-		}
-	} catch (e) {
-		console.error('Failed to load initial api data', e);
-	}
-};
+const fetchAllAgents = () =>
+	handleAction({
+		action: () => getAllAgents(usersStore.currentUser.id),
+		onSuccess: (res) => {
+			agents.value = res || [];
+		},
+	});
 
-const fetchAllProjects = async () => {
-	try {
-		const apiResult = await albertsonsRestApiRequest('GET', `/v1/projects/all`, {
-			userId: usersStore.currentUser?.id,
-		});
-		if (apiResult) {
-			projects.value = apiResult;
-		}
-	} catch (e) {
-		console.error('Failed to load initial api data', e);
-	}
-};
+const fetchAgentLibraries = () =>
+	handleAction({
+		action: () => getAllAgentLibraries(usersStore.currentUser.id),
+		onSuccess: (res) => {
+			agentLibraries.value = res || [];
+		},
+	});
 
-const PublishAgentLibrary = async () => {
-	try {
-		loading.value = true;
-
-		//publish agent api
-		const apiResult = await albertsonsRestApiRequest(
-			'POST',
-			`/v1/agent-library/publish`,
-			formValue.value,
-		);
-		if (apiResult) {
-			loading.value = false;
+// ------------------- Publish APIS -------------------
+const PublishAgentLibrary = () =>
+	handleAction({
+		loadingRef: loading,
+		action: () => publishAgentLib(formValue.value),
+		onSuccess: () => {
 			showPublishModal.value = false;
 			formValue.value = {
 				agentId: '',
@@ -600,24 +585,14 @@ const PublishAgentLibrary = async () => {
 				type: 'success',
 			});
 			fetchAgentLibraries();
-		}
-	} catch (e) {
-		loading.value = false;
-		console.error('Failed to load initial api data', e);
-	}
-};
+		},
+	});
 
-const MapAgentProjectData = async (agentId: string) => {
-	try {
-		if (formProjectValue.value.projectId == '') return;
-		loadingAddToProject.value = true;
-		const apiResult = await albertsonsRestApiRequest(
-			'POST',
-			`/v1/projects/${formProjectValue.value.projectId}/add-agents`,
-			{ agentIds: [agentId] },
-		);
-		if (apiResult) {
-			loadingAddToProject.value = false;
+const MapAgentProjectData = (agentId: string) =>
+	handleAction({
+		loadingRef: loadingAddToProject,
+		action: () => addAgentsToProject(formProjectValue.value.projectId, { agentIds: [agentId] }),
+		onSuccess: () => {
 			showAddToProjectModal.value = false;
 			formProjectValue.value.projectId = '';
 			toast.showMessage({
@@ -626,16 +601,13 @@ const MapAgentProjectData = async (agentId: string) => {
 				type: 'success',
 			});
 			fetchAllProjects();
-		}
-	} catch (e) {
-		console.error('Failed to add agent in project.', e.message, e);
-		toast.showMessage({
-			title: `Agent Library`,
-			message: e.message || 'Failed to add agent in project.',
-			type: 'error',
-		});
-	} finally {
-		loadingAddToProject.value = false;
-	}
-};
+		},
+		onError: (e) => {
+			toast.showMessage({
+				title: `Agent Library`,
+				message: e.message || 'Failed to add agent in project.',
+				type: 'error',
+			});
+		},
+	});
 </script>

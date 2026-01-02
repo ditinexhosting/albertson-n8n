@@ -190,10 +190,13 @@ import {
 } from 'lucide-vue-next';
 import { PROJECT_STATUS } from '@src/utils/constants';
 import { useToast } from '@/app/composables/useToast';
-import { albertsonsRestApiRequest } from '@src/utils/albertsonsRestApiRequest';
 import { PROJECT_ROLE } from '@src/utils/constants';
 import { runWorkflow } from '@src/utils/runWorkflow';
 import { getProgressStatus } from '@src/utils/helper';
+import { handleAction } from '@src/utils/handleAction';
+import { addMember, getAllUsers, removeMember } from '@src/services/users.service';
+import { getProjectDetails } from '@src/services/projects.service';
+import { getAllAgents, removeAgent, addAgent } from '@src/services/agents.service';
 
 const router = useRouter();
 const route = useRoute();
@@ -544,152 +547,107 @@ function handleConfirm(row) {
 	});
 }
 
-const fetchProjectDetails = async () => {
-	try {
-		const apiResult = await albertsonsRestApiRequest('GET', `/v1/projects/${projectId}`);
-		if (apiResult.length > 0) {
-			project.value = apiResult[0];
-		}
-	} catch (e) {
-		router.push('/projects');
-		console.error('Failed to load initial api data', e);
-	}
-};
+// ------------------- FETCH APIS -------------------
+const fetchProjectDetails = () =>
+	handleAction({
+		action: () => getProjectDetails(projectId),
+		onSuccess: (res) => {
+			project.value = res?.[0];
+		},
+		onError: () => {
+			router.push('/projects');
+		},
+	});
 
-const fetchAllUsers = async () => {
-	try {
-		const apiResult = await albertsonsRestApiRequest('GET', `/v1/user-metadata/all`);
-		if (apiResult.length > 0) {
-			users.value = apiResult;
-		}
-	} catch (e) {
-		console.error('Failed to load initial api data', e);
-	}
-};
+const fetchAllUsers = () =>
+	handleAction({
+		action: getAllUsers,
+		onSuccess: (res) => {
+			users.value = res || [];
+		},
+	});
 
-const fetchAllAgents = async () => {
-	try {
-		const apiResult = await albertsonsRestApiRequest('POST', `/v1/my-agents/all`, {
-			ownerId: usersStore.currentUser.id,
-		});
-		if (apiResult.length > 0) {
-			agents.value = apiResult;
-		}
-	} catch (e) {
-		console.error('Failed to load initial api data', e);
-	}
-};
+const fetchAllAgents = () =>
+	handleAction({
+		action: () => getAllAgents(usersStore.currentUser.id),
+		onSuccess: (res) => {
+			agents.value = res || [];
+		},
+	});
 
-const onAddMember = async () => {
-	try {
-		modalSubmitLoading.value = true;
-		const apiResult = await albertsonsRestApiRequest(
-			'POST',
-			`/v1/projects/${projectId}/add-member`,
-			formValue.value,
-		);
-		if (apiResult) {
+// ------------------- ADD / UPDATE -------------------
+const onAddMember = () =>
+	handleAction({
+		loadingRef: modalSubmitLoading,
+		action: () => addMember(projectId, formValue.value),
+		onSuccess: () => {
 			showAddMemberModal.value = false;
-			formValue.value = {
-				users: [],
-				role: null,
-			};
-			toast.showMessage({
-				title: `Project`,
-				message: 'Members added successfully.',
-				type: 'success',
-			});
+			formValue.value = { users: [], role: null };
 			fetchProjectDetails();
-		}
-	} catch (e) {
-		console.error('Failed to create project.', e.message, e);
-		toast.showMessage({
-			title: `Project`,
-			message: e.message || 'Failed to add member.',
-			type: 'error',
-		});
-	} finally {
-		modalSubmitLoading.value = false;
-	}
-};
+		},
+	});
 
-const onAddAgent = async () => {
-	try {
-		modalSubmitLoading.value = true;
-		const apiResult = await albertsonsRestApiRequest(
-			'POST',
-			`/v1/projects/${projectId}/add-agents`,
-			formValue2.value,
-		);
-		if (apiResult) {
+const onAddAgent = () =>
+	handleAction({
+		loadingRef: modalSubmitLoading,
+		action: () => addAgent(projectId, formValue2.value),
+		onSuccess: () => {
 			showAddAgentModal.value = false;
-			formValue2.value = {
-				agentIds: [],
-			};
+			formValue2.value = { agentIds: [] };
 			toast.showMessage({
-				title: `Project`,
+				title: 'Project',
 				message: 'Agents added successfully.',
 				type: 'success',
 			});
 			fetchProjectDetails();
-		}
-	} catch (e) {
-		console.error('Failed to create project.', e.message, e);
-		toast.showMessage({
-			title: `Project`,
-			message: e.message || 'Failed to add agent.',
-			type: 'error',
-		});
-	} finally {
-		modalSubmitLoading.value = false;
-	}
-};
-
-const onRemoveAgent = async (agentId) => {
-	try {
-		const apiResult = await albertsonsRestApiRequest(
-			'DELETE',
-			`/v1/projects/remove-agent/${projectId}/${agentId}`,
-		);
-		if (apiResult) {
+		},
+		onError: (e) => {
 			toast.showMessage({
-				title: `Project`,
+				title: 'Project',
+				message: e.message || 'Failed to add agent.',
+				type: 'error',
+			});
+		},
+	});
+
+// ------------------- DELETE -------------------
+const onRemoveAgent = (agentId) =>
+	handleAction({
+		action: () => removeAgent(projectId, agentId),
+		onSuccess: () => {
+			toast.showMessage({
+				title: 'Project',
 				message: 'Agent removed successfully.',
 				type: 'success',
 			});
 			fetchProjectDetails();
-		}
-	} catch (e) {
-		console.error('Failed.', e.message, e);
-		toast.showMessage({
-			title: `Project`,
-			message: e.message || 'Failed to remove agent.',
-			type: 'error',
-		});
-	}
-};
-
-const onRemoveMember = async (userId) => {
-	try {
-		const apiResult = await albertsonsRestApiRequest(
-			'DELETE',
-			`/v1/projects/remove-member/${projectId}/${userId}`,
-		);
-		if (apiResult) {
+		},
+		onError: (e) => {
 			toast.showMessage({
-				title: `Project`,
+				title: 'Project',
+				message: e.message || 'Failed to remove agent.',
+				type: 'error',
+			});
+		},
+	});
+
+const onRemoveMember = (userId) =>
+	handleAction({
+		action: () => removeMember(projectId, userId),
+		onSuccess: () => {
+			fetchProjectDetails();
+			toast.showMessage({
+				title: 'Project',
 				message: 'Member removed successfully.',
 				type: 'success',
 			});
-			fetchProjectDetails();
-		}
-	} catch (e) {
-		console.error('Failed.', e.message, e);
-		toast.showMessage({
-			title: `Project`,
-			message: e.message || 'Failed to remove member.',
-			type: 'error',
-		});
-	}
-};
+		},
+		onError: (e) => {
+			toast.showMessage({
+				title: 'Project',
+				message: e.message || 'Failed to remove member.',
+				type: 'error',
+			});
+		},
+	});
 </script>

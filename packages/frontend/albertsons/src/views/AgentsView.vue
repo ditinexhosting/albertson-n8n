@@ -1,7 +1,6 @@
 <script setup>
-import { computed, onMounted, ref, h, toRaw, render } from 'vue';
+import { computed, onMounted, ref, h } from 'vue';
 import { useRouter } from 'vue-router';
-import { useUserAgentMappingsStore } from '@src/stores/userAgentMappings.store';
 import {
 	NIcon,
 	NButton,
@@ -9,17 +8,33 @@ import {
 	NDropdown,
 	NProgress,
 	NInput,
-	NGradientText,
 	NEmpty,
+	useDialog,
 } from 'naive-ui';
-import { Play, EllipsisVertical, Search, ClockCheck, Pause, Edit, Plus } from 'lucide-vue-next';
+import {
+	Play,
+	EllipsisVertical,
+	Search,
+	ClockCheck,
+	Pause,
+	Edit,
+	Plus,
+	Trash2,
+} from 'lucide-vue-next';
 import dayjs from 'dayjs';
 import { runWorkflow } from '@src/utils/runWorkflow';
 import { getProgressStatus } from '@src/utils/helper';
+import { handleAction as handleActionAPI } from '@src/utils/handleAction';
+import { getAllAgents, deleteAgent } from '@src/services/agents.service';
+import { useUsersStore } from '@/features/settings/users/users.store';
+import { useToast } from '@/app/composables/useToast';
 
 const router = useRouter();
+const usersStore = useUsersStore();
+const toast = useToast();
+const dialog = useDialog();
+const agents = ref([]);
 const searchQuery = ref('');
-const userAgentMappingsStore = useUserAgentMappingsStore();
 
 function renderIcon(icon) {
 	return () =>
@@ -30,20 +45,31 @@ function renderIcon(icon) {
 
 const options = [
 	{
-		label: 'Edit Workflow',
+		label: 'Edit',
 		key: 'edit',
 		icon: renderIcon(Edit),
+	},
+	{
+		label: () => h('span', { class: 'text-danger' }, 'Delete'),
+		key: 'delete',
+		icon: () => h(Trash2, { class: 'h-4 text-danger' }),
 	},
 ];
 
 onMounted(async () => {
-	await userAgentMappingsStore.fetchUserAgentMappings();
+	fetchAllAgents();
 });
 
-const userAgentMappingsData = computed(() => userAgentMappingsStore.getUserAgentMappings());
+const fetchAllAgents = () =>
+	handleActionAPI({
+		action: () => getAllAgents(usersStore.currentUser.id),
+		onSuccess: (res) => {
+			agents.value = res || [];
+		},
+	});
 
 const filteredUserAgentMappings = computed(() => {
-	return userAgentMappingsData.value.filter((item) =>
+	return agents.value.filter((item) =>
 		item?.workflow?.name?.toLowerCase().includes(searchQuery?.value?.toLowerCase()),
 	);
 });
@@ -142,9 +168,9 @@ function createColumns() {
 					h(
 						NDropdown,
 						{
-							trigger: 'hover',
+							trigger: 'click',
 							options,
-							onSelect: () => goToEditWorkflow(row.workflowId),
+							onSelect: (key) => handleOptionSelect(key, row),
 						},
 						{
 							default: () => h(EllipsisVertical, { class: 'w-4 cursor-pointer' }),
@@ -154,6 +180,57 @@ function createColumns() {
 		},
 	];
 }
+
+const handleOptionSelect = async (key, row) => {
+	try {
+		switch (key) {
+			case 'edit':
+				goToEditWorkflow(row.workflowId);
+				break;
+			case 'delete':
+				handleAgentDeleteConfirm(row);
+				break;
+			default:
+				console.error(`Unknown action key: ${key}`);
+		}
+	} catch (e) {
+		console.error('handle action failed', e);
+	}
+};
+
+// ------------------- DELETE AGENT -------------------
+function handleAgentDeleteConfirm(row) {
+	dialog.error({
+		title: 'Delete Agent',
+		content: 'Are you sure?',
+		positiveText: 'Delete',
+		negativeText: 'Cancel',
+		draggable: true,
+		onPositiveClick: () => {
+			onDeleteAgent(row.id, row.workflowId);
+		},
+	});
+}
+
+const onDeleteAgent = (agentId, workflowId) =>
+	handleActionAPI({
+		action: () => deleteAgent(agentId, workflowId),
+		onSuccess: () => {
+			toast.showMessage({
+				title: 'Agent',
+				message: 'Agent deleted successfully.',
+				type: 'success',
+			});
+			fetchAllAgents();
+		},
+		onError: (e) => {
+			toast.showMessage({
+				title: 'Agent',
+				message: e.message || 'Failed to delete agent.',
+				type: 'error',
+			});
+		},
+	});
 </script>
 
 <template>
