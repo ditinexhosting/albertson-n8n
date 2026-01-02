@@ -1,32 +1,15 @@
 <template>
 	<!-- Page shell -->
-	<div
-		class="dashboard-scroll-container flex flex-1 p-4! flex-col gap-4 bg-[var(--color--background--light-2)]"
-	>
+	<div class="dashboard-scroll-container flex flex-1 p-4! flex-col gap-4">
 		<!-- METRICS STRIP: white container with ONLY metric cards -->
-		<div class="metrics-strip">
-			<n-grid :cols="5" :x-gap="14" :y-gap="14">
-				<!-- System Health -->
-				<n-gi>
-					<div class="metric-card health-card">
-						<div class="health-value">
-							{{ metrics.systemHealth ? metrics.systemHealth : 92 }}<span class="percent">%</span>
-						</div>
-						<div class="health-label">
-							<CheckCircle2 class="health-icon" />
-							<span>System Health</span>
-						</div>
-						<n-tag size="small" round type="success" class="health-status"> Good </n-tag>
-						<div class="health-time">
-							<Clock class="time-icon" />
-							Updated 2s ago
-						</div>
-					</div>
-				</n-gi>
-
+		<div class="metrics-strip p-4! rounded-md">
+			<n-grid :cols="4" :x-gap="14" :y-gap="14">
 				<!-- Other metrics -->
 				<n-gi v-for="card in metricCards" :key="card.key">
-					<div class="metric-card compact-card">
+					<div
+						class="metric-card compact-card cursor-pointer rounded-md"
+						@click="onMetricCardClick(card.key)"
+					>
 						<div class="compact-header">
 							<span class="card-label">
 								{{ card.label }}
@@ -55,28 +38,29 @@
 		</div>
 
 		<!-- ACTION BUTTONS: outside metrics strip, unchanged -->
-		<div class="max-w-[1400px] mx-auto w-full">
-			<div class="flex flex-row gap-2">
-				<n-button
-					type="primary"
-					size="small"
-					round
-					class="action-btn primary"
-					@click="goToNewWorkflow"
+		<div class="max-w-350 mx-auto w-full">
+			<div class="flex flex-row gap-4">
+				<n-button class="rounded-md!" type="primary" @click="goToNewWorkflow"
+					><template #icon>
+						<NIcon>
+							<Plus />
+						</NIcon> </template
+					>Create Agent</n-button
 				>
-					<Plus class="btn-icon" />
-					Create Agent
-				</n-button>
-
-				<n-button size="small" round class="action-btn secondary" @click="goToExecutions">
-					<Play class="btn-icon btn-icon-outline" />
-					View Executions
-				</n-button>
-
-				<n-button size="small" round class="action-btn secondary" @click="router.push('/projects')">
-					<Zap class="btn-icon" />
-					Projects
-				</n-button>
+				<n-button class="rounded-md!" type="default" @click="goToExecutions"
+					><template #icon>
+						<NIcon>
+							<Play class="btn-icon btn-icon-outline" />
+						</NIcon> </template
+					>View Executions</n-button
+				>
+				<n-button class="rounded-md!" type="default" @click="goToExecutions"
+					><template #icon>
+						<NIcon>
+							<Zap class="btn-icon" />
+						</NIcon> </template
+					>Projects</n-button
+				>
 			</div>
 		</div>
 
@@ -87,7 +71,7 @@
 				<n-gi :span="16">
 					<div class="left-column">
 						<!-- NEEDS ATTENTION -->
-						<n-card size="small" class="needs-attention">
+						<n-card size="small" class="needs-attention rounded-md">
 							<div class="needs-header">
 								<div class="needs-title">
 									<AlertTriangle class="needs-title-icon" />
@@ -98,7 +82,7 @@
 
 							<div class="needs-list">
 								<!-- Card 1 -->
-								<div class="needs-item needs-critical">
+								<div class="needs-item needs-critical rounded-md!">
 									<div class="needs-left">
 										<div class="needs-icon critical-icon">
 											<XCircle class="needs-inner-icon" />
@@ -120,7 +104,7 @@
 								</div>
 
 								<!-- Card 2 -->
-								<div class="needs-item needs-warning">
+								<div class="needs-item needs-warning rounded-md!">
 									<div class="needs-left">
 										<div class="needs-icon warning-icon">
 											<AlertTriangle class="needs-inner-icon" />
@@ -142,14 +126,14 @@
 						</n-card>
 
 						<!-- ACTIVITY STREAM -->
-						<n-card size="small" class="activity-section">
+						<n-card size="small" class="activity-section rounded-md!">
 							<div class="activity-header">
 								<div class="activity-title">
 									<span class="live-dot"></span>
 									<span class="live-text">LIVE</span>
 									Activity Stream
 								</div>
-								<button class="view-all">
+								<button @click="goToAgents" class="view-all">
 									View all
 									<ChevronRight class="view-all-icon" />
 								</button>
@@ -198,7 +182,7 @@
 				<n-gi :span="8">
 					<div class="right-column">
 						<!-- MVP AGENTS -->
-						<n-card size="small" class="mvp-card">
+						<n-card size="small" class="mvp-card rounded-md!">
 							<div class="mvp-header">
 								<div class="mvp-title">
 									<Trophy class="mvp-trophy" />
@@ -212,7 +196,7 @@
 								<div v-if="agentsLoading && !mvpAgents.length" class="state">Loading agents...</div>
 
 								<div v-else-if="!agentsLoading && !mvpAgents.length" class="state">
-									No agents yet. Create your first agent to see stats here.
+									MVP agents coming soon.
 								</div>
 
 								<div v-else v-for="agent in mvpAgents" :key="agent.id" class="mvp-item">
@@ -236,11 +220,11 @@
 								</div>
 							</div>
 
-							<button class="mvp-footer-link">View all agents</button>
+							<!-- <button class="mvp-footer-link">View all agents</button> -->
 						</n-card>
 
 						<!-- 7‑DAY TREND -->
-						<n-card size="small" class="trend-card">
+						<n-card size="small" class="trend-card rounded-md!">
 							<div class="trend-header">
 								<div class="trend-title">7-Day Trend</div>
 							</div>
@@ -330,6 +314,10 @@ function goToNewWorkflow() {
 	router.push('/workflow/new');
 }
 
+function goToAgents() {
+	router.push('/agents');
+}
+
 function goToExecutions() {
 	router.push('/executions');
 }
@@ -338,20 +326,21 @@ function openWorkflow(id) {
 	router.push(`/workflow/${id}`);
 }
 
-function publishAsTemplate(id) {
-	templatesStore.publishAsTemplate(id);
-}
+const onMetricCardClick = (key) => {
+	if (key == 'agents') goToAgents();
+	else goToExecutions();
+};
 
 /* ACTIVITY STREAM DATA */
 const activities = computed(() => {
-	if (!workflows.value || workflows.value.length === 0) {
+	if (true) {
 		return [
 			{
 				id: 'placeholder-1',
 				type: 'info',
 				icon: '📋',
 				title: 'No activities yet',
-				subtitle: 'Create your first agent to see activity here',
+				subtitle: 'Activity Stream is coming soon.',
 				date: new Date().toLocaleDateString('en-GB'),
 				time: '',
 			},
@@ -406,8 +395,6 @@ const metrics = ref({
 // Fetch execution statistics from your API using the utility function
 async function loadExecutionStats() {
 	try {
-		console.log('📊 Fetching execution stats...');
-
 		// Get the current logged-in user id
 		const ownerId = usersStore.currentUser?.id;
 
@@ -432,7 +419,6 @@ async function loadExecutionStats() {
 			'GET',
 			`/v1/executions/list?${successParams.toString()}`,
 		);
-		console.log('✅ Success data:', successData);
 		const successCount = successData?.total || 0;
 
 		// Fetch error/failure executions
@@ -440,7 +426,6 @@ async function loadExecutionStats() {
 			'GET',
 			`/v1/executions/list?${failureParams.toString()}`,
 		);
-		console.log('❌ Failure data:', failureData);
 		const failureCount = failureData?.total || 0;
 
 		// Calculate totals
@@ -453,8 +438,6 @@ async function loadExecutionStats() {
 			total,
 			successRate,
 		};
-
-		console.log('📈 Final Execution Stats:', executionStats.value);
 		return executionStats.value;
 	} catch (e) {
 		console.error('❌ Failed to load execution stats:', e);
@@ -550,7 +533,7 @@ const metricCards = computed(() => [
 	{
 		key: 'agents',
 		label: 'ACTIVE AGENTS',
-		value: String(metrics.value.activeAgents),
+		value: String(rawAgents.value?.length ?? 0),
 		delta:
 			(metrics.value.activeAgentsDelta >= 0 ? '+' : '') + metrics.value.activeAgentsDelta + '%',
 		positive: metrics.value.activeAgentsDelta >= 0,
@@ -573,19 +556,20 @@ const normalizedAgents = computed(() =>
 );
 
 const mvpAgents = computed(() =>
-	normalizedAgents.value
-		.slice()
-		.sort((a, b) => {
-			if ((b.successRate ?? 0) === (a.successRate ?? 0)) {
-				return (b.runs ?? 0) - (a.runs ?? 0);
-			}
-			return (b.successRate ?? 0) - (a.successRate ?? 0);
-		})
-		.slice(0, 5)
-		.map((agent, index) => ({
-			...agent,
-			rank: index + 1,
-		})),
+	// normalizedAgents.value
+	// 	.slice()
+	// 	.sort((a, b) => {
+	// 		if ((b.successRate ?? 0) === (a.successRate ?? 0)) {
+	// 			return (b.runs ?? 0) - (a.runs ?? 0);
+	// 		}
+	// 		return (b.successRate ?? 0) - (a.successRate ?? 0);
+	// 	})
+	// 	.slice(0, 5)
+	// 	.map((agent, index) => ({
+	// 		...agent,
+	// 		rank: index + 1,
+	// 	})),
+	[],
 );
 
 /* TREND DATA */
@@ -651,10 +635,8 @@ onMounted(async () => {
 /* METRICS STRIP CONTAINER */
 .metrics-strip {
 	background: white;
-	border-radius: 18px;
 	border: 1px solid var(--border-color--light);
 	box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
-	padding: 20px 28px;
 	max-width: 1400px;
 	margin: 0 auto;
 	width: 100%;
@@ -662,7 +644,6 @@ onMounted(async () => {
 
 /* metric cards */
 .metric-card {
-	border-radius: 12px;
 	border: 1px solid var(--border-color--light);
 	box-shadow: none;
 	display: flex;
@@ -675,7 +656,6 @@ onMounted(async () => {
 
 /* shared metric card base */
 .metric-card {
-	border-radius: 14px;
 	border: 1px solid var(--border-color--light);
 	box-shadow: none;
 	display: flex;
@@ -756,7 +736,6 @@ onMounted(async () => {
 .compact-card {
 	display: flex;
 	flex-direction: column;
-	margin-top: 14px;
 	justify-content: center;
 }
 
@@ -884,7 +863,6 @@ onMounted(async () => {
 /* NEEDS ATTENTION */
 .needs-attention {
 	background: var(--color--background--light-3) !important;
-	border-radius: 16px;
 	border: 1px solid var(--color--danger--tint-1) !important;
 }
 

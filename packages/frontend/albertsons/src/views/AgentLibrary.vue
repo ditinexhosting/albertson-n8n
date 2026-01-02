@@ -79,7 +79,7 @@
 				</template>
 
 				<!-- Description -->
-				<p class="text-xs text-secondary line-clamp-2">
+				<p class="text-xs text-secondary line-clamp-2 min-h-12">
 					{{ card.agent?.description }}
 				</p>
 
@@ -114,7 +114,7 @@
 		<n-modal
 			v-model:show="showModal"
 			preset="card"
-			:style="{ width: '460px', maxWidth: '95vw' }"
+			style="width: 500px"
 			:bordered="false"
 			:closable="true"
 			:on-close="closeModal"
@@ -134,7 +134,7 @@
 					<span class="text-xs bg-gray-100! p-1! px-2!">{{ selectedAgent?.version }}</span>
 				</div>
 			</template>
-			<h2 class="text-lg font-bold! mb-3!">
+			<h2 class="text-lg font-bold! mb-4!">
 				{{ selectedAgent?.agent?.name }}
 			</h2>
 
@@ -144,7 +144,7 @@
 			</p>
 
 			<!-- Stats Row -->
-			<div class="grid grid-cols-3 gap-3 p-3! bg-gray-100! rounded-lg my-5!">
+			<div class="grid grid-cols-3 gap-3 p-3! bg-gray-100! rounded-lg my-6!">
 				<div class="text-center">
 					<div class="text-base font-semibold">
 						{{ selectedAgent?.total_runs }}
@@ -164,7 +164,7 @@
 			</div>
 
 			<!-- Capabilities -->
-			<div class="mb-4">
+			<div>
 				<div class="text-xs font-semibold uppercase tracking-wide text-secondary mb-3!">
 					Capabilities
 				</div>
@@ -236,13 +236,69 @@
 			</template>
 		</n-modal>
 
+		<!-- Add Agent to Project Modal -->
+		<n-modal
+			v-model:show="showAddToProjectModal"
+			:mask-closable="false"
+			preset="card"
+			size="huge"
+			style="width: 450px"
+			class="rounded-lg!"
+		>
+			<template #header>Add Agent to Project</template>
+
+			<n-form
+				ref="formRef"
+				:model="formProjectValue"
+				:rules="formProjectRules"
+				label-placement="top"
+				size="medium"
+			>
+				<n-grid x-gap="12" :cols="1">
+					<n-gi>
+						<n-form-item label="Project" path="projectId">
+							<n-select
+								filterable
+								v-model:value="formProjectValue.projectId"
+								:options="availableProjectsToMapWithAgent"
+							/>
+						</n-form-item>
+					</n-gi>
+
+					<n-gi>
+						<n-form-item label="Agent" path="agentId">
+							<n-input :value="selectedAgent.agent?.name" readonly />
+						</n-form-item>
+					</n-gi>
+				</n-grid>
+			</n-form>
+
+			<!-- Action Buttons -->
+			<template #footer>
+				<div class="flex justify-end gap-2">
+					<n-button @click="showAddToProjectModal = false">Cancel</n-button>
+					<n-button
+						:loading="loadingAddToProject"
+						:disabled="loadingAddToProject"
+						type="primary"
+						@click="() => MapAgentProjectData(selectedAgent?.agentId)"
+					>
+						<template #icon>
+							<n-icon :size="14"><FolderPlus /></n-icon>
+						</template>
+						Add to Project</n-button
+					>
+				</div>
+			</template>
+		</n-modal>
+
 		<!-- Publish Agent Modal -->
 		<n-modal
 			v-model:show="showPublishModal"
 			:mask-closable="false"
 			preset="card"
 			size="huge"
-			style="width: 600px"
+			style="width: 500px"
 			class="rounded-lg!"
 		>
 			<template #header>Publish Agent</template>
@@ -356,12 +412,27 @@ const usersStore = useUsersStore();
 const router = useRouter();
 const activeCategory = ref('all');
 const showPublishModal = ref(false);
+const showAddToProjectModal = ref(false);
+const loadingAddToProject = ref(false);
 const agentLibraries = ref([]);
 const agents = ref([]);
+const projects = ref([]);
 const loading = ref(false);
 const showModal = ref(false);
 const searchQuery = ref('');
 const selectedAgent = ref<any | null>(null);
+
+const formProjectValue = ref({
+	projectId: '',
+});
+
+const formProjectRules = {
+	projectId: {
+		required: true,
+		message: 'You must select a project.',
+		trigger: ['input', 'blur'],
+	},
+};
 
 const formValue = ref({
 	agentId: '',
@@ -430,11 +501,7 @@ function closeModal() {
 
 function HandleActions(action: string, id?: string) {
 	if (action == 'show_toast') {
-		toast.showMessage({
-			title: `Upcoming Feature`,
-			message: 'Upcoming feature.',
-			type: 'info',
-		});
+		showAddToProjectModal.value = true;
 	} else if (action == 'show_navigation') {
 		router.push(`/workflow/${id}`);
 	}
@@ -445,6 +512,7 @@ onMounted(async () => {
 	try {
 		fetchAgentLibraries();
 		fetchAllAgents();
+		fetchAllProjects();
 	} catch (e) {
 		console.error('Failed to load initial api data for agent library', e);
 	}
@@ -457,6 +525,20 @@ const availableAgentsToAddInProject = computed(() => {
 			label: agent.workflow?.name,
 			value: agent.workflow?.id,
 		}));
+});
+
+const availableProjectsToMapWithAgent = computed(() => {
+	if (selectedAgent)
+		return projects.value
+			.filter(
+				(project) =>
+					!project?.mapped_agents?.some((agent) => agent.agentId === selectedAgent.value?.agentId),
+			)
+			.map((project) => ({
+				label: project.name,
+				value: project.id,
+			}));
+	else return;
 });
 
 const fetchAllAgents = async () => {
@@ -485,6 +567,20 @@ const fetchAgentLibraries = async () => {
 		console.error('Failed to load initial api data', e);
 	}
 };
+
+const fetchAllProjects = async () => {
+	try {
+		const apiResult = await albertsonsRestApiRequest('GET', `/v1/projects/all`, {
+			userId: usersStore.currentUser?.id,
+		});
+		if (apiResult) {
+			projects.value = apiResult;
+		}
+	} catch (e) {
+		console.error('Failed to load initial api data', e);
+	}
+};
+
 const PublishAgentLibrary = async () => {
 	try {
 		loading.value = true;
@@ -516,6 +612,38 @@ const PublishAgentLibrary = async () => {
 	} catch (e) {
 		loading.value = false;
 		console.error('Failed to load initial api data', e);
+	}
+};
+
+const MapAgentProjectData = async (agentId: string) => {
+	try {
+		if (formProjectValue.value.projectId == '') return;
+		loadingAddToProject.value = true;
+		const apiResult = await albertsonsRestApiRequest(
+			'POST',
+			`/v1/projects/${formProjectValue.value.projectId}/add-agents`,
+			{ agentIds: [agentId] },
+		);
+		if (apiResult) {
+			loadingAddToProject.value = false;
+			showAddToProjectModal.value = false;
+			formProjectValue.value.projectId = '';
+			toast.showMessage({
+				title: `Agent Library`,
+				message: 'Agent is added to Project.',
+				type: 'success',
+			});
+			fetchAllProjects();
+		}
+	} catch (e) {
+		console.error('Failed to add agent in project.', e.message, e);
+		toast.showMessage({
+			title: `Agent Library`,
+			message: e.message || 'Failed to add agent in project.',
+			type: 'error',
+		});
+	} finally {
+		loadingAddToProject.value = false;
 	}
 };
 </script>

@@ -1,11 +1,21 @@
 <script setup>
-import { computed, onMounted, ref, h, toRaw } from 'vue';
+import { computed, onMounted, ref, h, toRaw, render } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserAgentMappingsStore } from '@src/stores/userAgentMappings.store';
-import { NIcon, NButton, NDataTable, NDropdown, NProgress, NInput, NGradientText } from 'naive-ui';
+import {
+	NIcon,
+	NButton,
+	NDataTable,
+	NDropdown,
+	NProgress,
+	NInput,
+	NGradientText,
+	NEmpty,
+} from 'naive-ui';
 import { Play, EllipsisVertical, Search, ClockCheck, Pause, Edit, Plus } from 'lucide-vue-next';
 import dayjs from 'dayjs';
 import { runWorkflow } from '@src/utils/runWorkflow';
+import { getProgressStatus } from '@src/utils/helper';
 
 const router = useRouter();
 const searchQuery = ref('');
@@ -63,6 +73,7 @@ function createColumns() {
 		{
 			title: () => tableHeader('PROJECT'),
 			key: 'project.name',
+			render: (row) => row.project?.name ?? '-',
 		},
 		{
 			title: () => tableHeader('STATUS'),
@@ -74,7 +85,7 @@ function createColumns() {
 					'span',
 					{
 						class: [
-							'p-1.5! flex items-center justify-center w-[4.5rem] rounded-full text-[11px]! gap-1!',
+							'p-1.5! flex items-center justify-center w-[4.5rem] rounded-md text-[11px]! gap-1!',
 							isActive
 								? 'bg-[var(--color-light-green)]! text-[var(--color--success)]'
 								: 'bg-[var(--color-light-orange)]! text-[var(--color-warning-orange)]!',
@@ -113,7 +124,7 @@ function createColumns() {
 					{ class: 'w-4' },
 					h(NProgress, {
 						type: 'line',
-						status: 'success',
+						status: getProgressStatus(row.success_rate),
 						percentage: row.success_rate,
 						indicatorPlacement: 'inside',
 					}),
@@ -148,14 +159,13 @@ function createColumns() {
 <template>
 	<div class="p-4! w-full">
 		<div class="flex items-center justify-between pb-4!">
-			<div class="flex items-start flex-col gap-2">
-				<div class="text-2xl font-bold">Agents</div>
-				<div class="text-base text-secondary">
-					Automate your business processes with intelligent agents
-				</div>
-			</div>
+			<n-input v-model:value="searchQuery" placeholder="Search agents" class="w-64! rounded-md!">
+				<template #prefix>
+					<n-icon :component="Search" />
+				</template>
+			</n-input>
 
-			<n-button type="primary" @click="goToNewWorkflow"
+			<n-button class="rounded-md!" type="primary" @click="goToNewWorkflow"
 				><template #icon>
 					<NIcon>
 						<Plus />
@@ -163,26 +173,9 @@ function createColumns() {
 				>New Agent</n-button
 			>
 		</div>
-
-		<div class="py-4!">
-			<n-input v-model:value="searchQuery" placeholder="Search agents" class="w-64!">
-				<template #prefix>
-					<n-icon :component="Search" />
-				</template>
-			</n-input>
-			<!-- <button class="filter-btn">
-				<Funnel size="12" />
-				Filters
-			</button> -->
-		</div>
-		<div class="overflow-y-scroll h-130">
+		<div class="overflow-y-scroll h-140">
 			<n-data-table :columns="columns" :data="filteredUserAgentMappings" :scroll-x="900">
-				<template #empty>
-					<div class="flex flex-col items-center justify-center py-20 text-secondary">
-						<div class="text-base font-semibold">No agents available</div>
-						<div class="text-sm mt-1">Create an agent to get started</div>
-					</div>
-				</template>
+				<template #empty> <n-empty description="No agents found" /> </template>
 			</n-data-table>
 		</div>
 	</div>

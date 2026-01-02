@@ -25,6 +25,7 @@ import { usePostHog } from '@/app/stores/posthog.store';
 import { TEMPLATE_SETUP_EXPERIENCE } from '@/app/constants/experiments';
 import { useUsersStore } from '@/features/settings/users/users.store';
 import { ROUTERS } from '@src/utils/constants.ts';
+import { subtle } from 'crypto';
 
 /** custom components */
 const Header = async () => await import('@src/components/Header.vue');
@@ -159,6 +160,7 @@ export const routes: RouteRecordRaw[] = [
 			middleware: ['authenticated'],
 			header: {
 				title: 'Admin Console',
+				subtitle: 'Manage users, credentials and other things.',
 				showBack: false,
 			},
 		},
@@ -175,6 +177,7 @@ export const routes: RouteRecordRaw[] = [
 			middleware: ['authenticated'],
 			header: {
 				title: 'Projects',
+				subtitle: 'Manage your automation projects and agents.',
 				showBack: false,
 			},
 		},
@@ -208,6 +211,8 @@ export const routes: RouteRecordRaw[] = [
 			middleware: ['authenticated'],
 			header: {
 				title: 'My Agents',
+				subtitle: 'Automate your business processes with intelligent agents',
+				showSearch: false,
 				showBack: false,
 			},
 		},
@@ -261,6 +266,7 @@ export const routes: RouteRecordRaw[] = [
 			middleware: ['authenticated'],
 			header: {
 				title: 'Executions',
+				subtitle: 'Monitor agent execution history',
 				showBack: false,
 			},
 		},
