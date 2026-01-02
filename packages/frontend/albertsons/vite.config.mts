@@ -138,12 +138,19 @@ const plugins: UserConfig['plugins'] = [
 		transformIndexHtml: (html, ctx) => {
 			// Skip config tags when using Vite dev server. Otherwise the BE
 			// will replace it with the actual config script in cli/src/commands/start.ts.
-			return ctx.server
-				? html
-						.replace('%CONFIG_TAGS%', '')
-						.replaceAll('/{{BASE_PATH}}', '//localhost:5678')
-						.replaceAll('/{{REST_ENDPOINT}}', '/rest')
-				: html;
+			if (ctx.server) {
+				// Dev server
+				return html
+					.replace('%CONFIG_TAGS%', '')
+					.replaceAll('/{{BASE_PATH}}', '//localhost:5678')
+					.replaceAll('/{{REST_ENDPOINT}}', '/rest');
+			} else {
+				// Build - replace with actual publicPath or leave for backend
+				return html
+					.replace('%CONFIG_TAGS%', '') // Remove if backend handles this
+					.replaceAll('{{BASE_PATH}}', publicPath.replace(/\/$/, '')) // Remove trailing slash
+					.replaceAll('{{REST_ENDPOINT}}', '/rest');
+			}
 		},
 	},
 	// For sanitize-html
@@ -197,10 +204,10 @@ export default mergeConfig(
 			BASE_PATH: `'${publicPath}'`,
 		},
 		preview: {
-    	allowedHosts: true,
-  	},
+			allowedHosts: true,
+		},
 		server: {
-    	allowedHosts: true,
+			allowedHosts: true,
 			port: 8080,
 			proxy: {
 				'/rest': {

@@ -3,7 +3,7 @@ import { useRootStore } from '@n8n/stores/useRootStore';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
-const API_BASE_URL = import.meta.env.ALBERTSONS_API_BASE_URL ?? 'http://localhost:8000/api';
+const API_BASE_URL = import.meta.env.VUE_ALBERTSONS_API_BASE_URL ?? '/api';
 
 export async function albertsonsRestApiRequest<T = any>(
 	method: HttpMethod,
