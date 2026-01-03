@@ -322,7 +322,15 @@
 								filterable
 								v-model:value="formValue.agentId"
 								:options="availableAgentsToAddInProject"
-							/>
+								placeholder="Select agent"
+							>
+								<template #empty>
+									<div class="flex flex-col items-center gap-1 py-4 text-secondary">
+										<span class="font-medium">No agents available</span>
+										<span class="text-xs">Create an agent to publish</span>
+									</div>
+								</template>
+							</n-select>
 						</n-form-item>
 					</n-gi>
 
