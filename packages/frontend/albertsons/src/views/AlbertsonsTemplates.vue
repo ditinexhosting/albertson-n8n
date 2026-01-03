@@ -1,6 +1,6 @@
 <template>
 	<div class="p-4! w-full h-screen">
-		<!-- Strip Container (unchanged) -->
+		<!-- Strip Container -->
 		<n-card :bordered="true" class="rounded-lg!">
 			<div class="flex items-center justify-between">
 				<div class="flex items-center">
@@ -41,9 +41,14 @@
 		<!-- Template Count -->
 		<p class="text-sm text-secondary py-3! pl-0.5!">{{ filteredTemplates.length }} templates</p>
 
+		<!-- Loading State -->
+		<div v-if="isLoading" class="text-center py-20 text-secondary font-semibold">
+			Loading templates...
+		</div>
+
 		<!-- Empty State -->
 		<div
-			v-if="filteredTemplates.length === 0"
+			v-else-if="filteredTemplates.length === 0"
 			class="text-center py-20 text-secondary font-semibold"
 		>
 			No templates found.
@@ -260,7 +265,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import {
 	Search,
 	Users,
@@ -279,12 +285,26 @@ import {
 	RefreshCw,
 } from 'lucide-vue-next';
 import { NButton, NInput, NTag, NModal, NCard, NIcon } from 'naive-ui';
+import { albertsonsRestApiRequest } from '@src/utils/albertsonsRestApiRequest';
+import { useWorkflowsStore } from '@/app/stores/workflows.store';
+import { useUIStore } from '@/app/stores/ui.store';
+import { useBuilderStore } from '@/features/ai/assistant/builder.store';
+
+// Router
+const router = useRouter();
+
+// Stores
+const workflowsStore = useWorkflowsStore();
+const uiStore = useUIStore();
+const builderStore = useBuilderStore();
 
 // State
 const searchQuery = ref('');
 const activeCategory = ref('all');
 const showModal = ref(false);
 const selectedTemplate = ref<any | null>(null);
+const templates = ref<any[]>([]);
+const isLoading = ref(false);
 
 // Categories
 const categories = [
@@ -298,72 +318,70 @@ const categories = [
 
 // Setup steps
 const setupSteps = [
-	{
-		title: 'Set up the trigger',
-		description: 'Configure when your workflow should run',
-	},
-	{
-		title: 'Add processing logic',
-		description: 'Connect nodes and define how data flows',
-	},
-	{
-		title: 'Test and activate',
-		description: 'Run your workflow and review the results',
-	},
+	{ title: 'Set up the trigger', description: 'Configure when your workflow should run' },
+	{ title: 'Add processing logic', description: 'Connect nodes and define how data flows' },
+	{ title: 'Test and activate', description: 'Run your workflow and review the results' },
 ];
 
-// Templates (category + one chip)
-const templates = ref([
-	{
-		id: 1,
-		name: 'Hello World Workflow',
-		description:
-			'Your first workflow – learn the basics of creating and running agents in AgentSpace.',
-		category: 'Getting Started',
-		uses: '2.8K',
-		nodes: 3,
-		fullDescription:
-			"This template is perfect for beginners who want to understand how AgentSpace works. You'll create a simple workflow that runs, processes data ",
-		requirement: 'No prior experience required',
-		tags: [{ label: 'Manual', icon: Clock, type: 'default' }],
-	},
-	{
-		id: 2,
-		name: 'Slack Notification Bot',
-		description: 'Send automated notifications to Slack channels when important events occur.',
-		category: 'Notifications',
-		uses: '1.9K',
-		nodes: 4,
-		fullDescription:
-			'Automatically post messages into Slack when key events happen in your systems. Configure channels, formatting and delivery rules.',
-		requirement: 'Slack workspace access',
-		tags: [{ label: 'Webhook', icon: Webhook, type: 'info' }],
-	},
-	{
-		id: 3,
-		name: 'Daily Sales Report',
-		description: 'Automatically generate and distribute daily sales summaries to stakeholders.',
-		category: 'Reporting',
-		uses: '1.2K',
-		nodes: 8,
-		fullDescription:
-			'Collect sales data, calculate KPIs and email a daily digest to your team. Great for monitoring performance trends.',
-		requirement: 'Analytics or database access',
-		tags: [{ label: 'Schedule', icon: Clock, type: 'warning' }],
-	},
-	{
-		id: 4,
-		name: 'Google Sheets Sync',
-		description: 'Two-way synchronization between your data and Google Sheets.',
-		category: 'Data Sync',
-		uses: '1.6K',
-		nodes: 5,
-		fullDescription:
-			'Keep Google Sheets and your source of truth aligned by syncing rows on a schedule.',
-		requirement: 'Google account',
-		tags: [{ label: 'Schedule', icon: Clock, type: 'warning' }],
-	},
-]);
+// Fetch templates from API
+onMounted(async () => {
+	await fetchTemplates();
+});
+
+async function fetchTemplates() {
+	isLoading.value = true;
+	try {
+		const response = await albertsonsRestApiRequest('GET', '/v1/templates/all');
+		const templatesData = Array.isArray(response) ? response : response?.data || [];
+
+		templates.value = templatesData.map((template: any) => {
+			const nodeCount = template.nodes?.length || 0;
+
+			// Determine category
+			let category = 'Getting Started';
+			const name = (template.name || '').toLowerCase();
+			const desc = (template.description || '').toLowerCase();
+			if (name.includes('sync') || desc.includes('sync')) category = 'Data Sync';
+			else if (name.includes('notification') || name.includes('slack') || name.includes('email'))
+				category = 'Notifications';
+			else if (name.includes('report') || desc.includes('report')) category = 'Reporting';
+			else if (name.includes('ai') || name.includes('agent') || desc.includes('ai'))
+				category = 'AI Automation';
+
+			// Determine tags
+			const tags = [];
+			const chatTrigger = template.nodes?.find((n: any) => n.type?.includes('chatTrigger'));
+			const webhookTrigger = template.nodes?.find((n: any) => n.type?.includes('webhook'));
+			const scheduleTrigger = template.nodes?.find(
+				(n: any) => n.type?.includes('schedule') || n.type?.includes('cron'),
+			);
+			if (chatTrigger) tags.push({ label: 'Chat', icon: MessageCircle, type: 'success' });
+			if (webhookTrigger) tags.push({ label: 'Webhook', icon: Webhook, type: 'info' });
+			if (scheduleTrigger) tags.push({ label: 'Schedule', icon: Clock, type: 'warning' });
+			if (tags.length === 0) tags.push({ label: 'Manual', icon: Clock, type: 'default' });
+
+			return {
+				id: template.id,
+				name: template.name || 'Untitled Template',
+				description: template.description || 'No description available',
+				category,
+				uses: '0',
+				nodes: nodeCount,
+				fullDescription: template.description || 'No detailed description available',
+				requirement: 'No prior experience required',
+				tags,
+				workflowId: template.workflowId,
+				authorName: template.authorName,
+				rawNodes: template.nodes,
+				rawConnections: template.connections,
+			};
+		});
+	} catch (error) {
+		console.error('Failed to fetch templates:', error);
+	} finally {
+		isLoading.value = false;
+	}
+}
 
 // Filtered list
 const filteredTemplates = computed(() => {
@@ -408,8 +426,33 @@ function closeModal() {
 	showModal.value = false;
 }
 
-function handleUseTemplate() {
-	console.log('Use template:', selectedTemplate.value?.id);
-	closeModal();
+async function handleUseTemplate() {
+	if (!selectedTemplate.value) return;
+
+	try {
+		// Navigate to new workflow
+		await router.push({ name: 'NodeViewNew', params: { name: 'new' } });
+		await new Promise((resolve) => setTimeout(resolve, 300));
+
+		const workflowJson = JSON.stringify({
+			nodes: selectedTemplate.value.rawNodes || [],
+			connections: selectedTemplate.value.rawConnections || {},
+		});
+
+		const result = builderStore.applyWorkflowUpdate(workflowJson);
+
+		if (result.success && result.workflowData) {
+			if (result.workflowData.nodes) workflowsStore.setNodes(result.workflowData.nodes);
+			if (result.workflowData.connections)
+				workflowsStore.setConnections(result.workflowData.connections);
+			uiStore.stateIsDirty = true;
+		} else {
+			console.error('Failed to apply workflow:', result.error);
+		}
+
+		closeModal();
+	} catch (error) {
+		console.error('Failed to use template:', error);
+	}
 }
 </script>
