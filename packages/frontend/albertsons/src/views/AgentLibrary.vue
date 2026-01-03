@@ -1,11 +1,11 @@
 <template>
 	<div class="p-4! w-full h-screen">
 		<!-- Strip Container -->
-		<n-card :bordered="true" class="rounded-lg!">
+		<n-card :bordered="true" class="rounded-md!">
 			<!-- Page Header -->
 			<div class="flex items-center justify-between">
 				<div class="flex items-start">
-					<Library :size="22" class="text-gray-500 mr-3" />
+					<Library :size="22" class="text-secondary mr-3" />
 					<div class="flex flex-col">
 						<div class="text-lg font-semibold mb-2">Agent Library</div>
 						<div class="text-sm text-secondary">
@@ -14,7 +14,7 @@
 					</div>
 				</div>
 
-				<n-button type="primary" size="medium" @click="showPublishModal = true">
+				<n-button class="rounded-md!" type="primary" @click="showPublishModal = true">
 					<template #icon>
 						<n-icon><Plus /></n-icon>
 					</template>
@@ -23,7 +23,11 @@
 			</div>
 
 			<!-- Search -->
-			<n-input v-model:value="searchQuery" placeholder="Search agents..." class="w-64! my-6!">
+			<n-input
+				v-model:value="searchQuery"
+				placeholder="Search agents..."
+				class="w-64! rounded-md! my-6!"
+			>
 				<template #prefix>
 					<n-icon :component="Search" />
 				</template>
@@ -60,7 +64,7 @@
 				:key="card?.id"
 				:bordered="true"
 				hoverable
-				class="cursor-pointer transition-all flex-[1_1_24rem] max-w-[24rem] rounded-lg!"
+				class="cursor-pointer transition-all flex-[1_1_24rem] max-w-[24rem] rounded-md!"
 				@click="openAgentDetail(card)"
 			>
 				<template #header>
@@ -118,7 +122,7 @@
 			:bordered="false"
 			:closable="true"
 			:on-close="closeModal"
-			class="rounded-lg! px-4!"
+			class="rounded-md! px-4!"
 		>
 			<template #header>
 				<div class="flex flex-wrap items-center gap-2">
@@ -144,7 +148,7 @@
 			</p>
 
 			<!-- Stats Row -->
-			<div class="grid grid-cols-3 gap-3 p-3! bg-gray-100! rounded-lg my-6!">
+			<div class="grid grid-cols-3 gap-3 p-3! bg-gray-100! rounded-md my-6!">
 				<div class="text-center">
 					<div class="text-base font-semibold">
 						{{ selectedAgent?.total_runs }}
@@ -158,7 +162,7 @@
 					<div class="text-xs text-gray-500">Installs</div>
 				</div>
 				<div class="text-center">
-					<div class="text-base font-semibold">{{ selectedAgent?.success_rate }}%</div>
+					<div class="text-base font-semibold">{{ selectedAgent?.success_rate ?? '0' }}%</div>
 					<div class="text-xs text-gray-500">Success rate</div>
 				</div>
 			</div>
@@ -201,7 +205,7 @@
 			</div>
 
 			<!-- Owner Info -->
-			<div class="flex items-center gap-3 p-3! bg-gray-100! rounded-lg my-5!">
+			<div class="flex items-center gap-3 p-3! bg-gray-100! rounded-md my-5!">
 				<n-avatar round size="small" color="#01529f" class="p-5!">{{
 					(selectedAgent?.owner?.firstName?.[0] || '') + (selectedAgent?.owner?.lastName?.[0] || '')
 				}}</n-avatar>
@@ -217,16 +221,13 @@
 			<template #footer>
 				<div class="flex justify-end gap-2">
 					<n-button @click="closeModal">Cancel</n-button>
-					<n-button @click="() => HandleActions('show_toast')">
+					<n-button @click="() => handleSelectedActions('map_with_project')">
 						<template #icon>
 							<n-icon :size="14"><FolderPlus /></n-icon>
 						</template>
 						Add to Project</n-button
 					>
-					<n-button
-						type="primary"
-						@click="() => HandleActions('show_navigation', selectedAgent?.agentId)"
-					>
+					<n-button type="primary" @click="() => handleSelectedActions('use_agent', selectedAgent)">
 						<template #icon>
 							<n-icon :size="14"><Play /></n-icon>
 						</template>
@@ -243,7 +244,7 @@
 			preset="card"
 			size="huge"
 			style="width: 450px"
-			class="rounded-lg!"
+			class="rounded-md!"
 		>
 			<template #header>Add Agent to Project</template>
 
@@ -303,7 +304,7 @@
 			preset="card"
 			size="huge"
 			style="width: 500px"
-			class="rounded-lg!"
+			class="rounded-md!"
 		>
 			<template #header>Publish Agent</template>
 
@@ -375,7 +376,12 @@ import { useUsersStore } from '@/features/settings/users/users.store';
 import { useToast } from '@/app/composables/useToast';
 import { handleAction } from '@src/utils/handleAction';
 import { getAllProjects, addAgentsToProject } from '@src/services/projects.service';
-import { getAllAgents, getAllAgentLibraries, publishAgentLib } from '@src/services/agents.service';
+import {
+	getAllAgents,
+	getAllAgentLibraries,
+	publishAgentLib,
+	installAgentLib,
+} from '@src/services/agents.service';
 
 import {
 	Search,
@@ -497,13 +503,25 @@ function closeModal() {
 	showModal.value = false;
 }
 
-function HandleActions(action: string, id?: string) {
-	if (action == 'show_toast') {
-		showAddToProjectModal.value = true;
-	} else if (action == 'show_navigation') {
-		router.push(`/workflow/${id}`);
+const handleSelectedActions = (action: string, agentLib?: any) => {
+	try {
+		switch (action) {
+			case 'map_with_project':
+				showAddToProjectModal.value = true;
+				break;
+			case 'use_agent':
+				if (agentLib) {
+					router.push(`/workflow/${agentLib?.agentId}`);
+					InstallAgentLibrary(agentLib?.id);
+				}
+				break;
+			default:
+				console.error(`Unknown action key: ${action}`);
+		}
+	} catch (e) {
+		console.error('handle action failed', e);
 	}
-}
+};
 
 // Load initial data
 onMounted(async () => {
@@ -565,6 +583,11 @@ const fetchAgentLibraries = () =>
 	});
 
 // ------------------- Publish APIS -------------------
+const InstallAgentLibrary = (agentLibId: string) =>
+	handleAction({
+		action: () => installAgentLib(agentLibId),
+	});
+
 const PublishAgentLibrary = () =>
 	handleAction({
 		loadingRef: loading,

@@ -18,6 +18,14 @@ export const getAllAgentLibraries = (ownerId: string) =>
 export const publishAgentLib = (payload: any) =>
 	albertsonsRestApiRequest('POST', `/v1/agent-library/publish`, payload);
 
+/**
+ * Install a agent lib
+ *
+ * @param agentLibId - Agent Lib Id
+ */
+export const installAgentLib = (agentLibId: string) =>
+	albertsonsRestApiRequest('PUT', `/v1/agent-library/${agentLibId}/install`);
+
 /****************** My agents apis *****************/
 /**
  * Fetch all agents for current owner

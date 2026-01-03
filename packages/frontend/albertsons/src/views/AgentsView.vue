@@ -10,6 +10,12 @@ import {
 	NInput,
 	NEmpty,
 	useDialog,
+	NForm,
+	NModal,
+	NGrid,
+	NGi,
+	NFormItem,
+	NDynamicTags,
 } from 'naive-ui';
 import {
 	Play,
@@ -20,12 +26,13 @@ import {
 	Edit,
 	Plus,
 	Trash2,
+	BookPlus,
 } from 'lucide-vue-next';
 import dayjs from 'dayjs';
 import { runWorkflow } from '@src/utils/runWorkflow';
 import { getProgressStatus } from '@src/utils/helper';
 import { handleAction as handleActionAPI } from '@src/utils/handleAction';
-import { getAllAgents, deleteAgent } from '@src/services/agents.service';
+import { publishAgentLib, getAllAgents, deleteAgent } from '@src/services/agents.service';
 import { useUsersStore } from '@/features/settings/users/users.store';
 import { useToast } from '@/app/composables/useToast';
 
@@ -35,6 +42,25 @@ const toast = useToast();
 const dialog = useDialog();
 const agents = ref([]);
 const searchQuery = ref('');
+const showPublishModal = ref(false);
+const loading = ref(false);
+const formValue = ref({
+	ownerId: usersStore.currentUser?.id,
+	agentName: '',
+	agentId: '',
+	category: '',
+	capabilities: [],
+	integrations: [],
+	version: '',
+});
+
+const formRules = {
+	category: {
+		required: true,
+		message: 'Please input category.',
+		trigger: ['input', 'blur'],
+	},
+};
 
 function renderIcon(icon) {
 	return () =>
@@ -48,6 +74,11 @@ const options = [
 		label: 'Edit',
 		key: 'edit',
 		icon: renderIcon(Edit),
+	},
+	{
+		label: 'Publish',
+		key: 'publish',
+		icon: renderIcon(BookPlus),
 	},
 	{
 		label: () => h('span', { class: 'text-danger' }, 'Delete'),
@@ -187,6 +218,13 @@ const handleOptionSelect = async (key, row) => {
 			case 'edit':
 				goToEditWorkflow(row.workflowId);
 				break;
+			case 'publish':
+				//set formvalue's agent details
+				formValue.value.agentId = row?.workflowId;
+				formValue.value.agentName = row?.workflow?.name;
+
+				showPublishModal.value = true;
+				break;
 			case 'delete':
 				handleAgentDeleteConfirm(row);
 				break;
@@ -198,6 +236,28 @@ const handleOptionSelect = async (key, row) => {
 	}
 };
 
+// ------------------- Publish AGENT -------------------
+const PublishAgentLibrary = () =>
+	handleActionAPI({
+		loadingRef: loading,
+		action: () => publishAgentLib(formValue.value),
+		onSuccess: () => {
+			showPublishModal.value = false;
+			formValue.value = {
+				agentId: '',
+				ownerId: usersStore.currentUser?.id,
+				category: '',
+				capabilities: [],
+				integrations: [],
+				version: '',
+			};
+			toast.showMessage({
+				title: `Agent`,
+				message: 'Published successfully.',
+				type: 'success',
+			});
+		},
+	});
 // ------------------- DELETE AGENT -------------------
 function handleAgentDeleteConfirm(row) {
 	dialog.error({
@@ -255,5 +315,76 @@ const onDeleteAgent = (agentId, workflowId) =>
 				<template #empty> <n-empty description="No agents found" /> </template>
 			</n-data-table>
 		</div>
+
+		<!-- Publish Agent Modal -->
+		<n-modal
+			v-model:show="showPublishModal"
+			:mask-closable="false"
+			preset="card"
+			size="huge"
+			style="width: 500px"
+			class="rounded-md!"
+			:auto-focus="false"
+		>
+			<template #header>Publish Agent</template>
+
+			<n-form
+				ref="formRef"
+				:model="formValue"
+				:rules="formRules"
+				label-placement="top"
+				size="medium"
+			>
+				<n-grid x-gap="12" :cols="1">
+					<n-gi>
+						<n-form-item label="Agent" path="agentId">
+							<n-input
+								:value="formValue.agentName"
+								readonly
+								class="pointer-events-none border border-border-primary focus:border-border-primary focus:ring-0 hover:border-border-primary"
+							/>
+						</n-form-item>
+					</n-gi>
+
+					<n-gi>
+						<n-form-item label="Category" path="category">
+							<n-input v-model:value="formValue.category" placeholder="Inventory" />
+						</n-form-item>
+					</n-gi>
+
+					<n-gi>
+						<n-form-item label="Capabilities">
+							<n-dynamic-tags v-model:value="formValue.capabilities" />
+						</n-form-item>
+					</n-gi>
+
+					<n-gi>
+						<n-form-item label="Integrations">
+							<n-dynamic-tags v-model:value="formValue.integrations" />
+						</n-form-item>
+					</n-gi>
+
+					<n-gi>
+						<n-form-item label="Version" path="version">
+							<n-input v-model:value="formValue.version" placeholder="v1.2.0" />
+						</n-form-item>
+					</n-gi>
+				</n-grid>
+			</n-form>
+
+			<template #footer>
+				<div class="flex gap-4 justify-end">
+					<n-button ghost type="primary" @click="showPublishModal = false">Close </n-button>
+					<n-button
+						type="primary"
+						:loading="loading"
+						:disabled="loading"
+						@click="PublishAgentLibrary"
+					>
+						Publish Agent
+					</n-button>
+				</div>
+			</template>
+		</n-modal>
 	</div>
 </template>
