@@ -1,10 +1,10 @@
 <template>
 	<div class="p-4! w-full h-screen">
 		<!-- Strip Container -->
-		<n-card :bordered="true" class="rounded-lg!">
+		<n-card :bordered="true" class="rounded-md!">
 			<div class="flex items-center justify-between">
-				<div class="flex items-center">
-					<LayoutTemplate :size="22" class="text-gray-500 mr-3" />
+				<div class="flex items-start">
+					<LayoutTemplate :size="22" class="text-secondary mr-3 mt-1.5" />
 					<div class="flex flex-col">
 						<div class="text-lg font-semibold mb-2">Templates</div>
 						<div class="text-sm text-secondary">
@@ -15,7 +15,11 @@
 			</div>
 
 			<!-- Search -->
-			<n-input v-model:value="searchQuery" placeholder="Search templates..." class="w-64! my-4!">
+			<n-input
+				v-model:value="searchQuery"
+				placeholder="Search templates..."
+				class="w-64! my-4! rounded-md!"
+			>
 				<template #prefix>
 					<n-icon :component="Search" />
 				</template>
@@ -61,7 +65,7 @@
 				:key="card.id"
 				:bordered="true"
 				hoverable
-				class="cursor-pointer transition-all rounded-lg!"
+				class="cursor-pointer transition-all rounded-md!"
 				@click="openTemplateDetail(card)"
 			>
 				<template #header>
@@ -133,7 +137,7 @@
 			:bordered="false"
 			:closable="true"
 			:on-close="closeModal"
-			class="rounded-lg! px-4!"
+			class="rounded-md! px-4!"
 		>
 			<!-- Chips header -->
 			<template #header>
@@ -178,14 +182,14 @@
 			</p>
 
 			<!-- Stats row (icons + numbers) -->
-			<div class="grid grid-cols-2 gap-2 p-4! bg-gray-100! rounded-lg mb-5!">
+			<div class="grid grid-cols-2 gap-2 p-4! bg-gray-100! rounded-md mb-5!">
 				<div class="flex items-center justify-left gap-2">
 					<Workflow :size="16" class="text-secondary" />
 					<div class="text-left">
 						<div class="text-base font-semibold">
 							{{ selectedTemplate?.nodes }}
 						</div>
-						<div class="text-xs text-gray-500">Nodes</div>
+						<div class="text-xs text-secondary">Nodes</div>
 					</div>
 				</div>
 				<div class="flex items-center justify-left gap-2">
@@ -194,7 +198,7 @@
 						<div class="text-base font-semibold">
 							{{ selectedTemplate?.uses }}
 						</div>
-						<div class="text-xs text-gray-500">Uses</div>
+						<div class="text-xs text-secondary">Uses</div>
 					</div>
 				</div>
 			</div>

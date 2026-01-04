@@ -20,6 +20,9 @@
 				>Add Project</n-button
 			>
 		</div>
+		<div v-if="projects.length === 0" class="text-center py-20 text-secondary font-semibold">
+			No projects found.
+		</div>
 		<n-grid gap="4" :cols="4" v-for="project in projects" :key="project.id">
 			<n-gi>
 				<div class="shadow! hover:shadow-lg! border border-secondary rounded-md p-4! bg-white!">
