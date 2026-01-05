@@ -122,17 +122,17 @@ function replaceWorkflowText(root = document.body) {
 	}
 }
 
-// const observer = new MutationObserver(() => {
-// 	replaceWorkflowText();
-// });
+const observer = new MutationObserver(() => {
+	replaceWorkflowText();
+});
 
-// observer.observe(document.body, {
-// 	childList: true,
-// 	subtree: true,
-// });
+observer.observe(document.body, {
+	childList: true,
+	subtree: true,
+});
 
 // Initial run
-// replaceWorkflowText();
+replaceWorkflowText();
 
 // Watch for title changes
 new MutationObserver(forceTitleAndFavicon).observe(document.querySelector('title')!, {
