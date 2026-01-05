@@ -167,61 +167,61 @@ useExposeCssVar('--ask-assistant--floating-button--margin-bottom', askAiFloating
 
 <template>
 	<n-config-provider :theme-overrides="themeOverrides">
-		<n-theme-editor>
-			<n-dialog-provider>
-				<LoadingView v-if="loading" />
-				<div
-					v-else
-					id="n8n-app"
-					:class="{
-						[$style.container]: true,
-						[$style.sidebarCollapsed]: uiStore.sidebarMenuCollapsed,
-					}"
-				>
-					<div id="app-grid" ref="appGrid" :class="$style['app-grid']">
-						<div id="banners" :class="$style.banners">
-							<!-- <BannerStack v-if="!isDemoMode" /> -->
-						</div>
-						<div id="header" :class="$style.header">
-							<RouterView name="header" />
-						</div>
-						<div v-if="usersStore.currentUser" id="sidebar" :class="$style.sidebar">
-							<RouterView name="sidebar" />
-						</div>
-						<div id="content" class="bg-background!" :class="$style.content">
-							<div :class="$style.contentWrapper">
-								<RouterView v-slot="{ Component }">
-									<KeepAlive v-if="$route.meta.keepWorkflowAlive" include="NodeView" :max="1">
-										<component :is="Component" />
-									</KeepAlive>
-									<component :is="Component" v-else />
-								</RouterView>
-							</div>
-							<div v-if="hasContentFooter" :class="$style.contentFooter">
-								<RouterView name="footer" />
-							</div>
-						</div>
-						<div :id="APP_MODALS_ELEMENT_ID" :class="$style.modals">
-							<Modals />
-						</div>
-
-						<N8nCommandBar
-							v-if="showCommandBar"
-							:items="items"
-							:placeholder="placeholder"
-							:context="context"
-							:is-loading="isCommandBarLoading"
-							:z-index="APP_Z_INDEXES.COMMAND_BAR"
-							@input-change="onCommandBarChange"
-							@navigate-to="onCommandBarNavigateTo"
-						/>
-						<AskAssistantFloatingButton v-if="assistantStore.isFloatingButtonShown" />
+		<!-- <n-theme-editor> -->
+		<n-dialog-provider>
+			<LoadingView v-if="loading" />
+			<div
+				v-else
+				id="n8n-app"
+				:class="{
+					[$style.container]: true,
+					[$style.sidebarCollapsed]: uiStore.sidebarMenuCollapsed,
+				}"
+			>
+				<div id="app-grid" ref="appGrid" :class="$style['app-grid']">
+					<div id="banners" :class="$style.banners">
+						<!-- <BannerStack v-if="!isDemoMode" /> -->
 					</div>
-					<AssistantsHub />
-					<div :id="CODEMIRROR_TOOLTIP_CONTAINER_ELEMENT_ID" />
+					<div id="header" :class="$style.header">
+						<RouterView name="header" />
+					</div>
+					<div v-if="usersStore.currentUser" id="sidebar" :class="$style.sidebar">
+						<RouterView name="sidebar" />
+					</div>
+					<div id="content" class="bg-background!" :class="$style.content">
+						<div :class="$style.contentWrapper">
+							<RouterView v-slot="{ Component }">
+								<KeepAlive v-if="$route.meta.keepWorkflowAlive" include="NodeView" :max="1">
+									<component :is="Component" />
+								</KeepAlive>
+								<component :is="Component" v-else />
+							</RouterView>
+						</div>
+						<div v-if="hasContentFooter" :class="$style.contentFooter">
+							<RouterView name="footer" />
+						</div>
+					</div>
+					<div :id="APP_MODALS_ELEMENT_ID" :class="$style.modals">
+						<Modals />
+					</div>
+
+					<N8nCommandBar
+						v-if="showCommandBar"
+						:items="items"
+						:placeholder="placeholder"
+						:context="context"
+						:is-loading="isCommandBarLoading"
+						:z-index="APP_Z_INDEXES.COMMAND_BAR"
+						@input-change="onCommandBarChange"
+						@navigate-to="onCommandBarNavigateTo"
+					/>
+					<AskAssistantFloatingButton v-if="assistantStore.isFloatingButtonShown" />
 				</div>
-			</n-dialog-provider>
-		</n-theme-editor>
+				<AssistantsHub />
+				<div :id="CODEMIRROR_TOOLTIP_CONTAINER_ELEMENT_ID" />
+			</div>
+		</n-dialog-provider>
+		<!-- </n-theme-editor> -->
 	</n-config-provider>
 </template>
 
