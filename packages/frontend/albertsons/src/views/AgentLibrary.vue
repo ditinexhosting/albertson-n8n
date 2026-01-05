@@ -5,7 +5,7 @@
 			<!-- Page Header -->
 			<div class="flex items-center justify-between">
 				<div class="flex items-start">
-					<Library :size="22" class="text-secondary mr-3" />
+					<Library :size="22" class="text-secondary mr-3 mt-1.5" />
 					<div class="flex flex-col">
 						<div class="text-lg font-semibold mb-2">Agent Library</div>
 						<div class="text-sm text-secondary">
@@ -26,7 +26,7 @@
 			<n-input
 				v-model:value="searchQuery"
 				placeholder="Search agents..."
-				class="w-64! rounded-md! my-6!"
+				class="w-64! rounded-md! my-4!"
 			>
 				<template #prefix>
 					<n-icon :component="Search" />
@@ -148,28 +148,28 @@
 			</p>
 
 			<!-- Stats Row -->
-			<div class="grid grid-cols-3 gap-3 p-3! bg-gray-100! rounded-md my-6!">
+			<div class="grid grid-cols-3 gap-3 p-3! bg-gray-100! rounded-md! my-6!">
 				<div class="text-center">
 					<div class="text-base font-semibold">
 						{{ selectedAgent?.total_runs }}
 					</div>
-					<div class="text-xs text-gray-500">Total runs</div>
+					<div class="text-xs text-secondary">Total runs</div>
 				</div>
 				<div class="text-center">
 					<div class="text-base font-semibold">
 						{{ selectedAgent?.installs }}
 					</div>
-					<div class="text-xs text-gray-500">Installs</div>
+					<div class="text-xs text-secondary">Installs</div>
 				</div>
 				<div class="text-center">
 					<div class="text-base font-semibold">{{ selectedAgent?.success_rate ?? '0' }}%</div>
-					<div class="text-xs text-gray-500">Success rate</div>
+					<div class="text-xs text-secondary">Success rate</div>
 				</div>
 			</div>
 
 			<!-- Capabilities -->
 			<div>
-				<div class="text-xs font-semibold uppercase tracking-wide text-secondary mb-3!">
+				<div class="text-xs font-semibold uppercase tracking-wide text-secondary mb-2!">
 					Capabilities
 				</div>
 				<div class="flex flex-wrap gap-2">
@@ -205,7 +205,7 @@
 			</div>
 
 			<!-- Owner Info -->
-			<div class="flex items-center gap-3 p-3! bg-gray-100! rounded-md my-5!">
+			<div class="flex items-center gap-3 p-3! bg-gray-100! rounded-md! my-5!">
 				<n-avatar round size="small" color="#01529f" class="p-5!">{{
 					(selectedAgent?.owner?.firstName?.[0] || '') + (selectedAgent?.owner?.lastName?.[0] || '')
 				}}</n-avatar>
