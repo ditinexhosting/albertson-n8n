@@ -98,6 +98,42 @@ const forceTitleAndFavicon = () => {
 // Initial call
 forceTitleAndFavicon();
 
+function replaceWorkflow(text = '') {
+	return text.replace(/\bworkflow(s)?\b/gi, (match, plural) => {
+		const isPlural = !!plural;
+		const isCapitalized = match[0] === match[0].toUpperCase();
+
+		if (isPlural) {
+			return isCapitalized ? 'Agents' : 'agents';
+		}
+		return isCapitalized ? 'Agent' : 'agent';
+	});
+}
+
+function replaceWorkflowText(root = document.body) {
+	const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+
+	let node;
+	while ((node = walker.nextNode())) {
+		const updated = replaceWorkflow(node.nodeValue);
+		if (updated !== node.nodeValue) {
+			node.nodeValue = updated;
+		}
+	}
+}
+
+const observer = new MutationObserver(() => {
+	replaceWorkflowText();
+});
+
+observer.observe(document.body, {
+	childList: true,
+	subtree: true,
+});
+
+// Initial run
+replaceWorkflowText();
+
 // Watch for title changes
 new MutationObserver(forceTitleAndFavicon).observe(document.querySelector('title')!, {
 	childList: true,
