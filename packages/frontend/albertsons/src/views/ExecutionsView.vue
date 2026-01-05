@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref, onMounted, watch, h } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useToast } from '@/app/composables/useToast';
 import { albertsonsRestApiRequest } from '@src/utils/albertsonsRestApiRequest';
 import { VIEWS } from '@/app/constants';
@@ -35,6 +35,9 @@ interface ExecutionRow {
 
 const toast = useToast();
 const router = useRouter();
+const route = useRoute();
+
+const execution_type = route?.query?.execution_type as string | undefined;
 
 const search = ref('');
 const statusFilter = ref<'all' | 'success' | 'error' | 'running' | 'waiting'>('all');
@@ -182,11 +185,21 @@ function onRefresh() {
 	fetchExecutions();
 }
 
+function setExecutionFilter(key) {
+	statusFilter.value = key;
+	router.replace({
+		query: { execution_type: key },
+	});
+}
+
 watch([search, statusFilter], () => {
 	fetchExecutions();
 });
 
 onMounted(() => {
+	statusFilter.value =
+		typeof execution_type === 'string' ? (execution_type as typeof statusFilter.value) : 'all';
+
 	fetchExecutions();
 });
 
@@ -302,7 +315,7 @@ function formatDate(dateString: string | null) {
 					v-for="s in ['all', 'success', 'error', 'running', 'waiting']"
 					:key="s"
 					:type="statusFilter === s ? 'primary' : 'default'"
-					@click="statusFilter = s"
+					@click="setExecutionFilter(s)"
 				>
 					{{ s === 'all' ? 'All' : formatStatus(s) }}
 				</n-button>
