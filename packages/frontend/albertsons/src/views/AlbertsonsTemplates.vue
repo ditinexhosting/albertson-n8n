@@ -70,7 +70,7 @@
 			>
 				<template #header>
 					<div>
-						<h3 class="text-base font-semibold leading-tight">
+						<h3 class="text-base font-semibold leading-tight truncate">
 							{{ card.name }}
 						</h3>
 					</div>
