@@ -1,5 +1,5 @@
 <template>
-	<div class="flex flex-1 p-4! flex-col gap-4">
+	<div class="flex flex-1 p-4! flex-col gap-4 overflow-x-auto! h-[90vh]!">
 		<div class="flex flex-row items-center justify-between">
 			<div>
 				<n-input
@@ -20,11 +20,11 @@
 				>Add Project</n-button
 			>
 		</div>
-		<div v-if="projects.length === 0" class="text-center py-20 text-secondary font-semibold">
-			No projects found.
+		<div v-if="projects.length === 0">
+			<n-empty description="No projects found" />
 		</div>
-		<n-grid gap="4" :cols="4" v-for="project in projects" :key="project.id">
-			<n-gi>
+		<n-grid x-gap="18" y-gap="18" :cols="4">
+			<n-gi v-for="project in projects" :key="project.id">
 				<div class="shadow! hover:shadow-lg! border border-secondary rounded-md p-4! bg-white!">
 					<div class="flex justify-between items-center gap-4 mb-4!">
 						<div
@@ -172,6 +172,7 @@ import {
 	NDivider,
 	useDialog,
 	NDialogProvider,
+	NEmpty,
 } from 'naive-ui';
 import {
 	Plus,
