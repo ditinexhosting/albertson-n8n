@@ -7,7 +7,7 @@
 			</div>
 		</div>
 		<div>
-			<n-input v-if="showSearch" class="rounded-md!" placeholder="Search workflows, projects .." />
+			<n-input v-if="showSearch" class="rounded-md!" placeholder="Search agents, projects .." />
 		</div>
 		<div class="cursor-pointer hover:text-primary transition-all">
 			<n-badge :value="3" :max="15"><Bell /></n-badge>
