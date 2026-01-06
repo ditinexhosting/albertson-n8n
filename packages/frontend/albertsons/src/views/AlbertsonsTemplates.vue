@@ -283,10 +283,6 @@ import {
 	Webhook,
 	Clock,
 	MessageCircle,
-	Sparkles,
-	Bell,
-	BarChart2,
-	RefreshCw,
 } from 'lucide-vue-next';
 import { NButton, NInput, NTag, NModal, NCard, NIcon } from 'naive-ui';
 import { albertsonsRestApiRequest } from '@src/utils/albertsonsRestApiRequest';
@@ -436,23 +432,17 @@ async function handleUseTemplate() {
 	try {
 		// Navigate to new workflow
 		await router.push({ name: 'NodeViewNew', params: { name: 'new' } });
-		await new Promise((resolve) => setTimeout(resolve, 300));
 
-		const workflowJson = JSON.stringify({
-			nodes: selectedTemplate.value.rawNodes || [],
-			connections: selectedTemplate.value.rawConnections || {},
-		});
+		const nodesCount = selectedTemplate.value.rawNodes?.length || 0;
 
-		const result = builderStore.applyWorkflowUpdate(workflowJson);
+		const delay = nodesCount > 200 ? 1200 : nodesCount > 100 ? 800 : nodesCount > 50 ? 500 : 300;
 
-		if (result.success && result.workflowData) {
-			if (result.workflowData.nodes) workflowsStore.setNodes(result.workflowData.nodes);
-			if (result.workflowData.connections)
-				workflowsStore.setConnections(result.workflowData.connections);
-			uiStore.stateIsDirty = true;
-		} else {
-			console.error('Failed to apply workflow:', result.error);
-		}
+		await new Promise((r) => setTimeout(r, delay));
+
+		// Set Workflow nodes and connections
+		workflowsStore.setNodes(selectedTemplate.value.rawNodes);
+		workflowsStore.setConnections(selectedTemplate.value.rawConnections);
+		uiStore.stateIsDirty = true;
 
 		closeModal();
 	} catch (error) {

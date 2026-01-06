@@ -54,7 +54,7 @@
 						</NIcon> </template
 					>View Executions</n-button
 				>
-				<n-button class="rounded-md!" type="default" @click="goToExecutions"
+				<n-button class="rounded-md!" type="default" @click="goToProjects"
 					><template #icon>
 						<NIcon>
 							<Zap class="btn-icon" />
@@ -317,9 +317,13 @@ function goToNewWorkflow() {
 function goToAgents() {
 	router.push('/agents');
 }
+function goToProjects() {
+	router.push('/projects');
+}
 
-function goToExecutions() {
-	router.push('/executions');
+function goToExecutions(key) {
+	const execution_type = key == 'failures' ? 'error' : key == 'success' ? 'success' : 'all';
+	router.push({ path: 'executions', query: { execution_type } });
 }
 
 function openWorkflow(id) {
@@ -328,7 +332,7 @@ function openWorkflow(id) {
 
 const onMetricCardClick = (key) => {
 	if (key == 'agents') goToAgents();
-	else goToExecutions();
+	else goToExecutions(key);
 };
 
 /* ACTIVITY STREAM DATA */

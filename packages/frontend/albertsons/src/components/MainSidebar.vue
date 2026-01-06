@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, h } from 'vue';
+import { ref, watch, h, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import albertsonsLogo from '../assets/albertsons-logo.png';
 import { NIcon, NDropdown } from 'naive-ui';
@@ -21,10 +21,26 @@ import {
 } from 'lucide-vue-next';
 import { useUsersStore } from '@/features/settings/users/users.store';
 const { currentUser, logout } = useUsersStore();
+import { handleAction } from '@src/utils/handleAction';
+import { getUserMetadata } from '@src/services/users.service';
 
 const router = useRouter();
 const route = useRoute();
 const isCollapsed = ref(false);
+const userMetadata = ref();
+
+onMounted(() => {
+	fetchUserMetadata();
+});
+
+const fetchUserMetadata = async () => {
+	handleAction({
+		action: () => getUserMetadata(currentUser.id),
+		onSuccess: (res) => {
+			userMetadata.value = res;
+		},
+	});
+};
 
 function renderIcon(icon) {
 	return () => {
@@ -136,21 +152,23 @@ watch(() => route.path, updateActiveState, { immediate: true });
 
 		<!-- Footer with User Profile -->
 		<div class="sidebar-footer">
-			<template v-for="item in menuItemsFooter" :key="item.key">
-				<button
-					class="w-full border-0 bg-transparent flex items-center gap-3 px-3 py-2 mb-1 rounded-(--radius) text-(--color--text) text-sm cursor-pointer transition-all duration-200 text-left"
-					:class="{ 'sidebar-nav-item--active': item.active }"
-					@click="navigate(item)"
-					:title="isCollapsed ? item.label : ''"
-				>
-					<NIcon :size="18">
-						<component :is="item.icon" />
-					</NIcon>
+			<template v-if="userMetadata?.roleLabel === 'Super Admin'">
+				<template v-for="item in menuItemsFooter" :key="item.key">
+					<button
+						class="w-full border-0 bg-transparent flex items-center gap-3 px-3 py-2 mb-1 rounded-(--radius) text-(--color--text) text-sm cursor-pointer transition-all duration-200 text-left"
+						:class="{ 'sidebar-nav-item--active': item.active }"
+						@click="navigate(item)"
+						:title="isCollapsed ? item.label : ''"
+					>
+						<NIcon :size="18">
+							<component :is="item.icon" />
+						</NIcon>
 
-					<span v-if="!isCollapsed" class="whitespace-nowrap overflow-hidden text-ellipsis">
-						{{ item.label }}
-					</span>
-				</button>
+						<span v-if="!isCollapsed" class="whitespace-nowrap overflow-hidden text-ellipsis">
+							{{ item.label }}
+						</span>
+					</button>
+				</template>
 			</template>
 			<!-- Divider -->
 			<div class="sidebar-footer-divider" />
