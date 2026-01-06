@@ -15,6 +15,7 @@ import {
 	Clock,
 	SlidersHorizontal,
 } from 'lucide-vue-next';
+import { EXECUTION_PAGINATION } from '@src/utils/constants';
 
 const usersStore = useUsersStore();
 
@@ -283,7 +284,7 @@ function formatDate(dateString: string | null) {
 </script>
 
 <template>
-	<div class="executions-page p-4!">
+	<div class="executions-page p-4! overflow-x-auto! h-[90vh]!">
 		<!-- Second row: search + filters + status pills -->
 		<div class="flex flex-row gap-4 justify-between items-center mb-4!">
 			<div class="flex flex-row gap-4 items-center">
@@ -322,8 +323,13 @@ function formatDate(dateString: string | null) {
 			</div>
 		</div>
 
-		<div class="overflow-y-scroll h-140">
-			<n-data-table :columns="columns" :data="executions" :scroll-x="900">
+		<div class="overflow-y-scroll">
+			<n-data-table
+				:columns="columns"
+				:data="executions"
+				:pagination="EXECUTION_PAGINATION"
+				:scroll-x="900"
+			>
 				<template #empty> <n-empty description="No executions found" /> </template>
 			</n-data-table>
 		</div>

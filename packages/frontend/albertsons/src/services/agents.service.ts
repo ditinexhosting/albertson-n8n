@@ -62,3 +62,11 @@ export const removeAgent = (projectId: string, agentId: string) =>
  */
 export const deleteAgent = (agentId: string, workflowId: string) =>
 	albertsonsRestApiRequest('DELETE', `/v1/my-agents/delete/${agentId}/${workflowId}`);
+
+/**
+ * Remove agent from library
+ *
+ * @param id - Mapping id
+ */
+export const removeLibraryAgent = (id: string) =>
+	albertsonsRestApiRequest('DELETE', `/v1/agent-library/delete/${id}`);

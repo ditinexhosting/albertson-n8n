@@ -315,7 +315,7 @@ function goToNewWorkflow() {
 }
 
 function goToAgents() {
-	router.push('/agents');
+	router.push({ path: 'agents', query: { active: true } });
 }
 function goToProjects() {
 	router.push('/projects');
@@ -548,7 +548,9 @@ const metricCards = computed(() => [
 
 /* MVP AGENTS */
 const agentsLoading = ref(false);
-const rawAgents = computed(() => userAgentMappingsStore.getUserAgentMappings());
+const rawAgents = computed(() =>
+	userAgentMappingsStore.getUserAgentMappings().filter((i) => i.workflow?.active == true),
+);
 
 const normalizedAgents = computed(() =>
 	rawAgents.value.map((item) => ({
@@ -1271,6 +1273,7 @@ onMounted(async () => {
 	border: 1px solid var(--border-color--light) !important;
 	box-shadow: var(--shadow--light);
 	padding: 12px 18px 14px;
+	height: 255px;
 }
 
 .trend-header {

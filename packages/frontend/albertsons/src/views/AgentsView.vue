@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, ref, h } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import {
 	NIcon,
 	NButton,
@@ -35,8 +35,11 @@ import { handleAction as handleActionAPI } from '@src/utils/handleAction';
 import { publishAgentLib, getAllAgents, deleteAgent } from '@src/services/agents.service';
 import { useUsersStore } from '@/features/settings/users/users.store';
 import { useToast } from '@/app/composables/useToast';
+import { PAGINATION } from '@src/utils/constants';
 
 const router = useRouter();
+const route = useRoute();
+const filterActive = route.query?.active ?? null;
 const usersStore = useUsersStore();
 const toast = useToast();
 const dialog = useDialog();
@@ -99,8 +102,19 @@ const fetchAllAgents = () =>
 		},
 	});
 
+const filteredAgents = computed(() => {
+	return;
+});
+
 const filteredUserAgentMappings = computed(() => {
-	return agents.value.filter((item) =>
+	const filteredAgents =
+		filterActive == null
+			? agents.value
+			: agents.value.filter(
+					(item) => item?.workflow?.active?.toString() == filterActive.toString(),
+				);
+
+	return filteredAgents.filter((item) =>
 		item?.workflow?.name?.toLowerCase().includes(searchQuery?.value?.toLowerCase()),
 	);
 });
@@ -294,7 +308,7 @@ const onDeleteAgent = (agentId, workflowId) =>
 </script>
 
 <template>
-	<div class="p-4! w-full">
+	<div class="p-4! w-full overflow-x-auto! h-[90vh]!">
 		<div class="flex items-center justify-between pb-4!">
 			<n-input v-model:value="searchQuery" placeholder="Search agents" class="w-64! rounded-md!">
 				<template #prefix>
@@ -310,8 +324,13 @@ const onDeleteAgent = (agentId, workflowId) =>
 				>New Agent</n-button
 			>
 		</div>
-		<div class="overflow-y-scroll h-140">
-			<n-data-table :columns="columns" :data="filteredUserAgentMappings" :scroll-x="900">
+		<div class="overflow-y-scroll">
+			<n-data-table
+				:columns="columns"
+				:pagination="PAGINATION"
+				:data="filteredUserAgentMappings"
+				:scroll-x="900"
+			>
 				<template #empty> <n-empty description="No agents found" /> </template>
 			</n-data-table>
 		</div>
