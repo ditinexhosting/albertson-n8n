@@ -288,7 +288,7 @@ import { NButton, NInput, NTag, NModal, NCard, NIcon } from 'naive-ui';
 import { albertsonsRestApiRequest } from '@src/utils/albertsonsRestApiRequest';
 import { useWorkflowsStore } from '@/app/stores/workflows.store';
 import { useUIStore } from '@/app/stores/ui.store';
-import { useBuilderStore } from '@/features/ai/assistant/builder.store';
+import { useBuilderStore } from '@src/app/features/ai/assistant/builder.store';
 
 // Router
 const router = useRouter();
@@ -430,21 +430,22 @@ async function handleUseTemplate() {
 	if (!selectedTemplate.value) return;
 
 	try {
+		closeModal();
 		// Navigate to new workflow
-		await router.push({ name: 'NodeViewNew', params: { name: 'new' } });
+		router.push({ name: 'NodeViewNew', params: { name: 'new' } });
 
 		const nodesCount = selectedTemplate.value.rawNodes?.length || 0;
 
 		const delay = nodesCount > 200 ? 1200 : nodesCount > 100 ? 800 : nodesCount > 50 ? 500 : 300;
 
-		await new Promise((r) => setTimeout(r, delay));
-
-		// Set Workflow nodes and connections
-		workflowsStore.setNodes(selectedTemplate.value.rawNodes);
-		workflowsStore.setConnections(selectedTemplate.value.rawConnections);
-		uiStore.stateIsDirty = true;
-
-		closeModal();
+		builderStore.streaming = true;
+		setTimeout(() => {
+			// Set Workflow nodes and connections
+			workflowsStore.setNodes(selectedTemplate.value.rawNodes);
+			workflowsStore.setConnections(selectedTemplate.value.rawConnections);
+			uiStore.stateIsDirty = true;
+			builderStore.streaming = false;
+		}, 4000);
 	} catch (error) {
 		console.error('Failed to use template:', error);
 	}
