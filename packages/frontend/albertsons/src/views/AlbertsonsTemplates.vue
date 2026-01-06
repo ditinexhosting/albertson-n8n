@@ -8,7 +8,7 @@
 					<div class="flex flex-col">
 						<div class="text-lg font-semibold mb-2">Templates</div>
 						<div class="text-sm text-secondary">
-							Ready-to-use workflow templates to get you started quickly
+							Ready-to-use agent templates to get you started quickly
 						</div>
 					</div>
 				</div>

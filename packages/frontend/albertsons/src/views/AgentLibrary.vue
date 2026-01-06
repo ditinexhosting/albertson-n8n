@@ -220,7 +220,7 @@
 			<!-- Action Buttons -->
 			<template #footer>
 				<div class="flex justify-end gap-2">
-					<n-button @click="closeModal">Cancel</n-button>
+					<n-button type="error" @click="() => handleDeleteAgent(selectedAgent)">Delete</n-button>
 					<n-button @click="() => handleSelectedActions('map_with_project')">
 						<template #icon>
 							<n-icon :size="14"><FolderPlus /></n-icon>
@@ -381,6 +381,7 @@ import {
 	getAllAgentLibraries,
 	publishAgentLib,
 	installAgentLib,
+	removeLibraryAgent,
 } from '@src/services/agents.service';
 
 import {
@@ -393,6 +394,7 @@ import {
 	Library,
 	BadgeCheck,
 	FolderPlus,
+	MoreVertical,
 } from 'lucide-vue-next';
 import {
 	NButton,
@@ -409,6 +411,7 @@ import {
 	NForm,
 	NDynamicTags,
 	NFormItem,
+	NDropdown,
 } from 'naive-ui';
 
 const toast = useToast();
@@ -502,6 +505,21 @@ function openAgentDetail(agent: any) {
 function closeModal() {
 	showModal.value = false;
 }
+
+const handleDeleteAgent = (agent: any) => {
+	showModal.value = false;
+	handleAction({
+		action: () => removeLibraryAgent(agent?.id),
+		onSuccess: (res: any) => {
+			toast.showMessage({
+				title: `Agent Library`,
+				message: 'Deleted successfully.',
+				type: 'success',
+			});
+			fetchAgentLibraries();
+		},
+	});
+};
 
 const handleSelectedActions = (action: string, agentLib?: any) => {
 	try {

@@ -19,3 +19,11 @@ export const PROJECT_ROLE = {
 	EDITOR: 'Editor',
 	VIEWER: 'Viewer',
 };
+
+export const PAGINATION = {
+	pageSize: 7,
+};
+
+export const EXECUTION_PAGINATION = {
+	pageSize: 10,
+};
