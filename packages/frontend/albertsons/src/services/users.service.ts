@@ -8,6 +8,14 @@ import { albertsonsRestApiRequest } from '@src/utils/albertsonsRestApiRequest';
 export const getAllUsers = () => albertsonsRestApiRequest('GET', `/v1/user-metadata/all`);
 
 /**
+ * Fetch user's metadata
+ *
+ * @returns User metadata
+ */
+export const getUserMetadata = (ownerId: string) =>
+	albertsonsRestApiRequest('GET', `/v1/user-metadata/${ownerId}`);
+
+/**
  * Add members to a project
  *
  * @param projectId - Project id
