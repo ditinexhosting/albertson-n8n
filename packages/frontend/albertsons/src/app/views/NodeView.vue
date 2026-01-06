@@ -288,7 +288,10 @@ const routeNodeId = computed(() => route.params.nodeId as string | undefined);
 
 const isNewWorkflowRoute = computed(() => route.name === VIEWS.NEW_WORKFLOW || !workflowId.value);
 const isWorkflowRoute = computed(() => !!route?.meta?.nodeView || isDemoRoute.value);
-const isDemoRoute = computed(() => route.name === VIEWS.DEMO);
+/* CUSTOM_CODE_START */
+const isViewer = false;
+const isDemoRoute = computed(() => route.name === VIEWS.DEMO || isViewer);
+/* CUSTOM_CODE_END */
 const isReadOnlyRoute = computed(() => !!route?.meta?.readOnlyCanvas);
 const isReadOnlyEnvironment = computed(() => {
 	return sourceControlStore.preferences.branchReadOnly;
@@ -312,6 +315,62 @@ const keyBindingsEnabled = computed(() => {
 });
 
 const isLogsPanelOpen = computed(() => logsStore.isOpen);
+
+/* CUSTOM_CODE_START */
+onMounted(() => {
+	if (isViewer) {
+		const observer = new MutationObserver(() => {
+			// hide title
+			const input = document.querySelector('[data-test-id="workflow-name-input"]');
+
+			const preview = document.querySelector('[data-test-id="inline-edit-preview"]');
+
+			if (!input || !preview) return;
+
+			// Hide the input
+			input.style.display = 'none';
+
+			// Avoid duplicate replacement
+			if (document.querySelector('#workflow-name-static')) return;
+
+			// Create replacement element
+			const replacement = document.createElement('span');
+			replacement.id = 'workflow-name-static';
+			replacement.textContent = preview.textContent;
+			replacement.style.whiteSpace = 'pre';
+			replacement.style.fontWeight = '500';
+			replacement.style.cursor = 'default';
+
+			// Insert replacement next to input
+			input.parentElement.appendChild(replacement);
+
+			// hide publish / save / tags
+			const el = document.querySelector('[data-test-id="canvas-node-toolbar"]');
+			if (el) {
+				el.style.display = 'none';
+			}
+
+			const tag = document.querySelector('[data-test-id="workflow-tags-container"]');
+
+			if (!tag) return;
+
+			if (tag) {
+				tag.style.display = 'none';
+			}
+
+			const sibling = tag.parentElement.querySelector('span.actions');
+			if (sibling) {
+				sibling.style.display = 'none';
+			}
+		});
+
+		observer.observe(document.body, {
+			childList: true,
+			subtree: true,
+		});
+	}
+});
+/* CUSTOM_CODE_END */
 
 /**
  * Initialization
