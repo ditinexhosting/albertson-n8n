@@ -249,14 +249,14 @@
 			<!-- Footer buttons -->
 			<template #footer>
 				<div class="flex justify-end gap-2">
-					<n-button @click="closeModal"> Cancel </n-button>
-					<n-button @click="() => {}">
+					<n-button @click="closeModal" class="rounded-md!"> Cancel </n-button>
+					<n-button @click="() => {}" class="rounded-md!">
 						<template #icon>
 							<n-icon :size="14"><FolderPlus /></n-icon>
 						</template>
 						Add to Project
 					</n-button>
-					<n-button type="primary" @click="handleUseTemplate">
+					<n-button type="primary" @click="handleUseTemplate" class="rounded-md!">
 						<template #icon>
 							<n-icon :size="14"><Play /></n-icon>
 						</template>
