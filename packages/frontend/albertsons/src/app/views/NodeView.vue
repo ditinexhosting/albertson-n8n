@@ -319,6 +319,18 @@ const isLogsPanelOpen = computed(() => logsStore.isOpen);
 /* CUSTOM_CODE_START */
 onMounted(() => {
 	if (isViewer) {
+		// disable right click on node
+		document.addEventListener(
+			'contextmenu',
+			(e) => {
+				if (e.target.closest('[data-test-id="canvas"]')) {
+					e.preventDefault();
+					e.stopPropagation();
+				}
+			},
+			true,
+		);
+
 		const observer = new MutationObserver(() => {
 			// hide title
 			const input = document.querySelector('[data-test-id="workflow-name-input"]');
@@ -344,12 +356,17 @@ onMounted(() => {
 			// Insert replacement next to input
 			input.parentElement.appendChild(replacement);
 
-			// hide publish / save / tags
-			const el = document.querySelector('[data-test-id="canvas-node-toolbar"]');
-			if (el) {
-				el.style.display = 'none';
-			}
+			// hide 3 dot node menu
+			document.addEventListener(
+				'mouseenter',
+				() => {
+					const el = document.querySelector('[data-test-id="canvas-node-toolbar"]');
+					if (el) el.style.display = 'none';
+				},
+				true,
+			);
 
+			// hide publish / save / tags
 			const tag = document.querySelector('[data-test-id="workflow-tags-container"]');
 
 			if (!tag) return;
@@ -367,6 +384,8 @@ onMounted(() => {
 		observer.observe(document.body, {
 			childList: true,
 			subtree: true,
+			attributes: true,
+			attributeFilter: ['class', 'style'],
 		});
 	}
 });
