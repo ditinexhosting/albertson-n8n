@@ -1,14 +1,39 @@
 <script setup>
-import { defineAsyncComponent } from 'vue';
-
+import { defineAsyncComponent, ref, watch, computed } from 'vue';
+import { useRoute } from 'vue-router';
+import { handleAction } from '@src/utils/handleAction';
+import { agentEditAccessCheck } from '@src/services/agents.service';
+import { NEW_WORKFLOW_ID, PLACEHOLDER_EMPTY_WORKFLOW_ID } from '@/app/constants';
+import { useUsersStore } from '@/features/settings/users/users.store';
 const NodeView = defineAsyncComponent(() => import('@src/app/views/NodeView.vue'));
 
-//Ensure Editors can edit workflows (and view), while non-editors can only view workflows.
-// TODO:
-//Set isViewer = false only when the user owns the workflow
-// OR the workflow belongs to a project where the user’s role is Editor.
+const route = useRoute();
+const usersStore = useUsersStore();
+const isViewer = ref(true);
+
+const workflowId = computed(() => {
+	const workflowIdParam = route.params.name;
+	return [PLACEHOLDER_EMPTY_WORKFLOW_ID, NEW_WORKFLOW_ID].includes(workflowIdParam)
+		? undefined
+		: workflowIdParam;
+});
+
+watch(
+	workflowId,
+	(id) => {
+		if (!id) return;
+
+		handleAction({
+			action: () => agentEditAccessCheck(id, usersStore.currentUser.id),
+			onSuccess: (res) => {
+				isViewer.value = res.isViewer;
+			},
+		});
+	},
+	{ immediate: true },
+);
 </script>
 
 <template>
-	<NodeView :isViewer="true" />
+	<NodeView :isViewer="isViewer" />
 </template>
