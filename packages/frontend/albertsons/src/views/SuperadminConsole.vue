@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch, render, computed } from 'vue';
+import { ref, onMounted, watch, render, computed, nextTick } from 'vue';
 import {
 	NIcon,
 	NMenu,
@@ -27,6 +27,7 @@ const columns = createColumns();
 const toast = useToast();
 const showAddUserModal = ref(false);
 const addingUser = ref(false);
+const resetPasswordLoading = ref(false);
 const showEditUserModal = ref(false);
 const isModalOpen = computed({
 	get() {
@@ -103,7 +104,6 @@ const actionOptions = [
 	{
 		label: 'Reset Password',
 		key: 'reset-password',
-		disabled: true,
 		icon: renderIcon(LockKeyhole),
 	},
 ];
@@ -309,6 +309,34 @@ const onEditUser = async () => {
 	}
 };
 
+const onResetPassword = async (memberId) => {
+	try {
+		resetPasswordLoading.value = true;
+		const apiResult = await albertsonsRestApiRequest('POST', `/v1/user-metadata/reset-password`, {
+			memberId,
+		});
+
+		if (apiResult) {
+			await nextTick();
+			toast.showMessage({
+				title: `User`,
+				message: 'Password updated successfully.',
+				type: 'success',
+			});
+			fetchAllUser();
+		}
+	} catch (e) {
+		console.error('Failed to update password.', e.message, e);
+		toast.showMessage({
+			title: `User`,
+			message: e.message || 'Failed to update password.',
+			type: 'error',
+		});
+	} finally {
+		resetPasswordLoading.value = false;
+	}
+};
+
 const handleAction = async (key, row) => {
 	try {
 		switch (key) {
@@ -323,6 +351,8 @@ const handleAction = async (key, row) => {
 				};
 				break;
 			case 'reset-password':
+				if (resetPasswordLoading.value) return;
+				onResetPassword(row.owner?.id);
 				break;
 			default:
 				console.error(`Unknown action key: ${key}`);
