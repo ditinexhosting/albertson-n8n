@@ -427,12 +427,13 @@ function closeModal() {
 }
 
 async function handleUseTemplate() {
+	console.log('>>', selectedTemplate.value);
 	if (!selectedTemplate.value) return;
 
 	try {
 		closeModal();
 		// Navigate to new workflow
-		router.push({ name: 'NodeViewNew', params: { name: 'new' } });
+		router.push('/workflow/new');
 
 		const nodesCount = selectedTemplate.value.rawNodes?.length || 0;
 
@@ -440,6 +441,7 @@ async function handleUseTemplate() {
 
 		builderStore.streaming = true;
 		setTimeout(() => {
+			console.log('>>>timeout trigger');
 			// Set Workflow nodes and connections
 			workflowsStore.setNodes(selectedTemplate.value.rawNodes);
 			workflowsStore.setConnections(selectedTemplate.value.rawConnections);
