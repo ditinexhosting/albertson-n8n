@@ -109,7 +109,6 @@ const MigrationRuleReportView = async () =>
 const SuperadminConsoleView = async () => await import('@src/views/SuperadminConsole.vue');
 const TeamsView = async () => await import('@src/views/Teams.vue');
 
-
 function getTemplatesRedirect(defaultRedirect: VIEWS[keyof VIEWS]): { name: string } | false {
 	const settingsStore = useSettingsStore();
 	const isTemplatesEnabled: boolean = settingsStore.isTemplatesEnabled;

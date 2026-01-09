@@ -2,12 +2,10 @@
 	<div class="p-4! w-full h-screen">
 		<!-- Header with Create Button only -->
 		<div class="flex items-center justify-between mb-8">
-		<div>
-		<h2 class="text-xl font-semibold text-foreground">Teams</h2>
-		<p class="text-sm text-secondary">
-			Collaborate with your colleagues
-		</p>
-	</div>
+			<div>
+				<h2 class="text-xl font-semibold text-foreground">Teams</h2>
+				<p class="text-sm text-secondary">Collaborate with your colleagues</p>
+			</div>
 			<n-button type="primary" @click="showCreateTeamModal = true">
 				<template #icon>
 					<n-icon><Plus /></n-icon>
