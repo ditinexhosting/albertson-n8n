@@ -393,12 +393,15 @@ const onDeleteAgent = (agentId, workflowId) =>
 
 			<template #footer>
 				<div class="flex gap-4 justify-end">
-					<n-button ghost type="primary" @click="showPublishModal = false">Close </n-button>
+					<n-button ghost type="primary" @click="showPublishModal = false" class="rounded-md!"
+						>Close
+					</n-button>
 					<n-button
 						type="primary"
 						:loading="loading"
 						:disabled="loading"
 						@click="PublishAgentLibrary"
+						class="rounded-md!"
 					>
 						Publish Agent
 					</n-button>

@@ -130,11 +130,14 @@
 			</n-form>
 			<template #footer>
 				<div class="flex flex-row flex-1 gap-4 justify-end!">
-					<n-button ghost type="primary" @click="showProjectModal = false">Close</n-button>
+					<n-button ghost type="primary" @click="showProjectModal = false" class="rounded-md!"
+						>Close</n-button
+					>
 					<n-button
 						:loading="modalSubmitLoading"
 						type="primary"
 						@click="showEditProjectModal ? onEdit() : onAdd()"
+						class="rounded-md!"
 						>Submit</n-button
 					>
 				</div>
