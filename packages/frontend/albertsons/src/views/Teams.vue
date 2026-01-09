@@ -1,12 +1,12 @@
 <template>
-	<div class="p-4! w-full h-screen">
+	<div class="flex flex-1 p-4! flex-col gap-4 overflow-x-auto! h-[90vh]!">
 		<!-- Header with Create Button only -->
-		<div class="flex items-center justify-between mb-8">
+		<div class="flex items-center justify-between">
 			<div>
-				<h2 class="text-xl font-semibold text-foreground">Teams</h2>
-				<p class="text-sm text-secondary">Collaborate with your colleagues</p>
+				<div class="text-lg font-semibold mb-2">Teams</div>
+				<div class="text-sm text-secondary">Collaborate with your colleagues</div>
 			</div>
-			<n-button type="primary" @click="showCreateTeamModal = true">
+			<n-button class="rounded-md!" type="primary" @click="showCreateTeamModal = true">
 				<template #icon>
 					<n-icon><Plus /></n-icon>
 				</template>
@@ -14,78 +14,72 @@
 			</n-button>
 		</div>
 
+		<div v-if="teams.length === 0">
+			<n-empty description="No teams found" />
+		</div>
+
 		<!-- Teams Grid -->
-		<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 items-stretch">
+		<div
+			class="my-4! grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-stretch"
+		>
 			<n-card
 				v-for="team in teams"
 				:key="team.id"
 				:bordered="true"
 				hoverable
-				class="rounded-lg! transition-all h-full bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"
-				:content-style="{
-					padding: '18px 20px 14px 20px',
-					display: 'flex',
-					flexDirection: 'column',
-					height: '100%',
-				}"
+				class="rounded-md! transition-all h-full bg-white shadow-sm"
 			>
 				<!-- HEADER -->
-				<div class="mb-3">
-					<div class="flex items-start justify-between mb-1">
-						<h3 class="text-[15px] font-bold leading-snug leading-tight text-foreground">
-							{{ team.name }}
-						</h3>
 
-						<n-dropdown :options="teamMenuOptions" @select="(key) => handleTeamAction(key, team)">
-							<n-button text @click.stop>
-								<n-icon :size="16"><MoreVertical /></n-icon>
-							</n-button>
-						</n-dropdown>
+				<div class="flex items-start justify-between">
+					<div>
+						<div class="text-lg font-semibold">{{ team.name }}</div>
+						<div
+							class="text-sm text-secondary mt-2! wrap-break-words! line-clamp-2 min-h-[2.4rem]!"
+						>
+							{{ team.description }}
+						</div>
 					</div>
 
-					<!-- description immediately under title -->
-					<p class="text-[11px] text-secondary leading-snug leading-tight">
-						{{ team.description }}
-					</p>
+					<n-dropdown
+						trigger="click"
+						class="cursor-pointer"
+						:options="teamMenuOptions"
+						@select="(key) => handleTeamAction(key, team)"
+					>
+						<MoreVertical class="cursor-pointer" />
+					</n-dropdown>
 				</div>
 
 				<!-- STATS with min-h-13 gap row -->
-				<div class="flex items-center gap-4 text-[11px] text-secondary mb-3">
-					<div class="flex items-center gap-1.5 min-h-13">
-						<Users :size="20" />
-						<span>{{ team.memberCount }} Members</span>
+				<div
+					class="flex items-center gap-4 text-sm text-secondary my-4! py-3! border-b! border-border-primary!"
+				>
+					<div class="flex items-center gap-2">
+						<Users :size="15" />
+						<span>{{ team.total_member }} Members</span>
 					</div>
-					<div class="flex items-center gap-1.5">
-						<FolderKanban :size="20" />
-						<span>{{ team.projectCount }} Projects</span>
+					<div class="flex items-center gap-2">
+						<FolderKanban :size="15" />
+						<span>{{ team.total_project }} Projects</span>
 					</div>
 				</div>
 
-				<!-- divider -->
-				<div class="border-t border-border-primary mb-3"></div>
-
 				<!-- TEAM MEMBERS -->
-				<div class="mb-3">
-					<p class="text-[11px] text-secondary mb-1.5 tracking-wide uppercase font-medium">
-						Team Members
-					</p>
+				<div>
+					<p class="text-xs text-secondary mb-2! uppercase font-medium">Team Members</p>
 
-					<div class="space-y-1.5">
-						<div v-for="member in team.members" :key="member.id" class="flex items-center gap-2">
-							<n-avatar
-								round
-								:size="26"
-								class="text-[10px] font-semibold"
-								:style="{ backgroundColor: 'var(--color--primary)' }"
-							>
-								{{ member.initials }}
+					<div class="overflow-x-auto! h-32! space-y-2!">
+						<div v-for="member in team.members" :key="member.id" class="flex items-center">
+							<n-avatar round size="small" color="#01529f" class="p-4! mr-2!">
+								{{ member?.name?.split(' ')[0]?.[0] + member?.name?.split(' ').at(-1)?.[0] }}
 							</n-avatar>
 
-							<div class="leading-tight">
-								<p class="text-[11px] font-medium text-foreground">
+							<div>
+								<p class="text-sm! font-medium">
 									{{ member.name }}
 								</p>
-								<p class="text-[10px] text-secondary">
+								<p class="text-xs! text-secondary">
 									{{ member.role }}
 								</p>
 							</div>
@@ -93,12 +87,11 @@
 					</div>
 				</div>
 
-				<!-- bottom divider -->
-				<div class="border-t border-border-primary mb-1.5"></div>
-
 				<!-- FOOTER -->
-				<div class="mt-auto pt-0">
-					<p class="text-[10px] text-secondary">Created {{ team.createdDate }}</p>
+				<div class="mt-4! pt-4! border-t! border-border-primary!">
+					<p class="text-xs! text-secondary">
+						Created {{ dayjs(team.createdAt).format('MMM DD, YYYY') }}
+					</p>
 				</div>
 			</n-card>
 		</div>
@@ -163,7 +156,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, h } from 'vue';
+import { ref, h, onMounted } from 'vue';
+import dayjs from 'dayjs';
+import { handleAction as handleActionAPI } from '@src/utils/handleAction';
+import {
+	createNewTeam,
+	deleteTeam,
+	getAllTeams,
+	addTeamMembers,
+	removeTeamMember,
+} from '@src/services/teams.service';
 import { Users, Plus, FolderKanban, MoreVertical, Edit, Trash2 } from 'lucide-vue-next';
 import {
 	NButton,
@@ -176,6 +178,7 @@ import {
 	NInput,
 	NSelect,
 	NDropdown,
+	NEmpty,
 } from 'naive-ui';
 
 // State
@@ -183,6 +186,7 @@ const showCreateTeamModal = ref(false);
 const loading = ref(false);
 
 // Form
+const teams = ref([]);
 const formValue = ref({
 	name: '',
 	description: '',
@@ -202,138 +206,21 @@ const formRules = {
 	},
 };
 
-// Mock data
-const teams = ref([
-	{
-		id: 1,
-		name: 'Platform Engineering',
-		description: 'Core platform development and infrastructure automation.',
-		memberCount: 8,
-		projectCount: 3,
-		createdDate: 'Jan 15, 2024',
-		members: [
-			{
-				id: 1,
-				name: 'Sarah Johnson',
-				email: 'sarah.j@company.com',
-				role: 'Team Lead',
-				initials: 'SJ',
-			},
-			{
-				id: 2,
-				name: 'Mike Chen',
-				email: 'mike.c@company.com',
-				role: 'Member',
-				initials: 'MC',
-			},
-			{
-				id: 3,
-				name: 'Lisa Patel',
-				email: 'lisa.p@company.com',
-				role: 'Member',
-				initials: 'LP',
-			},
-		],
-	},
-	{
-		id: 2,
-		name: 'Marketing Automation',
-		description: 'Customer engagement and marketing campaign workflows.',
-		memberCount: 5,
-		projectCount: 2,
-		createdDate: 'Feb 1, 2024',
-		members: [
-			{
-				id: 4,
-				name: 'Alex Rodriguez',
-				email: 'alex.r@company.com',
-				role: 'Team Lead',
-				initials: 'AR',
-			},
-			{
-				id: 5,
-				name: 'Sarah Johnson',
-				email: 'sarah.j@company.com',
-				role: 'Member',
-				initials: 'SJ',
-			},
-		],
-	},
-	{
-		id: 3,
-		name: 'Supply Chain Analytics',
-		description: 'Supply chain optimization and vendor management automation.',
-		memberCount: 6,
-		projectCount: 2,
-		createdDate: 'Mar 1, 2024',
-		members: [
-			{
-				id: 6,
-				name: 'Mike Chen',
-				email: 'mike.c@company.com',
-				role: 'Team Lead',
-				initials: 'MC',
-			},
-			{
-				id: 7,
-				name: 'David Kim',
-				email: 'david.k@company.com',
-				role: 'Member',
-				initials: 'DK',
-			},
-			{
-				id: 8,
-				name: 'Lisa Patel',
-				email: 'lisa.p@company.com',
-				role: 'Member',
-				initials: 'LP',
-			},
-		],
-	},
-	{
-		id: 4,
-		name: 'Store Operations',
-		description: 'Store-level operations and performance monitoring.',
-		memberCount: 4,
-		projectCount: 1,
-		createdDate: 'Apr 1, 2024',
-		members: [
-			{
-				id: 9,
-				name: 'Lisa Patel',
-				email: 'lisa.p@company.com',
-				role: 'Team Lead',
-				initials: 'LP',
-			},
-			{
-				id: 10,
-				name: 'David Kim',
-				email: 'david.k@company.com',
-				role: 'Member',
-				initials: 'DK',
-			},
-		],
-	},
-]);
-
-const availableMembers = ref([
-	{ label: 'Sarah Johnson', value: 'sarah.j@company.com' },
-	{ label: 'Mike Chen', value: 'mike.c@company.com' },
-	{ label: 'Lisa Patel', value: 'lisa.p@company.com' },
-	{ label: 'Alex Rodriguez', value: 'alex.r@company.com' },
-	{ label: 'David Kim', value: 'david.k@company.com' },
-]);
-
 const teamMenuOptions = [
+	{
+		label: () => h('span', { class: 'text-primary' }, 'Add Members'),
+		key: 'add_members',
+		icon: () => h(Plus, { class: 'h-4 text-primary' }),
+	},
 	{
 		label: 'Edit Team',
 		key: 'edit',
 		icon: () => h(Edit, { size: 14 }),
 	},
 	{
-		label: 'Delete Team',
+		label: () => h('span', { class: 'text-danger' }, 'Delete Team'),
 		key: 'delete',
-		icon: () => h(Trash2, { size: 14 }),
+		icon: () => h(Trash2, { class: 'h-4 text-danger' }),
 	},
 ];
 
@@ -351,11 +238,38 @@ function handleCreateTeam() {
 	}, 1000);
 }
 
-function handleTeamAction(key: string, team: any) {
-	if (key === 'edit') {
-		// Handle edit
-	} else if (key === 'delete') {
-		// Handle delete
+const handleTeamAction = async (key, row) => {
+	try {
+		switch (key) {
+			case 'add_members':
+				break;
+			case 'edit':
+				break;
+			case 'delete':
+				break;
+			default:
+				console.error(`Unknown action key: ${key}`);
+		}
+	} catch (e) {
+		console.error('handle action failed', e);
 	}
-}
+};
+
+// Load initial data
+onMounted(async () => {
+	try {
+		fetchAllTeams();
+	} catch (e) {
+		console.error('Failed to load initial api data for teams', e);
+	}
+});
+
+// ------------------- APIS -------------------
+const fetchAllTeams = () =>
+	handleActionAPI({
+		action: () => getAllTeams(),
+		onSuccess: (res) => {
+			teams.value = res || [];
+		},
+	});
 </script>

@@ -1,5 +1,5 @@
 <template>
-	<div class="p-4! w-full h-screen">
+	<div class="flex flex-1 p-4! flex-col gap-4 overflow-x-auto! h-[90vh]!">
 		<!-- Strip Container -->
 		<n-card :bordered="true" class="rounded-md!">
 			<!-- Page Header -->
@@ -53,8 +53,8 @@
 		<!-- Agent Count -->
 		<p class="text-sm text-secondary py-3! pl-0.5!">{{ filteredAgents.length }} agents</p>
 
-		<div v-if="filteredAgents.length === 0" class="text-center py-20 text-secondary font-semibold">
-			No agents found.
+		<div v-if="filteredAgents.length === 0">
+			<n-empty description="No Agents Libraries found" />
 		</div>
 
 		<!-- Agent Cards Grid -->
@@ -421,7 +421,7 @@ import {
 	NForm,
 	NDynamicTags,
 	NFormItem,
-	NDropdown,
+	NEmpty,
 } from 'naive-ui';
 
 const toast = useToast();
