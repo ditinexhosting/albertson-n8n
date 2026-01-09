@@ -107,6 +107,9 @@ const MigrationReportView = async () =>
 const MigrationRuleReportView = async () =>
 	await import('@/features/settings/migrationReport/MigrationRuleDetail.vue');
 const SuperadminConsoleView = async () => await import('@src/views/SuperadminConsole.vue');
+const TeamsView = async () => await import('@src/views/Teams.vue');
+const AlbertsonsProfileSettings = async () =>
+	await import('@src/views/AlbertsonsProfileSettings.vue');
 
 function getTemplatesRedirect(defaultRedirect: VIEWS[keyof VIEWS]): { name: string } | false {
 	const settingsStore = useSettingsStore();
@@ -236,6 +239,25 @@ export const routes: RouteRecordRaw[] = [
 		},
 	},
 
+	// Albertsons Teams
+	{
+		path: '/teams',
+		name: ROUTERS.TEAMS,
+		components: {
+			default: TeamsView,
+			header: Header,
+			sidebar: MainSidebar,
+		},
+		meta: {
+			middleware: ['authenticated'],
+			header: {
+				title: 'Teams',
+				subtitle: 'Collaborate with your colleagues',
+				showBack: false,
+			},
+		},
+	},
+
 	// Albertsons Agent Library
 	{
 		path: '/agent-library',
@@ -253,7 +275,23 @@ export const routes: RouteRecordRaw[] = [
 			},
 		},
 	},
-
+	{
+		path: '/profile-settings',
+		name: 'ALBERTSONS_PROFILE_SETTINGS',
+		components: {
+			default: AlbertsonsProfileSettings,
+			header: Header,
+			sidebar: MainSidebar,
+		},
+		meta: {
+			middleware: ['authenticated'],
+			header: {
+				title: 'Settings',
+				subtitle: 'Manage your account details',
+				showBack: false,
+			},
+		},
+	},
 	{
 		path: '/executions',
 		name: 'EXECUTIONS',
@@ -1164,7 +1202,7 @@ router.afterEach((to, from) => {
 
 		void useExternalHooks().run('main.routeChange', { from, to });
 
-		uiStore.currentView = (to.name as string) ?? '';
+		uiStore.currentView = (to.meta?.currentView as string) ?? (to.name as string) ?? '';
 		if (to.meta?.templatesEnabled) {
 			templatesStore.setSessionId();
 		} else {
