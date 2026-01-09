@@ -322,15 +322,19 @@ function createColumns() {
 	];
 }
 const tableHeader = (text) => h('span', { class: 'text-secondary' }, text);
-const agentOptions = [
+const getAgentOptions = (canManageProject) => [
 	{
-		label: 'View/Edit Agent',
+		label: canManageProject ? 'View/Edit Agent' : 'View Agent',
 		key: 'view',
 	},
-	{
-		label: 'Remove Agent',
-		key: 'remove_agent',
-	},
+	...(canManageProject
+		? [
+				{
+					label: 'Remove Agent',
+					key: 'remove_agent',
+				},
+			]
+		: []),
 ];
 
 const handleAgentsAction = async (key, row) => {
@@ -437,17 +441,17 @@ function createAgentsColumns() {
 			title: ' ',
 			key: 'actions',
 			render: (row) => {
-				if (!canManageProject.value) return '';
 				return h('div', { class: 'flex items-center gap-3 text-gray-400' }, [
-					h(Play, {
-						class: 'w-4 cursor-pointer',
-						onClick: () => runWorkflow(router, row),
-					}),
+					canManageProject.value &&
+						h(Play, {
+							class: 'w-4 cursor-pointer',
+							onClick: () => runWorkflow(router, row),
+						}),
 					h(
 						NDropdown,
 						{
-							trigger: 'hover',
-							options: agentOptions,
+							trigger: 'click',
+							options: getAgentOptions(canManageProject.value),
 							onSelect: (key) => handleAgentsAction(key, row),
 						},
 						{
