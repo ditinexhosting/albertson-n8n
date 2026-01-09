@@ -107,8 +107,8 @@ const MigrationReportView = async () =>
 const MigrationRuleReportView = async () =>
 	await import('@/features/settings/migrationReport/MigrationRuleDetail.vue');
 const SuperadminConsoleView = async () => await import('@src/views/SuperadminConsole.vue');
-
 const TeamsView = async () => await import('@src/views/Teams.vue');
+
 
 function getTemplatesRedirect(defaultRedirect: VIEWS[keyof VIEWS]): { name: string } | false {
 	const settingsStore = useSettingsStore();
@@ -297,6 +297,23 @@ export const routes: RouteRecordRaw[] = [
 		redirect: '/dashboard',
 		meta: {
 			middleware: ['authenticated'],
+		},
+	},
+	{
+		path: '/teams',
+		name: 'ALBERTSONS_TEAMS',
+		components: {
+			default: TeamsView,
+			header: Header,
+			sidebar: MainSidebar,
+		},
+		meta: {
+			middleware: ['authenticated'],
+			header: {
+				title: 'Teams',
+				subtitle: 'Collaborate with your colleagues',
+				showBack: false,
+			},
 		},
 	},
 	{
