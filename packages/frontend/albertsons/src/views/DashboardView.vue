@@ -71,60 +71,73 @@
 				<n-gi :span="16">
 					<div class="left-column">
 						<!-- NEEDS ATTENTION -->
-						<n-card size="small" class="needs-attention rounded-md">
-							<div class="needs-header">
-								<div class="needs-title">
-									<AlertTriangle class="needs-title-icon" />
-									<span>Needs Attention</span>
-								</div>
-								<div class="needs-count">2</div>
-							</div>
-
-							<div class="needs-list">
-								<!-- Card 1 -->
-								<div class="needs-item needs-critical rounded-md!">
-									<div class="needs-left">
-										<div class="needs-icon critical-icon">
-											<XCircle class="needs-inner-icon" />
+						<div class="flex flex-row justify-between gap-4">
+							<n-card title="Templates" class="rounded-md! box-shadow flex-1">
+								<template #header-extra>
+									<n-badge :value="templates.length" color="#01529f" />
+								</template>
+								<template v-if="templates.length > 0">
+									<h3 class="text-base font-semibold leading-tight truncate mb-4!">
+										{{ templates[0].name }}
+									</h3>
+									<!-- Description -->
+									<p class="text-xs text-secondary line-clamp-2">
+										{{ templates[0].description }}
+									</p>
+								</template>
+								<template v-if="templates.length > 0" #footer>
+									<div class="flex items-center gap-4 text-xs text-secondary">
+										<div class="flex items-center gap-1.5">
+											<Users :size="12" />
+											<span>{{ templates[0].uses }} uses</span>
 										</div>
-										<div class="needs-main">
-											<div class="needs-name">Expense Anomaly Detection</div>
-											<div class="needs-desc">
-												Database connection timeout — unable to fetch expense records
-											</div>
-											<div class="needs-date-inline">13/12/2024</div>
-										</div>
-									</div>
-									<div class="needs-right">
-										<n-button size="tiny" type="error" round class="needs-btn needs-btn-primary">
-											Fix Now
-											<ChevronRight class="needs-arrow" />
-										</n-button>
-									</div>
-								</div>
-
-								<!-- Card 2 -->
-								<div class="needs-item needs-warning rounded-md!">
-									<div class="needs-left">
-										<div class="needs-icon warning-icon">
-											<AlertTriangle class="needs-inner-icon" />
-										</div>
-										<div class="needs-main">
-											<div class="needs-name">Expense Anomaly Detection</div>
-											<div class="needs-desc">Success rate dropped to 82.1%</div>
-											<div class="needs-date-inline">Last run: 13/12/2024</div>
+										<div class="flex items-center gap-1.5">
+											<Workflow :size="12" />
+											<span>{{ templates[0].nodes }} nodes</span>
 										</div>
 									</div>
-									<div class="needs-right">
-										<n-button size="tiny" round tertiary class="needs-btn">
-											Review
-											<ChevronRight class="needs-arrow" />
-										</n-button>
+								</template>
+								<template #action>
+									<span
+										class="text-primary text-bold hover:text-primary/30 cursor-pointer"
+										@click="goToTemplates"
+										>View all</span
+									>
+								</template>
+							</n-card>
+							<n-card title="Agent Library" class="rounded-md! box-shadow flex-1">
+								<template #header-extra>
+									<n-badge :value="agentLibraries.length" color="#01529f" />
+								</template>
+								<template v-if="agentLibraries.length > 0">
+									<h3 class="text-base font-semibold leading-tight truncate mb-4!">
+										{{ agentLibraries[0].agent?.name }}
+									</h3>
+									<p class="text-xs text-secondary line-clamp-2">
+										{{ agentLibraries[0].agent?.description }}
+									</p>
+								</template>
+								<template v-if="agentLibraries.length > 0" #footer>
+									<div class="flex items-center gap-4 text-xs text-secondary">
+										<div class="flex items-center gap-1.5">
+											<Play :size="12" />
+											<span>{{ agentLibraries[0].total_runs }}</span>
+										</div>
+										<div class="flex items-center gap-1.5">
+											<Download :size="12" />
+											<span>{{ agentLibraries[0].installs }}</span>
+										</div>
 									</div>
-								</div>
-							</div>
-						</n-card>
-
+								</template>
+								<template #action>
+									<span
+										class="text-primary text-bold hover:text-primary/30 cursor-pointer"
+										@click="goToAgentLibrary"
+										>View all</span
+									>
+								</template>
+							</n-card>
+						</div>
 						<!-- ACTIVITY STREAM -->
 						<n-card size="small" class="activity-section rounded-md!">
 							<div class="activity-header">
@@ -264,7 +277,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { NGrid, NGi, NCard, NTag, NButton } from 'naive-ui';
+import { NGrid, NGi, NCard, NTag, NButton, NBadge } from 'naive-ui';
 import {
 	CheckCircle2,
 	Clock,
@@ -277,16 +290,23 @@ import {
 	Plus,
 	Play,
 	Zap,
+	Users,
+	Workflow,
+	Download,
 } from 'lucide-vue-next';
 import { useWorkflowsStore } from '@/app/stores/workflows.store';
 import { useTemplatesStore } from '../stores/templates.store';
 import { useUserAgentMappingsStore } from '@src/stores/userAgentMappings.store';
 import { albertsonsRestApiRequest } from '@src/utils/albertsonsRestApiRequest';
-import { useUsersStore } from '@/features/settings/users/users.store'; // <-- add this
+import { useUsersStore } from '@/features/settings/users/users.store';
+import { handleAction } from '@src/utils/handleAction';
+import { getAllAgentLibraries } from '@src/services/agents.service';
 
 const usersStore = useUsersStore();
 
 const router = useRouter();
+const templates = ref([]);
+const agentLibraries = ref([]);
 const workflowsStore = useWorkflowsStore();
 const templatesStore = useTemplatesStore();
 const userAgentMappingsStore = useUserAgentMappingsStore();
@@ -312,6 +332,14 @@ async function loadWorkflows() {
 
 function goToNewWorkflow() {
 	router.push('/workflow/new');
+}
+
+function goToTemplates() {
+	router.push('/templates');
+}
+
+function goToAgentLibrary() {
+	router.push('/agent-library');
 }
 
 function goToAgents() {
@@ -395,6 +423,68 @@ const metrics = ref({
 	activeAgents: 0,
 	activeAgentsDelta: 0,
 });
+
+const fetchAgentLibraries = () =>
+	handleAction({
+		action: () => getAllAgentLibraries(usersStore.currentUser.id),
+		onSuccess: (res) => {
+			agentLibraries.value = res || [];
+		},
+	});
+
+// Fetch templates
+async function fetchTemplates() {
+	try {
+		const response = await albertsonsRestApiRequest('GET', '/v1/templates/all');
+		const templatesData = Array.isArray(response) ? response : [];
+
+		templates.value = templatesData.map((template) => {
+			const nodeCount = template.nodes?.length || 0;
+
+			// Determine category
+			let category = 'Getting Started';
+			const name = (template.name || '').toLowerCase();
+			const desc = (template.description || '').toLowerCase();
+			if (name.includes('sync') || desc.includes('sync')) category = 'Data Sync';
+			else if (name.includes('notification') || name.includes('slack') || name.includes('email'))
+				category = 'Notifications';
+			else if (name.includes('report') || desc.includes('report')) category = 'Reporting';
+			else if (name.includes('ai') || name.includes('agent') || desc.includes('ai'))
+				category = 'AI Automation';
+
+			// Determine tags
+			const tags = [];
+			const chatTrigger = template.nodes?.find((n) => n.type?.includes('chatTrigger'));
+			const webhookTrigger = template.nodes?.find((n) => n.type?.includes('webhook'));
+			const scheduleTrigger = template.nodes?.find(
+				(n) => n.type?.includes('schedule') || n.type?.includes('cron'),
+			);
+			if (chatTrigger) tags.push({ label: 'Chat', icon: MessageCircle, type: 'success' });
+			if (webhookTrigger) tags.push({ label: 'Webhook', icon: Webhook, type: 'info' });
+			if (scheduleTrigger) tags.push({ label: 'Schedule', icon: Clock, type: 'warning' });
+			if (tags.length === 0) tags.push({ label: 'Manual', icon: Clock, type: 'default' });
+
+			return {
+				id: template.id,
+				name: template.name || 'Untitled Template',
+				description: template.description || 'No description available',
+				category,
+				uses: '0',
+				nodes: nodeCount,
+				fullDescription: template.description || 'No detailed description available',
+				requirement: 'No prior experience required',
+				tags,
+				workflowId: template.workflowId,
+				authorName: template.authorName,
+				rawNodes: template.nodes,
+				rawConnections: template.connections,
+			};
+		});
+	} catch (error) {
+		console.error('Failed to fetch templates:', error);
+	} finally {
+	}
+}
 
 // Fetch execution statistics from your API using the utility function
 async function loadExecutionStats() {
@@ -592,6 +682,8 @@ const trendData = [
 onMounted(async () => {
 	await loadWorkflows();
 	await loadMetrics();
+	fetchTemplates();
+	fetchAgentLibraries();
 
 	if (!rawAgents.value?.length) {
 		try {
@@ -1133,6 +1225,10 @@ onMounted(async () => {
 	margin-top: 1px;
 }
 
+.box-shadow {
+	box-shadow: var(--shadow--light);
+}
+
 /* MVP CARD */
 .mvp-card {
 	background: var(--color--background--light-3) !important;
@@ -1273,7 +1369,7 @@ onMounted(async () => {
 	border: 1px solid var(--border-color--light) !important;
 	box-shadow: var(--shadow--light);
 	padding: 12px 18px 14px;
-	height: 255px;
+	height: 300px;
 }
 
 .trend-header {
