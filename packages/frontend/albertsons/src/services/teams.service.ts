@@ -17,6 +17,16 @@ export const createNewTeam = (payload: any) =>
 	albertsonsRestApiRequest('POST', `/v1/teams/create`, payload);
 
 /**
+ * update team
+ *
+ * @param teamId - teamId
+ * @param payload - Object
+ * @returns success message
+ */
+export const updateTeam = (teamId: string, payload: any) =>
+	albertsonsRestApiRequest('POST', `/v1/teams/update/${teamId}`, payload);
+
+/**
  * Delete team
  *
  * @param ownerId - ownerId
@@ -32,7 +42,7 @@ export const deleteTeam = (teamId: string) =>
  * @param payload - [memberIds]
  * @returns success message
  */
-export const addTeamMembers = (teamId: string, projectId: string, payload: any) =>
+export const addTeamMembers = (teamId: string, payload: any) =>
 	albertsonsRestApiRequest('POST', `/v1/teams/${teamId}/add-members`, payload);
 
 /**
@@ -41,7 +51,7 @@ export const addTeamMembers = (teamId: string, projectId: string, payload: any) 
  * @returns success message
  */
 export const removeTeamMember = (teamId: string, userId: string) =>
-	albertsonsRestApiRequest('DELETE', `/v1/teams/remove-member/${teamId}`);
+	albertsonsRestApiRequest('DELETE', `/v1/teams/remove-member/${teamId}/${userId}`);
 
 /**
  * Attach team to project
@@ -60,3 +70,12 @@ export const attachTeamToProject = (teamId: string, projectId: string, payload: 
  */
 export const deattachTeamFromProject = (teamId: string, projectId: string, payload: any) =>
 	albertsonsRestApiRequest('DELETE', `/v1/teams/${teamId}/projects/${projectId}`, payload);
+
+/**
+ * Get available user to add in team
+ *
+ * @param teamId - teamid
+ * @returns success message
+ */
+export const getAvailableUsers = (teamId: string) =>
+	albertsonsRestApiRequest('GET', `/v1/teams/${teamId}/available-users`);

@@ -56,6 +56,8 @@
 				<n-data-table :columns="columns" :data="sortedMembers" />
 			</n-tab-pane>
 		</n-tabs>
+
+		<!-- Add team/member modal -->
 		<n-modal
 			v-model:show="showAddMemberModal"
 			:mask-closable="false"
@@ -64,25 +66,59 @@
 			style="width: 600px"
 		>
 			<template #header> {{ 'Add Team / Member' }} </template>
-			<n-form :ref="formRef" :label-width="80" :model="formValue" size="medium">
-				<n-grid x-gap="12" :cols="1">
-					<n-gi>
-						<n-form-item label="Users" path="users">
-							<n-select
-								multiple
-								filterable
-								v-model:value="formValue.users"
-								:options="availableUsersToAddAsMember"
-							/>
-						</n-form-item>
-					</n-gi>
-					<n-gi>
-						<n-form-item label="Role" path="role">
-							<n-select v-model:value="formValue.role" :options="availableRoles" />
-						</n-form-item>
-					</n-gi>
-				</n-grid>
-			</n-form>
+
+			<n-tabs
+				@update-value="handleActiveTab"
+				class="card-tabs"
+				default-value="members"
+				size="large"
+				animated
+				pane-wrapper-style="margin: 0 -4px"
+				pane-style="padding-left: 4px; padding-right: 4px; box-sizing: border-box;"
+			>
+				<n-tab-pane name="members" tab="Members">
+					<n-form :ref="formRef" :label-width="80" :model="formValue" size="medium">
+						<n-grid x-gap="12" :cols="1">
+							<n-gi>
+								<n-form-item label="Users" path="users">
+									<n-select
+										multiple
+										filterable
+										v-model:value="formValue.users"
+										:options="availableUsersToAddAsMember"
+									/>
+								</n-form-item>
+							</n-gi>
+							<n-gi>
+								<n-form-item label="Role" path="role">
+									<n-select v-model:value="formValue.role" :options="availableRoles" />
+								</n-form-item>
+							</n-gi>
+						</n-grid>
+					</n-form>
+				</n-tab-pane>
+				<n-tab-pane name="team" tab="Attach Team">
+					<n-form :ref="formRef" :label-width="80" :model="formValue" size="medium">
+						<n-grid x-gap="12" :cols="1">
+							<n-gi>
+								<n-form-item label="Team" path="team">
+									<n-select
+										filterable
+										v-model:value="formValue.teamId"
+										:options="availableTeamsToAttach"
+									/>
+								</n-form-item>
+							</n-gi>
+							<n-gi>
+								<n-form-item label="Role" path="role">
+									<n-select v-model:value="formValue.role" :options="availableRoles" />
+								</n-form-item>
+							</n-gi>
+						</n-grid>
+					</n-form>
+				</n-tab-pane>
+			</n-tabs>
+
 			<template #footer>
 				<div class="flex flex-row flex-1 gap-4 justify-end!">
 					<n-button class="rounded-md!" ghost type="primary" @click="showAddMemberModal = false"
@@ -92,12 +128,14 @@
 						class="rounded-md!"
 						:loading="modalSubmitLoading"
 						type="primary"
-						@click="onAddMember"
+						@click="handleTeamOrMemberSubmit"
 						>Submit</n-button
 					>
 				</div>
 			</template>
 		</n-modal>
+
+		<!-- add agent modal -->
 		<n-modal
 			v-model:show="showAddAgentModal"
 			:mask-closable="false"
@@ -197,6 +235,7 @@ import { handleAction } from '@src/utils/handleAction';
 import { addMember, getAllUsers, removeMember } from '@src/services/users.service';
 import { getProjectDetails } from '@src/services/projects.service';
 import { getAllAgents, removeAgent, addAgent } from '@src/services/agents.service';
+import { getAllTeams } from '@src/services/teams.service';
 
 const router = useRouter();
 const route = useRoute();
@@ -206,20 +245,22 @@ const showAddAgentModal = ref(false);
 const modalSubmitLoading = ref(false);
 const usersStore = useUsersStore();
 const toast = useToast();
-
 const formRef = ref(null);
 const formRef2 = ref(null);
 const formValue = ref({
 	users: [],
+	teamId: null,
 	role: null,
 });
 const formValue2 = ref({
 	agentIds: [],
 });
+const activeTab = ref('members');
 const dialog = useDialog();
 const columns = createColumns();
 const agentsColumns = createAgentsColumns();
 const project = ref([]);
+const teams = ref([]);
 const users = ref([]);
 const agents = ref([]);
 const availableRoles = computed(() => {
@@ -236,6 +277,14 @@ const availableUsersToAddAsMember = computed(() => {
 		.map((user) => ({
 			label: user?.owner?.firstName + ' ' + user?.owner?.lastName + ' (' + user?.owner?.email + ')',
 			value: user?.ownerId,
+		}));
+});
+const availableTeamsToAttach = computed(() => {
+	return teams.value
+		.filter((team) => !project.value.members.some((member) => member.teamId === team.id))
+		.map((team) => ({
+			label: team?.name,
+			value: team?.id,
 		}));
 });
 
@@ -286,10 +335,7 @@ function createColumns() {
 		},
 		{
 			title: 'Team',
-			key: 'team',
-			render: () => {
-				return '-';
-			},
+			key: 'teamName',
 		},
 		{
 			title: 'Action',
@@ -516,6 +562,7 @@ onMounted(async () => {
 		fetchProjectDetails();
 		fetchAllUsers();
 		fetchAllAgents();
+		fetchAllTeams();
 	} catch (e) {
 		console.error('Failed to load initial api data', e);
 	}
@@ -551,6 +598,17 @@ function handleConfirm(row) {
 	});
 }
 
+const handleActiveTab = (tabName) => {
+	activeTab.value = tabName;
+};
+const handleTeamOrMemberSubmit = () => {
+	if (activeTab.value === 'members') {
+		onAddMember();
+	} else if (activeTab.value === 'team') {
+		// onAttachTeam();
+	} else console.log('Error: unknow tab', activeTab.value);
+};
+
 // ------------------- FETCH APIS -------------------
 const fetchProjectDetails = () =>
 	handleAction({
@@ -576,6 +634,14 @@ const fetchAllAgents = () =>
 		action: () => getAllAgents(usersStore.currentUser.id),
 		onSuccess: (res) => {
 			agents.value = res || [];
+		},
+	});
+
+const fetchAllTeams = () =>
+	handleAction({
+		action: () => getAllTeams(),
+		onSuccess: (res) => {
+			teams.value = res || [];
 		},
 	});
 
