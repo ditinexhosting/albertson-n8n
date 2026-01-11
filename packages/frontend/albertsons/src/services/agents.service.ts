@@ -70,3 +70,13 @@ export const deleteAgent = (agentId: string, workflowId: string) =>
  */
 export const removeLibraryAgent = (id: string) =>
 	albertsonsRestApiRequest('DELETE', `/v1/agent-library/delete/${id}`);
+
+/**
+ * Agent Editor access check
+ *
+ * @param agentId - Agent id
+ * @param userId - User id
+ * @returns JSON {"isViewer": true, "role": "VIEWER"}
+ */
+export const agentEditAccessCheck = (agentId: string, userId: string) =>
+	albertsonsRestApiRequest('GET', `/v1/my-agents/agent-access/${agentId}/${userId}`);

@@ -220,14 +220,20 @@
 			<!-- Action Buttons -->
 			<template #footer>
 				<div class="flex justify-end gap-2">
-					<n-button type="error" @click="() => handleDeleteAgent(selectedAgent)">Delete</n-button>
-					<n-button @click="() => handleSelectedActions('map_with_project')">
+					<n-button type="error" @click="() => handleDeleteAgent(selectedAgent)" class="rounded-md!"
+						>Delete</n-button
+					>
+					<n-button @click="() => handleSelectedActions('map_with_project')" class="rounded-md!">
 						<template #icon>
 							<n-icon :size="14"><FolderPlus /></n-icon>
 						</template>
 						Add to Project</n-button
 					>
-					<n-button type="primary" @click="() => handleSelectedActions('use_agent', selectedAgent)">
+					<n-button
+						type="primary"
+						@click="() => handleSelectedActions('use_agent', selectedAgent)"
+						class="rounded-md!"
+					>
 						<template #icon>
 							<n-icon :size="14"><Play /></n-icon>
 						</template>
@@ -281,12 +287,13 @@
 			<!-- Action Buttons -->
 			<template #footer>
 				<div class="flex justify-end gap-2">
-					<n-button @click="showAddToProjectModal = false">Cancel</n-button>
+					<n-button @click="showAddToProjectModal = false" class="rounded-md!">Cancel</n-button>
 					<n-button
 						:loading="loadingAddToProject"
 						:disabled="loadingAddToProject"
 						type="primary"
 						@click="() => MapAgentProjectData(selectedAgent?.agentId)"
+						class="rounded-md!"
 					>
 						<template #icon>
 							<n-icon :size="14"><FolderPlus /></n-icon>
@@ -354,12 +361,15 @@
 
 			<template #footer>
 				<div class="flex gap-4 justify-end">
-					<n-button ghost type="primary" @click="showPublishModal = false">Close </n-button>
+					<n-button ghost type="primary" @click="showPublishModal = false" class="rounded-md!"
+						>Close
+					</n-button>
 					<n-button
 						type="primary"
 						:loading="loading"
 						:disabled="loading"
 						@click="PublishAgentLibrary"
+						class="rounded-md!"
 					>
 						Publish Agent
 					</n-button>

@@ -45,7 +45,6 @@ const EditorHeader = async () => await import('@src/app/components/MainHeader/Ma
 const MainSidebar = async () => await import('@src/components/MainSidebar.vue');
 const LogsPanel = async () => await import('@/features/execution/logs/components/LogsPanel.vue');
 const DemoFooter = async () => await import('@/features/execution/logs/components/DemoFooter.vue');
-const NodeView = async () => await import('@src/app/views/NodeView.vue');
 const WorkflowExecutionsView = async () =>
 	await import('@/features/execution/executions/views/WorkflowExecutionsView.vue');
 const WorkflowExecutionsLandingPage = async () =>
@@ -110,6 +109,7 @@ const SuperadminConsoleView = async () => await import('@src/views/SuperadminCon
 const TeamsView = async () => await import('@src/views/Teams.vue');
 const AlbertsonsProfileSettings = async () =>
 	await import('@src/views/AlbertsonsProfileSettings.vue');
+const AlbertsonsNodeView = async () => await import('@src/views/AlbertsonsNodeView.vue');
 
 function getTemplatesRedirect(defaultRedirect: VIEWS[keyof VIEWS]): { name: string } | false {
 	const settingsStore = useSettingsStore();
@@ -317,6 +317,23 @@ export const routes: RouteRecordRaw[] = [
 		},
 	},
 	{
+		path: '/teams',
+		name: 'ALBERTSONS_TEAMS',
+		components: {
+			default: TeamsView,
+			header: Header,
+			sidebar: MainSidebar,
+		},
+		meta: {
+			middleware: ['authenticated'],
+			header: {
+				title: 'Teams',
+				subtitle: 'Collaborate with your colleagues',
+				showBack: false,
+			},
+		},
+	},
+	{
 		path: '/collections/:id',
 		name: VIEWS.COLLECTION,
 		components: {
@@ -456,7 +473,7 @@ export const routes: RouteRecordRaw[] = [
 		path: '/workflow/:name/debug/:executionId',
 		name: VIEWS.EXECUTION_DEBUG,
 		components: {
-			default: NodeView,
+			default: AlbertsonsNodeView,
 			header: EditorHeader,
 			sidebar: MainSidebar,
 			footer: LogsPanel,
@@ -558,7 +575,7 @@ export const routes: RouteRecordRaw[] = [
 		path: '/workflows/templates/:id',
 		name: VIEWS.TEMPLATE_IMPORT,
 		components: {
-			default: NodeView,
+			default: AlbertsonsNodeView,
 			header: EditorHeader,
 			sidebar: MainSidebar,
 		},
@@ -590,7 +607,7 @@ export const routes: RouteRecordRaw[] = [
 		path: '/workflow/new',
 		name: VIEWS.NEW_WORKFLOW,
 		components: {
-			default: NodeView,
+			default: AlbertsonsNodeView,
 			header: EditorHeader,
 			sidebar: MainSidebar,
 			footer: LogsPanel,
@@ -606,7 +623,7 @@ export const routes: RouteRecordRaw[] = [
 		path: '/workflows/demo',
 		name: VIEWS.DEMO,
 		components: {
-			default: NodeView,
+			default: AlbertsonsNodeView,
 			footer: DemoFooter,
 		},
 		meta: {
@@ -626,7 +643,7 @@ export const routes: RouteRecordRaw[] = [
 		path: '/workflow/:name/:nodeId?',
 		name: VIEWS.WORKFLOW,
 		components: {
-			default: NodeView,
+			default: AlbertsonsNodeView,
 			header: EditorHeader,
 			sidebar: MainSidebar,
 			footer: LogsPanel,

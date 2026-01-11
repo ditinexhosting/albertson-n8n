@@ -288,8 +288,12 @@ const routeNodeId = computed(() => route.params.nodeId as string | undefined);
 
 const isNewWorkflowRoute = computed(() => route.name === VIEWS.NEW_WORKFLOW || !workflowId.value);
 const isWorkflowRoute = computed(() => !!route?.meta?.nodeView || isDemoRoute.value);
+
 /* CUSTOM_CODE_START */
-const isViewer = false;
+const { isViewer } = defineProps({
+	isViewer: Boolean,
+});
+
 const isDemoRoute = computed(() => route.name === VIEWS.DEMO || isViewer);
 /* CUSTOM_CODE_END */
 const isReadOnlyRoute = computed(() => !!route?.meta?.readOnlyCanvas);
