@@ -1,12 +1,12 @@
 <template>
-	<div class="p-4! w-full h-screen">
+	<div class="flex flex-1 p-4! flex-col gap-4 overflow-x-auto! h-[90vh]!">
 		<!-- Header with Create Button only -->
-		<div class="flex items-center justify-between mb-8">
+		<div class="flex items-center justify-between">
 			<div>
-				<h2 class="text-xl font-semibold text-foreground">Teams</h2>
-				<p class="text-sm text-secondary">Collaborate with your colleagues</p>
+				<div class="text-lg font-semibold mb-2">Teams</div>
+				<div class="text-sm text-secondary">Collaborate with your colleagues</div>
 			</div>
-			<n-button type="primary" @click="showCreateTeamModal = true">
+			<n-button class="rounded-md!" type="primary" @click="showCreateTeamModal = true">
 				<template #icon>
 					<n-icon><Plus /></n-icon>
 				</template>
@@ -14,91 +14,96 @@
 			</n-button>
 		</div>
 
+		<div v-if="teams.length === 0">
+			<n-empty description="No teams found" />
+		</div>
+
 		<!-- Teams Grid -->
-		<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 items-stretch">
+		<div
+			class="my-4! grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-stretch"
+		>
 			<n-card
 				v-for="team in teams"
 				:key="team.id"
 				:bordered="true"
 				hoverable
-				class="rounded-lg! transition-all h-full bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"
-				:content-style="{
-					padding: '18px 20px 14px 20px',
-					display: 'flex',
-					flexDirection: 'column',
-					height: '100%',
-				}"
+				class="rounded-md! transition-all h-full bg-white shadow-sm"
 			>
 				<!-- HEADER -->
-				<div class="mb-3">
-					<div class="flex items-start justify-between mb-1">
-						<h3 class="text-[15px] font-bold leading-snug leading-tight text-foreground">
-							{{ team.name }}
-						</h3>
 
-						<n-dropdown :options="teamMenuOptions" @select="(key) => handleTeamAction(key, team)">
-							<n-button text @click.stop>
-								<n-icon :size="16"><MoreVertical /></n-icon>
-							</n-button>
-						</n-dropdown>
+				<div class="flex items-start justify-between">
+					<div>
+						<div class="text-lg font-semibold">{{ team.name }}</div>
+						<div
+							class="text-sm text-secondary mt-2! wrap-break-words! line-clamp-2 min-h-[2.4rem]!"
+						>
+							{{ team.description }}
+						</div>
 					</div>
 
-					<!-- description immediately under title -->
-					<p class="text-[11px] text-secondary leading-snug leading-tight">
-						{{ team.description }}
-					</p>
+					<n-dropdown
+						trigger="click"
+						class="cursor-pointer"
+						:options="teamMenuOptions"
+						@select="(key) => handleTeamAction(key, team)"
+					>
+						<MoreVertical class="cursor-pointer" />
+					</n-dropdown>
 				</div>
 
 				<!-- STATS with min-h-13 gap row -->
-				<div class="flex items-center gap-4 text-[11px] text-secondary mb-3">
-					<div class="flex items-center gap-1.5 min-h-13">
-						<Users :size="20" />
-						<span>{{ team.memberCount }} Members</span>
+				<div
+					class="flex items-center gap-4 text-sm text-secondary my-4! py-3! border-b! border-border-primary!"
+				>
+					<div class="flex items-center gap-2">
+						<Users :size="15" />
+						<span>{{ team.total_member }} Members</span>
 					</div>
-					<div class="flex items-center gap-1.5">
-						<FolderKanban :size="20" />
-						<span>{{ team.projectCount }} Projects</span>
+					<div class="flex items-center gap-2">
+						<FolderKanban :size="15" />
+						<span>{{ team.total_project }} Projects</span>
 					</div>
 				</div>
 
-				<!-- divider -->
-				<div class="border-t border-border-primary mb-3"></div>
-
 				<!-- TEAM MEMBERS -->
-				<div class="mb-3">
-					<p class="text-[11px] text-secondary mb-1.5 tracking-wide uppercase font-medium">
-						Team Members
-					</p>
+				<div>
+					<p class="text-xs text-secondary mb-2! uppercase font-medium">Team Members</p>
 
-					<div class="space-y-1.5">
-						<div v-for="member in team.members" :key="member.id" class="flex items-center gap-2">
-							<n-avatar
-								round
-								:size="26"
-								class="text-[10px] font-semibold"
-								:style="{ backgroundColor: 'var(--color--primary)' }"
-							>
-								{{ member.initials }}
-							</n-avatar>
+					<div class="overflow-x-auto! h-32! space-y-2!">
+						<div
+							v-for="member in [...team.members].reverse()"
+							:key="member.id"
+							class="flex items-center justify-between"
+						>
+							<div class="flex items-center">
+								<n-avatar round size="small" color="#01529f" class="p-4! mr-2!">
+									{{ member?.name?.split(' ')[0]?.[0] + member?.name?.split(' ').at(-1)?.[0] }}
+								</n-avatar>
 
-							<div class="leading-tight">
-								<p class="text-[11px] font-medium text-foreground">
-									{{ member.name }}
-								</p>
-								<p class="text-[10px] text-secondary">
-									{{ member.role }}
-								</p>
+								<div>
+									<p class="text-sm! font-medium">
+										{{ member.name }}
+									</p>
+									<p class="text-xs! text-secondary">
+										{{ member.role }}
+									</p>
+								</div>
 							</div>
+							<Trash2Icon
+								v-if="member.role == 'Member'"
+								class="text-danger cursor-pointer"
+								:size="14"
+								@click="() => handleDeleteMemberConfirm(team.id, member.id)"
+							/>
 						</div>
 					</div>
 				</div>
 
-				<!-- bottom divider -->
-				<div class="border-t border-border-primary mb-1.5"></div>
-
 				<!-- FOOTER -->
-				<div class="mt-auto pt-0">
-					<p class="text-[10px] text-secondary">Created {{ team.createdDate }}</p>
+				<div class="mt-4! pt-4! border-t! border-border-primary!">
+					<p class="text-xs! text-secondary">
+						Created {{ dayjs(team.createdAt).format('MMM DD, YYYY') }}
+					</p>
 				</div>
 			</n-card>
 		</div>
@@ -108,12 +113,15 @@
 			v-model:show="showCreateTeamModal"
 			preset="card"
 			:style="{ width: '500px', maxWidth: '95vw' }"
+			size="huge"
 			:bordered="false"
 			:closable="true"
-			class="rounded-lg!"
+			class="rounded-md!"
 		>
 			<template #header>
-				<h3 class="text-lg font-semibold">Create Team</h3>
+				<h3 class="text-lg font-semibold">
+					{{ isUpdatingTeamDetails ? 'Update Team Details' : 'Create Team' }}
+				</h3>
 			</template>
 
 			<n-form
@@ -135,7 +143,7 @@
 						:rows="3"
 					/>
 				</n-form-item>
-
+				<!-- 
 				<n-form-item label="Add Members">
 					<n-select
 						v-model:value="formValue.members"
@@ -144,17 +152,81 @@
 						placeholder="Select team members"
 						:options="availableMembers"
 					/>
+				</n-form-item> -->
+			</n-form>
+
+			<template #footer>
+				<div class="flex justify-end gap-2">
+					<n-button class="rounded-md!" @click="showCreateTeamModal = false"> Cancel </n-button>
+					<n-button
+						type="primary"
+						class="rounded-md!"
+						:loading="teamLoading"
+						:disabled="teamLoading"
+						@click="isUpdatingTeamDetails ? onUpdateTeam() : onCreateTeam()"
+					>
+						<template #icon>
+							<n-icon :size="14">
+								<component :is="isUpdatingTeamDetails ? Check : Plus" />
+							</n-icon>
+						</template>
+						{{ isUpdatingTeamDetails ? 'Update Team' : 'Create Team' }}
+					</n-button>
+				</div>
+			</template>
+		</n-modal>
+
+		<!-- Add Team members Modal -->
+		<n-modal
+			v-model:show="showAddTeamMembersModal"
+			preset="card"
+			:style="{ width: '500px', maxWidth: '95vw' }"
+			:bordered="false"
+			size="huge"
+			:closable="true"
+			class="rounded-md!"
+			:auto-focus="false"
+		>
+			<template #header>
+				<h3 class="text-lg font-semibold">Add Team Members</h3>
+			</template>
+
+			<n-form ref="formRef" :model="formValueMembers" label-placement="top" size="medium">
+				<n-form-item label="Team Name" path="name">
+					<n-input
+						v-model:value="formValueMembers.name"
+						readonly
+						class="pointer-events-none border border-border-primary focus:border-border-primary focus:ring-0 hover:border-border-primary"
+					/>
+				</n-form-item>
+
+				<n-form-item label="Add Members">
+					<n-select
+						v-model:value="formValueMembers.members"
+						multiple
+						filterable
+						placeholder="Select team members"
+						:options="userOptions"
+						label-field="label"
+						value-field="value"
+					/>
 				</n-form-item>
 			</n-form>
 
 			<template #footer>
 				<div class="flex justify-end gap-2">
-					<n-button @click="showCreateTeamModal = false"> Cancel </n-button>
-					<n-button type="primary" :loading="loading" :disabled="loading" @click="handleCreateTeam">
+					<n-button class="rounded-md!" @click="showAddTeamMembersModal = false"> Cancel </n-button>
+					<n-button
+						type="primary"
+						class="rounded-md!"
+						:loading="memberLoading"
+						:disabled="memberLoading"
+						@click="onAddTeamMembers"
+					>
 						<template #icon>
 							<n-icon :size="14"><Plus /></n-icon>
 						</template>
-						Create Team
+						Add Members
 					</n-button>
 				</div>
 			</template>
@@ -163,8 +235,30 @@
 </template>
 
 <script setup lang="ts">
-import { ref, h } from 'vue';
-import { Users, Plus, FolderKanban, MoreVertical, Edit, Trash2 } from 'lucide-vue-next';
+import { ref, h, onMounted, computed } from 'vue';
+import dayjs from 'dayjs';
+import { handleAction as handleActionAPI } from '@src/utils/handleAction';
+import {
+	createNewTeam,
+	updateTeam,
+	deleteTeam,
+	getAllTeams,
+	addTeamMembers,
+	removeTeamMember,
+	getAvailableUsers,
+} from '@src/services/teams.service';
+import { useUsersStore } from '@/features/settings/users/users.store';
+import { useToast } from '@/app/composables/useToast';
+import {
+	Users,
+	Plus,
+	FolderKanban,
+	MoreVertical,
+	Edit,
+	Trash2,
+	Check,
+	Trash2Icon,
+} from 'lucide-vue-next';
 import {
 	NButton,
 	NCard,
@@ -174,18 +268,42 @@ import {
 	NForm,
 	NFormItem,
 	NInput,
-	NSelect,
 	NDropdown,
+	NEmpty,
+	useDialog,
+	NSelect,
 } from 'naive-ui';
 
+interface FormValue {
+	name: string;
+	description: string;
+	ownerId: string;
+	teamId?: string | null;
+}
+
 // State
+const dialog = useDialog();
+const usersStore = useUsersStore();
+const toast = useToast();
 const showCreateTeamModal = ref(false);
-const loading = ref(false);
+const isUpdatingTeamDetails = ref(false);
+const teamLoading = ref(false);
+const showAddTeamMembersModal = ref(false);
+const memberLoading = ref(false);
 
 // Form
-const formValue = ref({
+const availableUsers = ref([]);
+const teams = ref([]);
+const formValue = ref<FormValue>({
 	name: '',
 	description: '',
+	ownerId: usersStore.currentUser.id,
+	teamId: null,
+});
+
+const formValueMembers = ref({
+	name: '',
+	teamId: '',
 	members: [] as string[],
 });
 
@@ -202,160 +320,233 @@ const formRules = {
 	},
 };
 
-// Mock data
-const teams = ref([
-	{
-		id: 1,
-		name: 'Platform Engineering',
-		description: 'Core platform development and infrastructure automation.',
-		memberCount: 8,
-		projectCount: 3,
-		createdDate: 'Jan 15, 2024',
-		members: [
-			{
-				id: 1,
-				name: 'Sarah Johnson',
-				email: 'sarah.j@company.com',
-				role: 'Team Lead',
-				initials: 'SJ',
-			},
-			{
-				id: 2,
-				name: 'Mike Chen',
-				email: 'mike.c@company.com',
-				role: 'Member',
-				initials: 'MC',
-			},
-			{
-				id: 3,
-				name: 'Lisa Patel',
-				email: 'lisa.p@company.com',
-				role: 'Member',
-				initials: 'LP',
-			},
-		],
-	},
-	{
-		id: 2,
-		name: 'Marketing Automation',
-		description: 'Customer engagement and marketing campaign workflows.',
-		memberCount: 5,
-		projectCount: 2,
-		createdDate: 'Feb 1, 2024',
-		members: [
-			{
-				id: 4,
-				name: 'Alex Rodriguez',
-				email: 'alex.r@company.com',
-				role: 'Team Lead',
-				initials: 'AR',
-			},
-			{
-				id: 5,
-				name: 'Sarah Johnson',
-				email: 'sarah.j@company.com',
-				role: 'Member',
-				initials: 'SJ',
-			},
-		],
-	},
-	{
-		id: 3,
-		name: 'Supply Chain Analytics',
-		description: 'Supply chain optimization and vendor management automation.',
-		memberCount: 6,
-		projectCount: 2,
-		createdDate: 'Mar 1, 2024',
-		members: [
-			{
-				id: 6,
-				name: 'Mike Chen',
-				email: 'mike.c@company.com',
-				role: 'Team Lead',
-				initials: 'MC',
-			},
-			{
-				id: 7,
-				name: 'David Kim',
-				email: 'david.k@company.com',
-				role: 'Member',
-				initials: 'DK',
-			},
-			{
-				id: 8,
-				name: 'Lisa Patel',
-				email: 'lisa.p@company.com',
-				role: 'Member',
-				initials: 'LP',
-			},
-		],
-	},
-	{
-		id: 4,
-		name: 'Store Operations',
-		description: 'Store-level operations and performance monitoring.',
-		memberCount: 4,
-		projectCount: 1,
-		createdDate: 'Apr 1, 2024',
-		members: [
-			{
-				id: 9,
-				name: 'Lisa Patel',
-				email: 'lisa.p@company.com',
-				role: 'Team Lead',
-				initials: 'LP',
-			},
-			{
-				id: 10,
-				name: 'David Kim',
-				email: 'david.k@company.com',
-				role: 'Member',
-				initials: 'DK',
-			},
-		],
-	},
-]);
-
-const availableMembers = ref([
-	{ label: 'Sarah Johnson', value: 'sarah.j@company.com' },
-	{ label: 'Mike Chen', value: 'mike.c@company.com' },
-	{ label: 'Lisa Patel', value: 'lisa.p@company.com' },
-	{ label: 'Alex Rodriguez', value: 'alex.r@company.com' },
-	{ label: 'David Kim', value: 'david.k@company.com' },
-]);
-
 const teamMenuOptions = [
+	{
+		label: () => h('span', { class: 'text-primary' }, 'Add Members'),
+		key: 'add_members',
+		icon: () => h(Plus, { class: 'h-4 text-primary' }),
+	},
 	{
 		label: 'Edit Team',
 		key: 'edit',
 		icon: () => h(Edit, { size: 14 }),
 	},
 	{
-		label: 'Delete Team',
+		label: () => h('span', { class: 'text-danger' }, 'Delete Team'),
 		key: 'delete',
-		icon: () => h(Trash2, { size: 14 }),
+		icon: () => h(Trash2, { class: 'h-4 text-danger' }),
 	},
 ];
 
-// Actions
-function handleCreateTeam() {
-	loading.value = true;
-	setTimeout(() => {
-		loading.value = false;
-		showCreateTeamModal.value = false;
-		formValue.value = {
-			name: '',
-			description: '',
-			members: [],
-		};
-	}, 1000);
+const userOptions = computed(() =>
+	availableUsers?.value?.map((u) => ({
+		label: `${u?.name} (${u?.email})`,
+		value: u?.id,
+	})),
+);
+
+const handleTeamAction = async (key, row) => {
+	try {
+		const teamId = row.id;
+		switch (key) {
+			case 'add_members':
+				showAddTeamMembersModal.value = true;
+				getAllAvailableUsers(teamId);
+				formValueMembers.value = {
+					teamId: teamId,
+					name: row.name,
+					members: [],
+				};
+				break;
+			case 'edit':
+				showCreateTeamModal.value = true;
+				isUpdatingTeamDetails.value = true;
+				formValue.value = {
+					name: row.name,
+					description: row.description,
+					ownerId: row.ownerId,
+					teamId: teamId,
+				};
+				break;
+			case 'delete':
+				handleDeleteTeamConfirm(teamId);
+				break;
+			default:
+				console.error(`Unknown action key: ${key}`);
+		}
+	} catch (e) {
+		console.error('handle action failed', e);
+	}
+};
+
+// Load initial data
+onMounted(async () => {
+	try {
+		fetchAllTeams();
+	} catch (e) {
+		console.error('Failed to load initial api data for teams', e);
+	}
+});
+
+function handleDeleteTeamConfirm(teamId) {
+	dialog.error({
+		title: 'Delete Team',
+		content: 'Are you sure?',
+		positiveText: 'Delete',
+		negativeText: 'Cancel',
+		draggable: true,
+		onPositiveClick: () => {
+			onDeleteTeam(teamId);
+		},
+	});
+}
+function handleDeleteMemberConfirm(teamId, userId) {
+	dialog.error({
+		title: 'Delete Member',
+		content: 'Are you sure?',
+		positiveText: 'Delete',
+		negativeText: 'Cancel',
+		draggable: true,
+		onPositiveClick: () => {
+			onRemoveMember(teamId, userId);
+		},
+	});
 }
 
-function handleTeamAction(key: string, team: any) {
-	if (key === 'edit') {
-		// Handle edit
-	} else if (key === 'delete') {
-		// Handle delete
-	}
-}
+// ------------------- APIS -------------------
+const fetchAllTeams = () =>
+	handleActionAPI({
+		action: () => getAllTeams(),
+		onSuccess: (res) => {
+			teams.value = res || [];
+		},
+	});
+
+const onCreateTeam = () =>
+	handleActionAPI({
+		loadingRef: teamLoading,
+		action: () => createNewTeam(formValue.value),
+		onSuccess: () => {
+			showCreateTeamModal.value = false;
+			formValue.value = {
+				name: '',
+				description: '',
+				ownerId: usersStore.currentUser.id,
+			};
+			toast.showMessage({
+				title: `Team`,
+				message: 'Team created successfully.',
+				type: 'success',
+			});
+			fetchAllTeams();
+		},
+		onError: () => {
+			toast.showMessage({
+				title: `Team`,
+				message: 'Failed to create team.',
+				type: 'error',
+			});
+		},
+	});
+
+const onUpdateTeam = () =>
+	handleActionAPI({
+		loadingRef: teamLoading,
+		action: () => updateTeam(formValue.value.teamId, formValue.value),
+		onSuccess: () => {
+			showCreateTeamModal.value = false;
+			isUpdatingTeamDetails.value = false;
+			formValue.value = {
+				name: '',
+				description: '',
+				ownerId: usersStore.currentUser.id,
+				teamId: null,
+			};
+			toast.showMessage({
+				title: `Team`,
+				message: 'Team updated successfully.',
+				type: 'success',
+			});
+			fetchAllTeams();
+		},
+		onError: () => {
+			toast.showMessage({
+				title: `Team`,
+				message: 'Failed to update team.',
+				type: 'error',
+			});
+		},
+	});
+
+const onDeleteTeam = (teamId) =>
+	handleActionAPI({
+		action: () => deleteTeam(teamId),
+		onSuccess: () => {
+			toast.showMessage({
+				title: `Team`,
+				message: 'Team deleted successfully.',
+				type: 'success',
+			});
+			fetchAllTeams();
+		},
+		onError: () => {
+			toast.showMessage({
+				title: `Team`,
+				message: 'Failed to delete team.',
+				type: 'error',
+			});
+		},
+	});
+
+const onAddTeamMembers = () =>
+	handleActionAPI({
+		loadingRef: memberLoading,
+		action: () => addTeamMembers(formValueMembers.value.teamId, formValueMembers.value),
+		onSuccess: () => {
+			showAddTeamMembersModal.value = false;
+			toast.showMessage({
+				title: `Team`,
+				message: 'Team member added.',
+				type: 'success',
+			});
+			fetchAllTeams();
+		},
+		onError: () => {
+			toast.showMessage({
+				title: `Team`,
+				message: 'Failed to add team member.',
+				type: 'error',
+			});
+		},
+	});
+
+const onRemoveMember = (teamId, userId) =>
+	handleActionAPI({
+		loadingRef: memberLoading,
+		action: () => removeTeamMember(teamId, userId),
+		onSuccess: () => {
+			toast.showMessage({
+				title: `Team`,
+				message: 'Team member removed.',
+				type: 'success',
+			});
+			fetchAllTeams();
+		},
+		onError: () => {
+			toast.showMessage({
+				title: `Team`,
+				message: 'Failed to remove team member.',
+				type: 'error',
+			});
+		},
+	});
+
+const getAllAvailableUsers = (teamId) =>
+	handleActionAPI({
+		loadingRef: memberLoading,
+		action: () => getAvailableUsers(teamId),
+		onSuccess: (res) => {
+			availableUsers.value = res || [];
+		},
+	});
 </script>

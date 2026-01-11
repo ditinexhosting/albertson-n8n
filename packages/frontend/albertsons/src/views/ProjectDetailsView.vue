@@ -56,6 +56,8 @@
 				<n-data-table :columns="columns" :data="sortedMembers" />
 			</n-tab-pane>
 		</n-tabs>
+
+		<!-- Add team/member modal -->
 		<n-modal
 			v-model:show="showAddMemberModal"
 			:mask-closable="false"
@@ -64,25 +66,59 @@
 			style="width: 600px"
 		>
 			<template #header> {{ 'Add Team / Member' }} </template>
-			<n-form :ref="formRef" :label-width="80" :model="formValue" size="medium">
-				<n-grid x-gap="12" :cols="1">
-					<n-gi>
-						<n-form-item label="Users" path="users">
-							<n-select
-								multiple
-								filterable
-								v-model:value="formValue.users"
-								:options="availableUsersToAddAsMember"
-							/>
-						</n-form-item>
-					</n-gi>
-					<n-gi>
-						<n-form-item label="Role" path="role">
-							<n-select v-model:value="formValue.role" :options="availableRoles" />
-						</n-form-item>
-					</n-gi>
-				</n-grid>
-			</n-form>
+
+			<n-tabs
+				@update-value="handleActiveTab"
+				class="card-tabs"
+				default-value="members"
+				size="large"
+				animated
+				pane-wrapper-style="margin: 0 -4px"
+				pane-style="padding-left: 4px; padding-right: 4px; box-sizing: border-box;"
+			>
+				<n-tab-pane name="members" tab="Members">
+					<n-form :ref="formRef" :label-width="80" :model="formValue" size="medium">
+						<n-grid x-gap="12" :cols="1">
+							<n-gi>
+								<n-form-item label="Users" path="users">
+									<n-select
+										multiple
+										filterable
+										v-model:value="formValue.users"
+										:options="availableUsersToAddAsMember"
+									/>
+								</n-form-item>
+							</n-gi>
+							<n-gi>
+								<n-form-item label="Role" path="role">
+									<n-select v-model:value="formValue.role" :options="availableRoles" />
+								</n-form-item>
+							</n-gi>
+						</n-grid>
+					</n-form>
+				</n-tab-pane>
+				<n-tab-pane name="team" tab="Attach Team">
+					<n-form :ref="formRef" :label-width="80" :model="formValue" size="medium">
+						<n-grid x-gap="12" :cols="1">
+							<n-gi>
+								<n-form-item label="Team" path="team">
+									<n-select
+										filterable
+										v-model:value="formValue.teamId"
+										:options="availableTeamsToAttach"
+									/>
+								</n-form-item>
+							</n-gi>
+							<n-gi>
+								<n-form-item label="Role" path="role">
+									<n-select v-model:value="formValue.role" :options="availableRoles" />
+								</n-form-item>
+							</n-gi>
+						</n-grid>
+					</n-form>
+				</n-tab-pane>
+			</n-tabs>
+
 			<template #footer>
 				<div class="flex flex-row flex-1 gap-4 justify-end!">
 					<n-button class="rounded-md!" ghost type="primary" @click="showAddMemberModal = false"
@@ -92,12 +128,14 @@
 						class="rounded-md!"
 						:loading="modalSubmitLoading"
 						type="primary"
-						@click="onAddMember"
+						@click="handleTeamOrMemberSubmit"
 						>Submit</n-button
 					>
 				</div>
 			</template>
 		</n-modal>
+
+		<!-- add agent modal -->
 		<n-modal
 			v-model:show="showAddAgentModal"
 			:mask-closable="false"
@@ -197,6 +235,11 @@ import { handleAction } from '@src/utils/handleAction';
 import { addMember, getAllUsers, removeMember } from '@src/services/users.service';
 import { getProjectDetails } from '@src/services/projects.service';
 import { getAllAgents, removeAgent, addAgent } from '@src/services/agents.service';
+import {
+	getAllTeams,
+	attachTeamToProject,
+	deattachTeamFromProject,
+} from '@src/services/teams.service';
 
 const router = useRouter();
 const route = useRoute();
@@ -206,20 +249,22 @@ const showAddAgentModal = ref(false);
 const modalSubmitLoading = ref(false);
 const usersStore = useUsersStore();
 const toast = useToast();
-
 const formRef = ref(null);
 const formRef2 = ref(null);
 const formValue = ref({
 	users: [],
+	teamId: null,
 	role: null,
 });
 const formValue2 = ref({
 	agentIds: [],
 });
+const activeTab = ref('members');
 const dialog = useDialog();
 const columns = createColumns();
 const agentsColumns = createAgentsColumns();
 const project = ref([]);
+const teams = ref([]);
 const users = ref([]);
 const agents = ref([]);
 const availableRoles = computed(() => {
@@ -236,6 +281,14 @@ const availableUsersToAddAsMember = computed(() => {
 		.map((user) => ({
 			label: user?.owner?.firstName + ' ' + user?.owner?.lastName + ' (' + user?.owner?.email + ')',
 			value: user?.ownerId,
+		}));
+});
+const availableTeamsToAttach = computed(() => {
+	return teams.value
+		.filter((team) => !project.value.members.some((member) => member.teamId === team.id))
+		.map((team) => ({
+			label: team?.name,
+			value: team?.id,
 		}));
 });
 
@@ -286,10 +339,7 @@ function createColumns() {
 		},
 		{
 			title: 'Team',
-			key: 'team',
-			render: () => {
-				return '-';
-			},
+			key: 'teamName',
 		},
 		{
 			title: 'Action',
@@ -299,7 +349,7 @@ function createColumns() {
 				return h(
 					NDropdown,
 					{
-						options: memberActionOptions,
+						options: getMemberActionOptions(row.teamId),
 						trigger: 'click',
 						onSelect: (key) => handleMemberAction(key, row),
 					},
@@ -322,15 +372,19 @@ function createColumns() {
 	];
 }
 const tableHeader = (text) => h('span', { class: 'text-secondary' }, text);
-const agentOptions = [
+const getAgentOptions = (canManageProject) => [
 	{
-		label: 'View/Edit Agent',
+		label: canManageProject ? 'View/Edit Agent' : 'View Agent',
 		key: 'view',
 	},
-	{
-		label: 'Remove Agent',
-		key: 'remove_agent',
-	},
+	...(canManageProject
+		? [
+				{
+					label: 'Remove Agent',
+					key: 'remove_agent',
+				},
+			]
+		: []),
 ];
 
 const handleAgentsAction = async (key, row) => {
@@ -437,17 +491,17 @@ function createAgentsColumns() {
 			title: ' ',
 			key: 'actions',
 			render: (row) => {
-				if (!canManageProject.value) return '';
 				return h('div', { class: 'flex items-center gap-3 text-gray-400' }, [
-					h(Play, {
-						class: 'w-4 cursor-pointer',
-						onClick: () => runWorkflow(router, row),
-					}),
+					canManageProject.value &&
+						h(Play, {
+							class: 'w-4 cursor-pointer',
+							onClick: () => runWorkflow(router, row),
+						}),
 					h(
 						NDropdown,
 						{
-							trigger: 'hover',
-							options: agentOptions,
+							trigger: 'click',
+							options: getAgentOptions(canManageProject.value),
 							onSelect: (key) => handleAgentsAction(key, row),
 						},
 						{
@@ -474,15 +528,16 @@ function renderIcon(icon) {
 		});
 }
 
-const memberActionOptions = [
+const getMemberActionOptions = (teamId) => [
 	{
 		label: 'Remove full team',
 		key: 'remove_team',
-		disabled: true,
+		disabled: !teamId,
 	},
 	{
 		label: 'Remove member',
 		key: 'remove_member',
+		disabled: !!teamId,
 	},
 ];
 
@@ -512,18 +567,21 @@ onMounted(async () => {
 		fetchProjectDetails();
 		fetchAllUsers();
 		fetchAllAgents();
+		fetchAllTeams();
 	} catch (e) {
 		console.error('Failed to load initial api data', e);
 	}
 });
 
 const handleMemberAction = async (key, row) => {
+	console.log('team->', row);
 	try {
 		switch (key) {
 			case 'remove_member':
 				handleConfirm(row);
 				break;
 			case 'remove_team':
+				handleTeamDeleteConfirm(row);
 				break;
 			default:
 				console.error(`Unknown action key: ${key}`);
@@ -535,7 +593,7 @@ const handleMemberAction = async (key, row) => {
 
 function handleConfirm(row) {
 	dialog.error({
-		title: 'Deleting team / member',
+		title: 'Deleting member',
 		content: 'Are you sure ?',
 		positiveText: 'Delete',
 		negativeText: 'Cancel',
@@ -546,6 +604,31 @@ function handleConfirm(row) {
 		onNegativeClick: () => {},
 	});
 }
+
+function handleTeamDeleteConfirm(row) {
+	dialog.error({
+		title: 'Deleting team',
+		content: 'Are you sure ?',
+		positiveText: 'Delete',
+		negativeText: 'Cancel',
+		draggable: true,
+		onPositiveClick: () => {
+			onRemoveTeam(row.teamId);
+		},
+		onNegativeClick: () => {},
+	});
+}
+
+const handleActiveTab = (tabName) => {
+	activeTab.value = tabName;
+};
+const handleTeamOrMemberSubmit = () => {
+	if (activeTab.value === 'members') {
+		onAddMember();
+	} else if (activeTab.value === 'team') {
+		onAttachTeam();
+	} else console.log('Error: unknow tab', activeTab.value);
+};
 
 // ------------------- FETCH APIS -------------------
 const fetchProjectDetails = () =>
@@ -575,6 +658,14 @@ const fetchAllAgents = () =>
 		},
 	});
 
+const fetchAllTeams = () =>
+	handleAction({
+		action: () => getAllTeams(),
+		onSuccess: (res) => {
+			teams.value = res || [];
+		},
+	});
+
 // ------------------- ADD / UPDATE -------------------
 const onAddMember = () =>
 	handleAction({
@@ -583,6 +674,18 @@ const onAddMember = () =>
 		onSuccess: () => {
 			showAddMemberModal.value = false;
 			formValue.value = { users: [], role: null };
+			fetchProjectDetails();
+		},
+	});
+
+const onAttachTeam = () =>
+	handleAction({
+		loadingRef: modalSubmitLoading,
+		//teamId, projectId, payload(role: 'Editor')
+		action: () => attachTeamToProject(formValue.value.teamId, projectId, formValue.value),
+		onSuccess: () => {
+			showAddMemberModal.value = false;
+			formValue.value = { users: [], role: null, teamId: null };
 			fetchProjectDetails();
 		},
 	});
@@ -646,6 +749,26 @@ const onRemoveMember = (userId) =>
 			toast.showMessage({
 				title: 'Project',
 				message: e.message || 'Failed to remove member.',
+				type: 'error',
+			});
+		},
+	});
+const onRemoveTeam = (teamId) =>
+	handleAction({
+		//teamId, projectId, payload(projectOwnerId: IID)
+		action: () => deattachTeamFromProject(teamId, projectId, project.value.ownerId),
+		onSuccess: () => {
+			fetchProjectDetails();
+			toast.showMessage({
+				title: 'Project',
+				message: 'Team removed successfully.',
+				type: 'success',
+			});
+		},
+		onError: (e) => {
+			toast.showMessage({
+				title: 'Project',
+				message: e.message || 'Failed to remove team.',
 				type: 'error',
 			});
 		},
