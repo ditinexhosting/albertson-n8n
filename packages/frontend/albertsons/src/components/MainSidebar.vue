@@ -72,7 +72,7 @@ const menuItems = ref([
 	{ label: 'Templates', icon: LayoutTemplate, path: '/templates', active: false },
 	{ label: 'Agent Library', icon: Store, path: '/agent-library', active: false },
 	{ label: 'Teams', icon: Users, path: '/teams', active: false },
-	{ label: 'Settings', icon: Settings, path: '/settings', active: false },
+	{ label: 'Settings', icon: Settings, path: '/profile-settings', active: false },
 ]);
 
 const menuItemsFooter = ref([
