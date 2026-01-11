@@ -20,35 +20,32 @@
 
 		<!-- Teams Grid -->
 		<div
-			class="my-4! grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-stretch"
+			class="mb-4! grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-stretch"
 		>
 			<n-card
 				v-for="team in teams"
 				:key="team.id"
 				:bordered="true"
 				hoverable
-				class="rounded-md! transition-all h-full bg-white shadow-sm"
+				class="rounded-md! transition-all h-full bg-white hover:shadow-sm"
 			>
 				<!-- HEADER -->
 
-				<div class="flex items-start justify-between">
-					<div>
+				<div class="flex items-start flex-col">
+					<div class="flex items-center justify-between w-full">
 						<div class="text-lg font-semibold">{{ team.name }}</div>
-						<div
-							class="text-sm text-secondary mt-2! wrap-break-words! line-clamp-2 min-h-[2.4rem]!"
+						<n-dropdown
+							trigger="click"
+							class="cursor-pointer"
+							:options="teamMenuOptions"
+							@select="(key) => handleTeamAction(key, team)"
 						>
-							{{ team.description }}
-						</div>
+							<MoreVertical :size="16" class="cursor-pointer" />
+						</n-dropdown>
 					</div>
-
-					<n-dropdown
-						trigger="click"
-						class="cursor-pointer"
-						:options="teamMenuOptions"
-						@select="(key) => handleTeamAction(key, team)"
-					>
-						<MoreVertical class="cursor-pointer" />
-					</n-dropdown>
+					<div class="text-sm text-secondary mt-2! wrap-break-words! line-clamp-2 min-h-[2.4rem]!">
+						{{ team.description }}
+					</div>
 				</div>
 
 				<!-- STATS with min-h-13 gap row -->
@@ -91,7 +88,7 @@
 							</div>
 							<Trash2Icon
 								v-if="member.role == 'Member'"
-								class="text-danger cursor-pointer"
+								class="text-warning-orange cursor-pointer"
 								:size="14"
 								@click="() => handleDeleteMemberConfirm(team.id, member.id)"
 							/>
