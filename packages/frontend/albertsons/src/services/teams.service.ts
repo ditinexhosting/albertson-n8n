@@ -68,8 +68,15 @@ export const attachTeamToProject = (teamId: string, projectId: string, payload: 
  * @param payload - Object
  * @returns success message
  */
-export const deattachTeamFromProject = (teamId: string, projectId: string, payload: any) =>
-	albertsonsRestApiRequest('DELETE', `/v1/teams/${teamId}/projects/${projectId}`, payload);
+export const deattachTeamFromProject = (
+	teamId: string,
+	projectId: string,
+	projectOwnerId: string,
+) =>
+	albertsonsRestApiRequest(
+		'DELETE',
+		`/v1/teams/${teamId}/projects/${projectId}?projectOwnerId=${projectOwnerId}`,
+	);
 
 /**
  * Get available user to add in team

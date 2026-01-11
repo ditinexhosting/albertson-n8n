@@ -235,7 +235,11 @@ import { handleAction } from '@src/utils/handleAction';
 import { addMember, getAllUsers, removeMember } from '@src/services/users.service';
 import { getProjectDetails } from '@src/services/projects.service';
 import { getAllAgents, removeAgent, addAgent } from '@src/services/agents.service';
-import { getAllTeams } from '@src/services/teams.service';
+import {
+	getAllTeams,
+	attachTeamToProject,
+	deattachTeamFromProject,
+} from '@src/services/teams.service';
 
 const router = useRouter();
 const route = useRoute();
@@ -345,7 +349,7 @@ function createColumns() {
 				return h(
 					NDropdown,
 					{
-						options: memberActionOptions,
+						options: getMemberActionOptions(row.teamId),
 						trigger: 'click',
 						onSelect: (key) => handleMemberAction(key, row),
 					},
@@ -524,15 +528,16 @@ function renderIcon(icon) {
 		});
 }
 
-const memberActionOptions = [
+const getMemberActionOptions = (teamId) => [
 	{
 		label: 'Remove full team',
 		key: 'remove_team',
-		disabled: true,
+		disabled: !teamId,
 	},
 	{
 		label: 'Remove member',
 		key: 'remove_member',
+		disabled: !!teamId,
 	},
 ];
 
@@ -569,12 +574,14 @@ onMounted(async () => {
 });
 
 const handleMemberAction = async (key, row) => {
+	console.log('team->', row);
 	try {
 		switch (key) {
 			case 'remove_member':
 				handleConfirm(row);
 				break;
 			case 'remove_team':
+				handleTeamDeleteConfirm(row);
 				break;
 			default:
 				console.error(`Unknown action key: ${key}`);
@@ -586,13 +593,27 @@ const handleMemberAction = async (key, row) => {
 
 function handleConfirm(row) {
 	dialog.error({
-		title: 'Deleting team / member',
+		title: 'Deleting member',
 		content: 'Are you sure ?',
 		positiveText: 'Delete',
 		negativeText: 'Cancel',
 		draggable: true,
 		onPositiveClick: () => {
 			onRemoveMember(row.userId);
+		},
+		onNegativeClick: () => {},
+	});
+}
+
+function handleTeamDeleteConfirm(row) {
+	dialog.error({
+		title: 'Deleting team',
+		content: 'Are you sure ?',
+		positiveText: 'Delete',
+		negativeText: 'Cancel',
+		draggable: true,
+		onPositiveClick: () => {
+			onRemoveTeam(row.teamId);
 		},
 		onNegativeClick: () => {},
 	});
@@ -605,7 +626,7 @@ const handleTeamOrMemberSubmit = () => {
 	if (activeTab.value === 'members') {
 		onAddMember();
 	} else if (activeTab.value === 'team') {
-		// onAttachTeam();
+		onAttachTeam();
 	} else console.log('Error: unknow tab', activeTab.value);
 };
 
@@ -653,6 +674,18 @@ const onAddMember = () =>
 		onSuccess: () => {
 			showAddMemberModal.value = false;
 			formValue.value = { users: [], role: null };
+			fetchProjectDetails();
+		},
+	});
+
+const onAttachTeam = () =>
+	handleAction({
+		loadingRef: modalSubmitLoading,
+		//teamId, projectId, payload(role: 'Editor')
+		action: () => attachTeamToProject(formValue.value.teamId, projectId, formValue.value),
+		onSuccess: () => {
+			showAddMemberModal.value = false;
+			formValue.value = { users: [], role: null, teamId: null };
 			fetchProjectDetails();
 		},
 	});
@@ -716,6 +749,26 @@ const onRemoveMember = (userId) =>
 			toast.showMessage({
 				title: 'Project',
 				message: e.message || 'Failed to remove member.',
+				type: 'error',
+			});
+		},
+	});
+const onRemoveTeam = (teamId) =>
+	handleAction({
+		//teamId, projectId, payload(projectOwnerId: IID)
+		action: () => deattachTeamFromProject(teamId, projectId, project.value.ownerId),
+		onSuccess: () => {
+			fetchProjectDetails();
+			toast.showMessage({
+				title: 'Project',
+				message: 'Team removed successfully.',
+				type: 'success',
+			});
+		},
+		onError: (e) => {
+			toast.showMessage({
+				title: 'Project',
+				message: e.message || 'Failed to remove team.',
 				type: 'error',
 			});
 		},
