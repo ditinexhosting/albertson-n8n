@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { NInput, NButton, NDivider } from 'naive-ui';
-
+import { useRouter } from 'vue-router';
 import { handleAction as handleActionAPI } from '@src/utils/handleAction';
 import { updateProfle } from '@src/services/users.service';
 import { useToast } from '@/app/composables/useToast';
 import { useUsersStore } from '@/features/settings/users/users.store';
 
 const { currentUser } = useUsersStore();
+const router = useRouter();
 const toast = useToast();
 const loading = ref(false);
 const formValue = ref({
@@ -64,9 +65,11 @@ const onUpdateProfile = (isUpdatingBasicInfo = true) => {
 				title: `Profile`,
 				message: isUpdatingBasicInfo
 					? 'Account details updated successfully.'
-					: 'Password updated successfully.',
+					: 'Password updated successfully. Please log in again.',
 				type: 'success',
 			});
+
+			if (!isUpdatingBasicInfo) router.push('/login');
 		},
 		onError: (e) => {
 			let message = '';
