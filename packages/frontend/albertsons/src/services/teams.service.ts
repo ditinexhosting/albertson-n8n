@@ -1,11 +1,13 @@
 import { albertsonsRestApiRequest } from '@src/utils/albertsonsRestApiRequest';
 
 /**
- * Fetch teams list for
+ * Fetch teams list for for logged-in user
  *
+ * @param userId - logged-in userId
  * @returns Teams list
  */
-export const getAllTeams = () => albertsonsRestApiRequest('GET', `/v1/teams/all`);
+export const getAllTeams = (userId: string) =>
+	albertsonsRestApiRequest('GET', `/v1/teams/all/${userId}`);
 
 /**
  * Create team

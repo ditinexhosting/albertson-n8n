@@ -35,12 +35,17 @@
 					<div class="flex items-center justify-between w-full">
 						<div class="text-lg font-semibold">{{ team.name }}</div>
 						<n-dropdown
+							:disabled="!isTeamOwner(team?.ownerId)"
 							trigger="click"
 							class="cursor-pointer"
 							:options="teamMenuOptions"
 							@select="(key) => handleTeamAction(key, team)"
 						>
-							<MoreVertical :size="16" class="cursor-pointer" />
+							<MoreVertical
+								:size="16"
+								class="cursor-pointer"
+								:class="{ 'text-border-primary': !isTeamOwner(team?.ownerId) }"
+							/>
 						</n-dropdown>
 					</div>
 					<div class="text-sm text-secondary mt-2! wrap-break-words! line-clamp-2 min-h-[2.4rem]!">
@@ -87,7 +92,7 @@
 								</div>
 							</div>
 							<Trash2Icon
-								v-if="member.role == 'Member'"
+								v-if="member.role == 'Member' && isTeamOwner(team?.ownerId)"
 								class="text-warning-orange cursor-pointer"
 								:size="14"
 								@click="() => handleDeleteMemberConfirm(team.id, member.id)"
@@ -317,6 +322,12 @@ const formRules = {
 	},
 };
 
+function isTeamOwner(teamOwnerId: string) {
+	if (teamOwnerId == usersStore.currentUser.id) return true;
+
+	return false;
+}
+
 const teamMenuOptions = [
 	{
 		label: () => h('span', { class: 'text-primary' }, 'Add Members'),
@@ -413,7 +424,7 @@ function handleDeleteMemberConfirm(teamId, userId) {
 // ------------------- APIS -------------------
 const fetchAllTeams = () =>
 	handleActionAPI({
-		action: () => getAllTeams(),
+		action: () => getAllTeams(usersStore.currentUser.id),
 		onSuccess: (res) => {
 			teams.value = res || [];
 		},

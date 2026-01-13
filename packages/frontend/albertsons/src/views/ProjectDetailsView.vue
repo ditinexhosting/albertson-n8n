@@ -660,7 +660,7 @@ const fetchAllAgents = () =>
 
 const fetchAllTeams = () =>
 	handleAction({
-		action: () => getAllTeams(),
+		action: () => getAllTeams(usersStore.currentUser.id),
 		onSuccess: (res) => {
 			teams.value = res || [];
 		},
