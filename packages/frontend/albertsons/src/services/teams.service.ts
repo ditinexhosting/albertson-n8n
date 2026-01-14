@@ -1,11 +1,13 @@
 import { albertsonsRestApiRequest } from '@src/utils/albertsonsRestApiRequest';
 
 /**
- * Fetch teams list for
+ * Fetch teams list for for logged-in user
  *
+ * @param userId - logged-in userId
  * @returns Teams list
  */
-export const getAllTeams = () => albertsonsRestApiRequest('GET', `/v1/teams/all`);
+export const getAllTeams = (userId: string) =>
+	albertsonsRestApiRequest('GET', `/v1/teams/all/${userId}`);
 
 /**
  * Create team
@@ -65,18 +67,10 @@ export const attachTeamToProject = (teamId: string, projectId: string, payload: 
 /**
  * De-attach team from project
  *
- * @param payload - Object
  * @returns success message
  */
-export const deattachTeamFromProject = (
-	teamId: string,
-	projectId: string,
-	projectOwnerId: string,
-) =>
-	albertsonsRestApiRequest(
-		'DELETE',
-		`/v1/teams/${teamId}/projects/${projectId}?projectOwnerId=${projectOwnerId}`,
-	);
+export const deattachTeamFromProject = (teamId: string, projectId: string) =>
+	albertsonsRestApiRequest('DELETE', `/v1/teams/${teamId}/projects/${projectId}`);
 
 /**
  * Get available user to add in team

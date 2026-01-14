@@ -16,6 +16,14 @@ export const getUserMetadata = (ownerId: string) =>
 	albertsonsRestApiRequest('GET', `/v1/user-metadata/${ownerId}`);
 
 /**
+ * Update user's Account Details or Password
+ * @param payload ObJect { "id": string, "name":string, "password":string }
+ * @returns success message
+ */
+export const updateProfle = (payload: any) =>
+	albertsonsRestApiRequest('POST', `/v1/user-metadata/update-profile`, payload);
+
+/**
  * Add members to a project
  *
  * @param projectId - Project id

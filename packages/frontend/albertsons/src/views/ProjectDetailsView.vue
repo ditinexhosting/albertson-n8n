@@ -345,7 +345,8 @@ function createColumns() {
 			title: 'Action',
 			key: 'actions',
 			render: (row) => {
-				if (row.userId == project.value?.ownerId || !canManageProject.value) return '';
+				if ((row.userId == project.value?.ownerId && !row.teamId) || !canManageProject.value)
+					return '';
 				return h(
 					NDropdown,
 					{
@@ -574,7 +575,6 @@ onMounted(async () => {
 });
 
 const handleMemberAction = async (key, row) => {
-	console.log('team->', row);
 	try {
 		switch (key) {
 			case 'remove_member':
@@ -660,7 +660,7 @@ const fetchAllAgents = () =>
 
 const fetchAllTeams = () =>
 	handleAction({
-		action: () => getAllTeams(),
+		action: () => getAllTeams(usersStore.currentUser.id),
 		onSuccess: (res) => {
 			teams.value = res || [];
 		},
@@ -755,8 +755,8 @@ const onRemoveMember = (userId) =>
 	});
 const onRemoveTeam = (teamId) =>
 	handleAction({
-		//teamId, projectId, payload(projectOwnerId: IID)
-		action: () => deattachTeamFromProject(teamId, projectId, project.value.ownerId),
+		//teamId, projectId
+		action: () => deattachTeamFromProject(teamId, projectId),
 		onSuccess: () => {
 			fetchProjectDetails();
 			toast.showMessage({
