@@ -1,0 +1,4 @@
+[submodule "packages/frontend/albertsons"]
+	path = packages/frontend/albertsons
+	url = git@github.com:ditinexhosting/albertsons.git
+	branch = main
