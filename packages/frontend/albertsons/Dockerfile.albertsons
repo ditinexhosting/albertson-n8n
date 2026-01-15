@@ -1,0 +1,24 @@
+FROM node:22-alpine
+
+WORKDIR /app
+RUN npm install -g pnpm
+
+# Workspace essentials
+COPY pnpm-workspace.yaml ./
+COPY pnpm-lock.yaml ./
+COPY package.json ./
+COPY patches ./patches
+
+# All packages (needed for workspace + catalogs)
+COPY packages ./packages
+
+# Install ONCE from workspace root
+RUN pnpm install
+
+# Build ONLY albertsons
+RUN pnpm --filter albertsons build
+# or (path based => if the above doesn't work)
+# RUN pnpm --filter "./packages/frontend/albertsons" build
+
+EXPOSE 8080
+CMD ["pnpm", "--filter", "albertsons", "run", "dev"]
