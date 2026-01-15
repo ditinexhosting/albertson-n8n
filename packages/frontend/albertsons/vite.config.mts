@@ -16,7 +16,7 @@ import { isLocaleFile, sendLocaleUpdate } from './vite/i18n-locales-hmr-helpers'
 import { nodePopularityPlugin } from './vite/vite-plugin-node-popularity.mjs';
 import tailwindcss from '@tailwindcss/vite';
 
-const publicPath = process.env.VUE_APP_PUBLIC_PATH || '/';
+const publicPath = '/';
 
 const { NODE_ENV } = process.env;
 

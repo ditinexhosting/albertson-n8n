@@ -7,9 +7,10 @@
   "scripts": {
     "clean": "rimraf dist .turbo .build",
     "dev": "pnpm serve",
-    "buildProd": "VUE_APP_PUBLIC_PATH=\"/\" VUE_APP_URL_BASE_API=https://albertsons.sashai.tech/n8n/ NODE_OPTIONS=\"--max-old-space-size=8192\" vite build",
+    "buildProd": "VUE_APP_PUBLIC_PATH=\"/\" NODE_OPTIONS=\"--max-old-space-size=8192\" vite build && node scripts/replace-base-path.js",
     "serve": "cross-env VUE_APP_URL_BASE_API=http://localhost:5678/ vite --host 0.0.0.0 --port 8080 dev",
-    "preview": "cross-env VUE_APP_PUBLIC_PATH=\"/\" VUE_APP_URL_BASE_API=https://albertsons.sashai.tech/n8n/ vite --host 0.0.0.0 --port 8080 preview"
+    "previewLocal": "VUE_APP_PUBLIC_PATH=\"/\" VUE_APP_URL_BASE_API=http://localhost:5678/ vite --host 0.0.0.0 --port 8080 preview",
+    "previewProd": "cross-env VUE_APP_PUBLIC_PATH=\"/\" VUE_APP_URL_BASE_API=https://albertsons.sashai.tech/n8n/ vite --host 0.0.0.0 --port 8080 preview"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.16.0",
@@ -125,6 +126,7 @@
     "@vitejs/plugin-vue": "catalog:frontend",
     "@vitest/coverage-v8": "catalog:",
     "browserslist-to-esbuild": "^2.1.1",
+    "cross-env": "^7.0.3",
     "fake-indexeddb": "^6.0.0",
     "miragejs": "^0.1.48",
     "unplugin-icons": "catalog:frontend",
