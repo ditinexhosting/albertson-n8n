@@ -8,12 +8,13 @@ COPY pnpm-workspace.yaml ./
 COPY pnpm-lock.yaml ./
 COPY package.json ./
 COPY patches ./patches
+COPY scripts ./scripts
 
 # All packages (needed for workspace + catalogs)
 COPY packages ./packages
 
 # Install ONCE from workspace root
-RUN pnpm install
+RUN pnpm install --ignore-scripts
 
 # Build ONLY albertsons
 RUN pnpm --filter albertsons build
